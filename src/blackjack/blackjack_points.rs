@@ -6,7 +6,7 @@ pub struct Points {
 }
 
 impl Points {
-    fn new(lower: i32, upper: i32) -> Points {
+    pub fn new(lower: i32, upper: i32) -> Points {
         Points { lower, upper }
     }
 

@@ -1,5 +1,7 @@
+use crate::blackjack::traits::Allable;
+
 #[derive(Copy, Clone, Eq, Ord, PartialEq, PartialOrd)]
-enum Rank {
+pub enum Rank {
     Deuce,
     Three,
     Four,
@@ -147,15 +149,10 @@ pub struct BlackjackRank {
 }
 
 impl BlackjackRank {
-    fn new(rank: Rank) -> BlackjackRank {
+    pub fn new(rank: Rank) -> BlackjackRank {
         BlackjackRank {
             val: rank.to_blackjack_score(),
         }
-    }
-
-    pub fn create_all() -> Vec<BlackjackRank> {
-        // implementation
-        Vec::<BlackjackRank>::default()
     }
 
     fn to_string(&self) -> String {
@@ -166,6 +163,13 @@ impl BlackjackRank {
     fn get_representative_card(&self) -> Card {
         // implementation
         Card::default()
+    }
+}
+
+impl Allable for BlackjackRank{
+    fn create_all() -> Vec<BlackjackRank> {
+        // implementation
+        Vec::<BlackjackRank>::default()
     }
 }
 

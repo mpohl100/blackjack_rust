@@ -3,13 +3,13 @@ use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::traits::Allable;
 
 #[derive(Eq, Ord, PartialEq, PartialOrd)]
-struct BlackjackSituation<T> {
+pub struct BlackjackSituation<T> {
     situation: T,
     dealer_card: BlackjackRank,
 }
 
-impl<T: Allable> BlackjackSituation<T> {
-    fn new(sit: T, dealer_card: BlackjackRank) -> BlackjackSituation<T> {
+impl<T: Allable + Clone> BlackjackSituation<T> {
+    pub fn new(sit: T, dealer_card: BlackjackRank) -> BlackjackSituation<T> {
         BlackjackSituation { situation: sit, dealer_card }
     }
 
@@ -18,8 +18,8 @@ impl<T: Allable> BlackjackSituation<T> {
         let dealer_cards = BlackjackRank::create_all();
         let mut ret = vec![];
         for sit in all_sits {
-            for dealer_card in dealer_cards {
-                ret.push(BlackjackSituation::new(sit, dealer_card));
+            for dealer_card in dealer_cards.clone() {
+                ret.push(BlackjackSituation::new(sit.clone(), dealer_card));
             }
         }
         ret
