@@ -1,12 +1,12 @@
-use std::collections::HashMap;
+pub use std::collections::BTreeMap;
 use crate::blackjack::blackjack_situation::HandSituation;
 use crate::blackjack::blackjack_situation::SplitSituation;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct BlackjackStrategy {
-    pub drawing_percentages: HashMap<HandSituation, bool>,
-    pub double_down_percentages: HashMap<HandSituation, bool>,
-    pub split_percentages: HashMap<SplitSituation, bool>,
+    pub drawing_percentages: BTreeMap<HandSituation, bool>,
+    pub double_down_percentages: BTreeMap<HandSituation, bool>,
+    pub split_percentages: BTreeMap<SplitSituation, bool>,
 }
 
 impl BlackjackStrategy{
