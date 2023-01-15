@@ -10,15 +10,15 @@ impl Points {
         Points { lower, upper }
     }
 
-    fn lower(&self) -> i32 {
+    pub fn lower(&self) -> i32 {
         self.lower
     }
 
-    fn upper(&self) -> i32 {
+    pub fn upper(&self) -> i32 {
         self.upper
     }
 
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         //implementation
         return String::default();
     }

@@ -56,7 +56,7 @@ impl Rank {
 }
 
 #[derive(Copy, Clone, Eq, Ord, PartialEq, PartialOrd)]
-enum Suit {
+pub enum Suit {
     Hearts,
     Diamonds,
     Spades,
@@ -81,7 +81,7 @@ pub struct Card {
 }
 
 impl Card {
-    fn new(rank: Rank, suit: Suit) -> Card {
+    pub fn new(rank: Rank, suit: Suit) -> Card {
         Card { rank, suit }
     }
 
@@ -95,7 +95,7 @@ impl Card {
         return Card::default();
     }
 
-    fn rank(&self) -> Rank {
+    pub fn rank(&self) -> Rank {
         self.rank
     }
 
@@ -113,7 +113,7 @@ impl Card {
         return String::default();
     }
 
-    fn to_blackjack_score(&self) -> i32 {
+    pub fn to_blackjack_score(&self) -> i32 {
         // implementation
         return  0;
     }
@@ -155,12 +155,12 @@ impl BlackjackRank {
         }
     }
 
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         // implementation
         String::default()
     }
 
-    fn get_representative_card(&self) -> Card {
+    pub fn get_representative_card(&self) -> Card {
         // implementation
         Card::default()
     }

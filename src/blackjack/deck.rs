@@ -1,6 +1,11 @@
 pub use crate::blackjack::card::Card;
-pub use rand::Rng;
+use crate::blackjack::rng::RandomNumberGenerator;
 
+pub trait Deck{
+    fn deal_card(&self, rng: &mut RandomNumberGenerator) -> Card;
+}
+
+#[derive(Default, Clone)]
 pub struct CountedDeck {
     count: i32,
     deck: Vec<Card>,
@@ -14,12 +19,14 @@ impl CountedDeck {
         }
     }
 
-    pub fn deal_card<R: Rng>(&self, rng: &mut R) -> Card {
-        // implementation of the dealCard method
-        Card::default()
-    }
-
     pub fn count(&self) -> i32 {
         self.count
+    }
+}
+
+impl Deck for CountedDeck{
+    fn deal_card(&self, rng: &mut RandomNumberGenerator) -> Card {
+        // implementation of the dealCard method
+        Card::default()
     }
 }

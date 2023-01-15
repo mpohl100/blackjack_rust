@@ -8,6 +8,16 @@ pub struct BlackjackSituation<T> {
     dealer_card: BlackjackRank,
 }
 
+impl<T: Copy> BlackjackSituation<T>{
+    pub fn situation(&self) -> T{
+        self.situation
+    }
+
+    pub fn dealer_card(&self) -> BlackjackRank{
+        self.dealer_card
+    }
+}
+
 impl<T: Allable + Clone> BlackjackSituation<T> {
     pub fn new(sit: T, dealer_card: BlackjackRank) -> BlackjackSituation<T> {
         BlackjackSituation { situation: sit, dealer_card }
