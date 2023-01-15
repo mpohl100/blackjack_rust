@@ -18,7 +18,7 @@ pub enum PlayMode {
     Draw,
 }
 
-fn play_blackjack_hand(
+pub fn play_blackjack_hand(
     mut player_bet: f64, 
     mut player_hand: PlayerHand, 
     mut dealer_hand: DealerHand, 

@@ -101,7 +101,7 @@ fn optimize_situation(situation: &BlackjackGameSituation, deck: &CountedDeck) ->
         BlackjackChallengeType::DoubleDown
     };
     let boxed_deck = Box::new(deck.clone());
-    let challenge = BlackjackChallenge::new(situationtype.clone(), get_dealer_rank(situationtype.clone(), situation), get_player_hand(situationtype.clone(), situation), situation.strat.clone(), boxed_deck);
+    let mut challenge = BlackjackChallenge::new(situationtype.clone(), get_dealer_rank(situationtype.clone(), situation), get_player_hand(situationtype.clone(), situation), situation.strat.clone(), boxed_deck);
     let dont = false;
     let do_it = true;
     let score_dont = challenge.score(dont);

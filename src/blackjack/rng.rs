@@ -7,7 +7,7 @@ pub struct RandomNumberGenerator {
 }
 
 impl RandomNumberGenerator {
-    fn new() -> RandomNumberGenerator {
+    pub fn new() -> RandomNumberGenerator {
         RandomNumberGenerator {
             rd: StdRng::from_entropy(),
         }
