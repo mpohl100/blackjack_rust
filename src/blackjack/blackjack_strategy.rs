@@ -13,16 +13,6 @@ pub struct BlackjackStrategy {
 }
 
 impl BlackjackStrategy{
-    fn to_string(&self) -> String
-    {
-        return String::default();
-    }
-
-    fn to_string_mat(&self) -> String
-    {
-        return String::default();
-    }
-
     pub fn to_string_mat2(&self) -> String
     {
         let mut hard_strat: BTreeMap<HandSituation, String> = BTreeMap::new();

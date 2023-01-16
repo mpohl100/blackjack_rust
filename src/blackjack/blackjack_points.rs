@@ -1,3 +1,4 @@
+use std::collections::BTreeSet;
 use super::traits::Allable;
 
 pub struct Points {
@@ -19,15 +20,18 @@ impl Points {
     }
 
     pub fn to_string(&self) -> String {
-        //implementation
-        return String::default();
+        self.lower.to_string() + &"/".to_string() + &self.upper.to_string()
     }
 }
 
 impl Allable for Points{
     fn create_all() -> Vec<Points> {
-        // implementation
-        return Vec::<Points>::default();
+        let mut points = std::collections::BTreeSet::new();
+        for i in 4..=21 {
+            points.insert(Points::new(i, i));
+            points.insert(Points::new(i, i + 10 ));
+        }
+        points.into_iter().collect()
     }
 }
 

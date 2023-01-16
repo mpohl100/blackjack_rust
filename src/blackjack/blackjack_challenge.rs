@@ -63,7 +63,10 @@ impl BlackjackChallenge{
 
     fn get_play_mode(&self) -> PlayMode
     {
-        // implementation
-        PlayMode::All
+        match self.type_{
+            BlackjackChallengeType::Draw => PlayMode::Draw,
+            BlackjackChallengeType::DoubleDown => PlayMode::DoubleDown,
+            BlackjackChallengeType::Split => PlayMode::All,
+        }
     }
 }
