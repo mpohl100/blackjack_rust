@@ -13,7 +13,7 @@ impl RandomNumberGenerator {
         }
     }
 
-    fn fetch_uniform(&mut self, from: i32, to: i32, num: usize) -> Vec<i32> {
+    pub fn fetch_uniform(&mut self, from: i32, to: i32, num: usize) -> Vec<i32> {
         let mut uniform_numbers = Vec::new();
         let dist = Uniform::new(from, to);
         for _ in 0..num {

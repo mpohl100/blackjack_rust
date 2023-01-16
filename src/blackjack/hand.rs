@@ -25,7 +25,12 @@ impl BlackjackHand{
     }
 
     pub fn is_pair(&self) -> bool {
-        self.cards.len() == 2
+        if self.cards.len() != 2{
+            false
+        }
+        else{
+            self.cards[0].rank() == self.cards[1].rank()
+        }
     } 
 }
 
@@ -65,6 +70,11 @@ impl DealerHand {
     pub fn new(cards: &Vec<Card>) -> DealerHand {
         DealerHand { blackjack_hand: BlackjackHand { cards: cards.clone() } }
     }
+
+    fn get_cards(&self) -> Vec<Card>{
+        self.blackjack_hand.cards.clone()
+    }
+
     pub fn play(&mut self, deck: &mut Box<dyn Deck>, rng: &mut RandomNumberGenerator) -> i32 {
         let draw_until = 17;
         let mut result = 0;
@@ -87,8 +97,7 @@ impl DealerHand {
     }
 
     pub fn open_card(&self) -> BlackjackRank {
-        // Implementation for openCard method
-        BlackjackRank::default()
+        BlackjackRank::new(self.get_cards()[0].rank())
     }
 
     pub fn add_card(&mut self, card: &Card) {

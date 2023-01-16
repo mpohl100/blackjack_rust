@@ -1,5 +1,10 @@
+use std::default;
+
+
 pub use crate::blackjack::card::Card;
 use crate::blackjack::rng::RandomNumberGenerator;
+use crate::blackjack::card::BlackjackRank;
+use crate::blackjack::card::Rank;
 
 pub trait Deck{
     fn deal_card(&self, rng: &mut RandomNumberGenerator) -> Card;
@@ -13,9 +18,34 @@ pub struct CountedDeck {
 
 impl CountedDeck {
     pub fn new(count: i32) -> CountedDeck {
+        let mut deck = Vec::<Card>::default();
+        for i in 0..52 {
+            deck.push(Card::new_with_int(i));
+        }
+        if count > 0 {
+            let mut cnt = count;
+            deck = deck.into_iter().filter(|card| {
+                if cnt > 0 && BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ten) {
+                    cnt -= 1;
+                    return false;
+                }
+                return true;
+            }).collect();
+        } else if count < 0 {
+            let mut cnt = -count;
+            deck = deck.into_iter().filter(|card| {
+                let blackjackRank = BlackjackRank::new(card.rank());
+                if cnt > 0 && blackjackRank >= BlackjackRank::new(Rank::Deuce) && blackjackRank <= BlackjackRank::new(Rank::Six) {
+                    cnt -= 1;
+                    return false;
+                }
+                return true;
+            }).collect();
+        }
+        
         CountedDeck {
             count,
-            deck: vec![],
+            deck,
         }
     }
 
@@ -27,6 +57,11 @@ impl CountedDeck {
 impl Deck for CountedDeck{
     fn deal_card(&self, rng: &mut RandomNumberGenerator) -> Card {
         // implementation of the dealCard method
-        Card::default()
+        let max = (self.deck.len() - 1).try_into().unwrap();
+        let i = rng.fetch_uniform(0, max, 1).pop();
+        Card::new_with_int(match i{
+            Some(value) => { value },
+            None => panic!("converting usize to i32 failed"),
+        })
     }
 }
