@@ -37,24 +37,6 @@ impl Rank {
         }
     } 
 
-    fn to_string(&self) -> String {
-        match self {
-            Rank::Deuce => "Deuce",
-            Rank::Three => "Three",
-            Rank::Four => "Four",
-            Rank::Five => "Five",
-            Rank::Six => "Six",
-            Rank::Seven => "Seven",
-            Rank::Eight => "Eight",
-            Rank::Nine => "Nine",
-            Rank::Ten => "Ten",
-            Rank::Jack => "Jack",
-            Rank::Queen => "Queen",
-            Rank::King => "King",
-            Rank::Ace => "Ace",
-        }.to_string()
-    }
-
     fn to_blackjack_score(&self) -> i32 {
         match self {
             Rank::Deuce => return 2,
@@ -70,24 +52,6 @@ impl Rank {
             Rank::Queen => return 10,
             Rank::King => return 10,
             Rank::Ace => return 1, // case eleven is handled outside
-        }
-    }
-
-    fn to_int(&self) -> i32{
-        match self {
-            Rank::Ace => return 1,
-            Rank::Deuce => return 2,
-            Rank::Three => return 3,
-            Rank::Four => return 4,
-            Rank::Five => return 5,
-            Rank::Six => return 6,
-            Rank::Seven => return 7,
-            Rank::Eight => return 8,
-            Rank::Nine => return 9,
-            Rank::Ten => return 10,
-            Rank::Jack => return 11,
-            Rank::Queen => return 12,
-            Rank::King => return 13,
         }
     }
 }
@@ -110,24 +74,6 @@ impl Suit {
             _ => panic!("wrong i32 for Suit"),
         }
     }
-
-    fn to_string(&self) -> String {
-        match self {
-            Suit::Hearts => "Hearts",
-            Suit::Diamonds => "Diamonds",
-            Suit::Spades => "Spades",
-            Suit::Clubs => "Clubs",
-        }.to_string()
-    }
-
-    fn to_int(&self) -> i32{
-        match self {
-            Suit::Hearts => return 0,
-            Suit::Diamonds => return 1,
-            Suit::Spades => return 2,
-            Suit::Clubs => return 3,
-        } 
-    }
 }
 
 #[derive(Eq, Ord, PartialEq, PartialOrd)]
@@ -145,37 +91,26 @@ impl Card {
         Card::new(Rank::new_from_int(i % 13), Suit::new_from_int(i / 13))
     }
 
-    fn from_string(str: &str) -> Card {
-        // implementation
-        return Card::default();
-    }
-
-    fn from_nb(nb: i32) -> Card {
-        // implementation
-        return Card::default();
-    }
-
     pub fn rank(&self) -> Rank {
         self.rank
     }
 
-    fn suit(&self) -> Suit {
-        self.suit
-    }
-
-    fn nb(&self) -> i32 {
-        // implementation
-        return 0;
-    }
-
-    fn to_string(&self) -> String {
-        // implementation
-        return String::default();
-    }
-
     pub fn to_blackjack_score(&self) -> i32 {
-        // implementation
-        return  0;
+        match self.rank {
+            Rank::Ace => 1, // case 11 is handled outside
+            Rank::Deuce => 2,
+            Rank::Three => 3,
+            Rank::Four => 4,
+            Rank::Five => 5,
+            Rank::Six => 6,
+            Rank::Seven => 7,
+            Rank::Eight => 8,
+            Rank::Nine => 9,
+            Rank::Ten => 10,
+            Rank::Jack => 10,
+            Rank::Queen => 10,
+            Rank::King => 10,
+        }
     }
 }
 
@@ -199,11 +134,6 @@ impl Clone for Card {
 
 impl Copy for Card {}
 
-fn to_cards(str: &str) -> Vec<Card> {
-    // implementation
-    Vec::<Card>::default()
-}
-
 pub struct BlackjackRank {
     val: i32,
 }
@@ -216,20 +146,52 @@ impl BlackjackRank {
     }
 
     pub fn to_string(&self) -> String {
-        // implementation
-        String::default()
+        match self.val{
+            1 => "1",
+            2 => "2",
+            3 => "3",
+            4 => "4",
+            5 => "5",
+            6 => "6",
+            7 => "7",
+            8 => "8",
+            9 => "9",
+            10 => "10",
+            11 => "11",
+            _ => "invalid",
+        }.to_string()
     }
 
     pub fn get_representative_card(&self) -> Card {
-        // implementation
-        Card::default()
+        match self.val {
+            2 => Card::new(Rank::Deuce, Suit::Spades),
+            3 => Card::new(Rank::Three, Suit::Spades),
+            4 => Card::new(Rank::Four, Suit::Spades),
+            5 => Card::new(Rank::Five, Suit::Spades),
+            6 => Card::new(Rank::Six, Suit::Spades),
+            7 => Card::new(Rank::Seven, Suit::Spades),
+            8 => Card::new(Rank::Eight, Suit::Spades),
+            9 => Card::new(Rank::Nine, Suit::Spades),
+            10 => Card::new(Rank::Ten, Suit::Spades),
+            11 => Card::new(Rank::Ace, Suit::Spades),
+            _ => Card::new(Rank::Deuce, Suit::Spades),
+
+        }
     }
 }
 
 impl Allable for BlackjackRank{
     fn create_all() -> Vec<BlackjackRank> {
-        // implementation
-        Vec::<BlackjackRank>::default()
+        vec![BlackjackRank::new(Rank::Deuce),
+        BlackjackRank::new(Rank::Three),
+        BlackjackRank::new(Rank::Four),
+        BlackjackRank::new(Rank::Five),
+        BlackjackRank::new(Rank::Six),
+        BlackjackRank::new(Rank::Seven),
+        BlackjackRank::new(Rank::Eight),
+        BlackjackRank::new(Rank::Nine),
+        BlackjackRank::new(Rank::Ten),
+        BlackjackRank::new(Rank::Ace),]
     }
 }
 

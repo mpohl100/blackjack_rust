@@ -1,6 +1,3 @@
-use std::default;
-
-
 pub use crate::blackjack::card::Card;
 use crate::blackjack::rng::RandomNumberGenerator;
 use crate::blackjack::card::BlackjackRank;
@@ -12,7 +9,6 @@ pub trait Deck{
 
 #[derive(Default, Clone)]
 pub struct CountedDeck {
-    count: i32,
     deck: Vec<Card>,
 }
 
@@ -34,8 +30,8 @@ impl CountedDeck {
         } else if count < 0 {
             let mut cnt = -count;
             deck = deck.into_iter().filter(|card| {
-                let blackjackRank = BlackjackRank::new(card.rank());
-                if cnt > 0 && blackjackRank >= BlackjackRank::new(Rank::Deuce) && blackjackRank <= BlackjackRank::new(Rank::Six) {
+                let blackjack_rank = BlackjackRank::new(card.rank());
+                if cnt > 0 && blackjack_rank >= BlackjackRank::new(Rank::Deuce) && blackjack_rank <= BlackjackRank::new(Rank::Six) {
                     cnt -= 1;
                     return false;
                 }
@@ -44,13 +40,8 @@ impl CountedDeck {
         }
         
         CountedDeck {
-            count,
             deck,
         }
-    }
-
-    pub fn count(&self) -> i32 {
-        self.count
     }
 }
 

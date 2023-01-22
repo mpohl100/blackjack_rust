@@ -11,15 +11,6 @@ pub struct BlackjackHand {
 }
 
 impl BlackjackHand{
-    pub fn new(cards: &Vec<Card>) -> BlackjackHand {
-        BlackjackHand { cards: cards.clone() }
-    }
-
-    pub fn from_string(str: &str) -> BlackjackHand {
-        // Implementation for fromString method
-        BlackjackHand::default()
-    }
-
     pub fn add_card(&mut self, card: &Card) {
         self.cards.push(card.clone());
     }
@@ -77,7 +68,7 @@ impl DealerHand {
 
     pub fn play(&mut self, deck: &mut Box<dyn Deck>, rng: &mut RandomNumberGenerator) -> i32 {
         let draw_until = 17;
-        let mut result = 0;
+        let result;
         loop {
             let points = evaluate_blackjack_hand(&self.blackjack_hand);
             if points.upper() >= draw_until && points.upper() <= 21 {
@@ -98,9 +89,5 @@ impl DealerHand {
 
     pub fn open_card(&self) -> BlackjackRank {
         BlackjackRank::new(self.get_cards()[0].rank())
-    }
-
-    pub fn add_card(&mut self, card: &Card) {
-        self.blackjack_hand.add_card(card);
     }
 }

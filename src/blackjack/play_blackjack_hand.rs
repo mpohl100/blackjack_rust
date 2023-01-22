@@ -4,7 +4,6 @@ use crate::blackjack::deck::Deck;
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 use crate::blackjack::blackjack_strategy::BlackjackStrategy;
-use crate::blackjack::blackjack_points::Points;
 use crate::blackjack::rng::RandomNumberGenerator;
 
 
@@ -49,7 +48,7 @@ pub fn play_blackjack_hand(
         }
     }
 
-    let mut player_points = Points::default();
+    let mut player_points;
     let mut only_draw_once = false;
     if play_mode == PlayMode::All || play_mode == PlayMode::DoubleDown {
         player_points = evaluate_blackjack_hand(&player_hand.get_blackjack_hand());

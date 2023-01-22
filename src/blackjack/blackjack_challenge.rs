@@ -41,15 +41,15 @@ impl BlackjackChallenge{
         }
     }
 
-    pub fn score(&mut self, doIt: bool) -> f64
+    pub fn score(&mut self, do_it: bool) -> f64
     {
         let points = evaluate_blackjack_hand(&self.player_hand.get_blackjack_hand());
         if self.type_ == BlackjackChallengeType::Draw {
-            self.strat.drawing_percentages.insert(HandSituation::new(points, self.dealer_rank.clone()), doIt);
+            self.strat.drawing_percentages.insert(HandSituation::new(points, self.dealer_rank.clone()), do_it);
         } else if self.type_ == BlackjackChallengeType::DoubleDown {
-            self.strat.double_down_percentages.insert(HandSituation::new(points, self.dealer_rank.clone()), doIt);
+            self.strat.double_down_percentages.insert(HandSituation::new(points, self.dealer_rank.clone()), do_it);
         } else if self.type_ == BlackjackChallengeType::Split {
-            self.strat.split_percentages.insert(SplitSituation::new(BlackjackRank::new(self.player_hand.get_cards()[0].rank()), self.dealer_rank.clone()), doIt);
+            self.strat.split_percentages.insert(SplitSituation::new(BlackjackRank::new(self.player_hand.get_cards()[0].rank()), self.dealer_rank.clone()), do_it);
         }
         let mut rng = RandomNumberGenerator::new();
         let mut result = 0.0;
