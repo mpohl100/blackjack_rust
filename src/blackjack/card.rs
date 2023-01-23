@@ -51,7 +51,7 @@ impl Rank {
             Rank::Jack => return 10,
             Rank::Queen => return 10,
             Rank::King => return 10,
-            Rank::Ace => return 1, // case eleven is handled outside
+            Rank::Ace => return 11, // case eleven is handled outside
         }
     }
 }

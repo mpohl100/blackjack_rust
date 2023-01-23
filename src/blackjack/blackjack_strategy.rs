@@ -20,14 +20,25 @@ impl BlackjackStrategy{
 
         for (situation, do_it) in self.double_down_percentages.iter() {
             let points = situation.situation();
-            let target = if points.upper() == points.lower() { &mut hard_strat } else { &mut soft_strat };
-            if *do_it {
-                target.insert(situation.clone(), "D".to_string());
-            } else if *self.drawing_percentages.get(situation).unwrap() {
-                target.insert(situation.clone(), "H".to_string());
-            } else {
-                target.insert(situation.clone(), "S".to_string());
-            }
+            if points.upper() == points.lower() { 
+                if *do_it {
+                    hard_strat.insert(situation.clone(), "D".to_string());
+                } else if *self.drawing_percentages.get(situation).unwrap() {
+                    hard_strat.insert(situation.clone(), "H".to_string());
+                } else {
+                    hard_strat.insert(situation.clone(), "S".to_string());
+                }
+            } 
+            else { 
+                if *do_it {
+                    soft_strat.insert(situation.clone(), "D".to_string());
+                } else if *self.drawing_percentages.get(situation).unwrap() {
+                    soft_strat.insert(situation.clone(), "H".to_string());
+                } else {
+                    soft_strat.insert(situation.clone(), "S".to_string());
+                }
+            };
+
         }
 
         let mut ret = "Hard hands strategy:\n".to_string();

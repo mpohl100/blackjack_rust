@@ -6,8 +6,11 @@ pub struct Points {
 }
 
 impl Points {
-    pub fn new(lower: i32, upper: i32) -> Points {
-        Points { lower, upper }
+    pub fn new(lower: i32, mut upper: i32) -> Points {
+        if upper > 21{
+            upper -= 10;
+        }
+        Points { lower, upper}
     }
 
     pub fn lower(&self) -> i32 {
