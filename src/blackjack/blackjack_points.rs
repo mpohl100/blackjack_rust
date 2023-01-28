@@ -1,4 +1,5 @@
 use super::traits::Allable;
+use super::traits::Stringable;
 
 pub struct Points {
     lower: i32,
@@ -20,8 +21,10 @@ impl Points {
     pub fn upper(&self) -> i32 {
         self.upper
     }
+}
 
-    pub fn to_string(&self) -> String {
+impl Stringable for Points{
+    fn to_string_internal(&self) -> String {
         self.lower.to_string() + &"/".to_string() + &self.upper.to_string()
     }
 }

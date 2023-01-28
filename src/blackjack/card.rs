@@ -1,4 +1,5 @@
 use crate::blackjack::traits::Allable;
+use crate::blackjack::traits::Stringable;
 
 #[derive(Copy, Clone, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Rank {
@@ -145,23 +146,6 @@ impl BlackjackRank {
         }
     }
 
-    pub fn to_string(&self) -> String {
-        match self.val{
-            1 => "1",
-            2 => "2",
-            3 => "3",
-            4 => "4",
-            5 => "5",
-            6 => "6",
-            7 => "7",
-            8 => "8",
-            9 => "9",
-            10 => "10",
-            11 => "11",
-            _ => "invalid",
-        }.to_string()
-    }
-
     pub fn get_representative_card(&self) -> Card {
         match self.val {
             2 => Card::new(Rank::Deuce, Suit::Spades),
@@ -177,6 +161,25 @@ impl BlackjackRank {
             _ => Card::new(Rank::Deuce, Suit::Spades),
 
         }
+    }
+}
+
+impl Stringable for BlackjackRank{
+    fn to_string_internal(&self) -> String {
+        match self.val{
+            1 => "1",
+            2 => "2",
+            3 => "3",
+            4 => "4",
+            5 => "5",
+            6 => "6",
+            7 => "7",
+            8 => "8",
+            9 => "9",
+            10 => "10",
+            11 => "11",
+            _ => "invalid",
+        }.to_string()
     }
 }
 

@@ -5,7 +5,7 @@ use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 use crate::blackjack::blackjack_strategy::BlackjackStrategy;
 use crate::blackjack::rng::RandomNumberGenerator;
-
+use crate::blackjack::traits::Stringable;
 
 use super::blackjack_analysis::HandSituation;
 use super::blackjack_analysis::SplitSituation;
@@ -35,7 +35,7 @@ pub fn play_blackjack_hand(
         let rank = BlackjackRank::new(player_hand.get_cards()[0].rank());
         let it = player_strategy.split_percentages.get(&SplitSituation::new(rank, dealer_hand.open_card()));
         if it == None {
-            panic!("Split strategy not found for rank {} ; {}", rank.to_string(), dealer_hand.open_card().to_string())
+            panic!("Split strategy not found for rank {} ; {}", rank.to_string_internal(), dealer_hand.open_card().to_string_internal())
         }
         let do_split = it.unwrap();
         if *do_split {
@@ -54,7 +54,7 @@ pub fn play_blackjack_hand(
         player_points = evaluate_blackjack_hand(&player_hand.get_blackjack_hand());
         let it = player_strategy.double_down_percentages.get(&HandSituation::new(player_points, dealer_hand.open_card()));
         if it == None {
-            panic!("Double down strategy not found {} ; {}", player_points.to_string(), dealer_hand.open_card().to_string());
+            panic!("Double down strategy not found {} ; {}", player_points.to_string_internal(), dealer_hand.open_card().to_string_internal());
         }
         only_draw_once = *it.unwrap();   
         if only_draw_once {
@@ -74,7 +74,7 @@ pub fn play_blackjack_hand(
         }
         let it = player_strategy.drawing_percentages.get(&HandSituation::new(player_points, dealer_hand.open_card()));
         if it == None {
-            panic!("Drawing strategy not found {} ; {}", player_points.to_string(), dealer_hand.open_card().to_string());
+            panic!("Drawing strategy not found {} ; {}", player_points.to_string_internal(), dealer_hand.open_card().to_string_internal());
         }
         let draw = *it.unwrap();
         if !draw {

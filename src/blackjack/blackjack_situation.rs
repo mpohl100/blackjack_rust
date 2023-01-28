@@ -1,6 +1,7 @@
 use crate::blackjack::blackjack_points::Points;
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::traits::Allable;
+use crate::blackjack::traits::Stringable;
 
 #[derive(Eq, Ord, PartialEq, PartialOrd)]
 pub struct BlackjackSituation<T> {
@@ -15,6 +16,12 @@ impl<T: Copy> BlackjackSituation<T>{
 
     pub fn dealer_card(&self) -> BlackjackRank{
         self.dealer_card
+    }
+}
+
+impl<T: Copy + Stringable> Stringable for BlackjackSituation<T>{
+    fn to_string_internal(&self) -> String{
+        <T as Stringable>::to_string_internal(&self.situation()) + &"|" + &self.dealer_card().to_string_internal()
     }
 }
 

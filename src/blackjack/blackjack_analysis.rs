@@ -12,6 +12,7 @@ use crate::blackjack::card::Card;
 use crate::blackjack::card::Rank;
 use crate::blackjack::card::Suit;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
+use crate::blackjack::traits::Stringable;
 
 
 struct BlackjackGameSituation {
@@ -106,6 +107,13 @@ fn optimize_situation(situation: &BlackjackGameSituation, deck: &CountedDeck) ->
     let do_it = true;
     let score_dont = challenge.score(dont);
     let score_do_it = challenge.score(do_it);
+    if situationtype == BlackjackChallengeType::Split{
+        println!("{:?} for {}: do {}, dont {}", situationtype, match situation.split_situation{ Some(value) => {value.to_string_internal()}, _ => panic!("no split situation found")}, score_do_it, score_dont);
+    }
+    else{
+        println!("{:?} for {}: do {}, dont {}", situationtype, match situation.hand_situation{ Some(value) => {value.to_string_internal()}, _ => panic!("no split situation found")}, score_do_it, score_dont);
+    }
+
     if score_do_it > score_dont {
         do_it
     } else {
@@ -145,7 +153,10 @@ pub fn optimize_blackjack(card_count: i32) -> BlackjackStrategy
                 .insert(hand_situation_upper, optimize_situation(&situation, &deck));
         }
     }
-
+    // print drawing strategy
+    for (situation, do_it) in &result.drawing_percentages{
+        println!("{}: {}", situation.to_string_internal(), if *do_it { "H" } else {"S"});
+    }
     // then optimize double down
     for i in (2..=21).rev() {
         let blackjack_ranks = BlackjackRank::create_all();

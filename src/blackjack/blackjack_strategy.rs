@@ -4,6 +4,7 @@ use crate::blackjack::blackjack_situation::SplitSituation;
 use crate::blackjack::blackjack_points::Points;
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::traits::Allable;
+use crate::blackjack::traits::Stringable;
 
 #[derive(Default, Clone)]
 pub struct BlackjackStrategy {
@@ -45,13 +46,13 @@ impl BlackjackStrategy{
         let mut first_points = Points::default();
         ret.push_str(";");
         for rank in BlackjackRank::create_all() {
-            ret.push_str(&(rank.to_string() + &";".to_string()));
+            ret.push_str(&(rank.to_string_internal() + &";".to_string()));
         }
         for (situation, action) in hard_strat {
             let points = situation.situation();
             if points != first_points {
                 ret.push_str("\n");
-                ret.push_str(&(points.to_string() + &";".to_string()));
+                ret.push_str(&(points.to_string_internal() + &";".to_string()));
                 first_points = points;
             }
             ret.push_str(&(action + &";".to_string()));
@@ -61,13 +62,13 @@ impl BlackjackStrategy{
         first_points = Points::default();
         ret.push_str(";");
         for rank in BlackjackRank::create_all() {
-            ret.push_str(&(rank.to_string() + &";".to_string()));
+            ret.push_str(&(rank.to_string_internal() + &";".to_string()));
         }
         for (situation, action) in soft_strat {
             let points = situation.situation();
             if points != first_points {
                 ret.push_str("\n");
-                ret.push_str(&(points.to_string() + &";".to_string()));
+                ret.push_str(&(points.to_string_internal() + &";".to_string()));
                 first_points = points;
             }
             ret.push_str(&(action + &";".to_string()));
@@ -77,13 +78,13 @@ impl BlackjackStrategy{
         let mut first_rank = BlackjackRank::default();
         ret.push_str(";");
         for rank in BlackjackRank::create_all() {
-            ret.push_str(&(rank.to_string() + &";".to_string()));
+            ret.push_str(&(rank.to_string_internal() + &";".to_string()));
         }
         for (situation, do_it) in self.split_percentages.iter() {
             let hand_rank = situation.situation();
             if hand_rank != first_rank {
                 ret.push_str("\n");
-                ret.push_str(&(hand_rank.to_string() + &";".to_string()));
+                ret.push_str(&(hand_rank.to_string_internal() + &";".to_string()));
                 first_rank = hand_rank;
             }
             if *do_it {

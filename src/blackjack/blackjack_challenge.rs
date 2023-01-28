@@ -9,7 +9,7 @@ use crate::blackjack::play_blackjack_hand::play_blackjack_hand;
 
 use super::{blackjack_analysis::{HandSituation, SplitSituation}, rng::RandomNumberGenerator};
 
-#[derive(Clone, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Eq, Ord, PartialEq, PartialOrd, Debug)]
 pub enum BlackjackChallengeType {
     Draw,
     DoubleDown,
