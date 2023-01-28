@@ -9,6 +9,8 @@ use crate::blackjack::traits::BlackjackStrategyTrait;
 use super::blackjack_analysis::HandSituation;
 use super::blackjack_analysis::SplitSituation;
 
+use std::rc::Rc;
+
 #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
 pub enum PlayMode {
     All,
@@ -40,7 +42,7 @@ pub fn play_blackjack_hand(
     mut player_hand: PlayerHand, 
     mut dealer_hand: DealerHand, 
     deck: &mut Box<dyn Deck>, 
-    player_strategy: &Box<dyn BlackjackStrategyTrait>, 
+    player_strategy: Rc<dyn BlackjackStrategyTrait>, 
     rng: &mut RandomNumberGenerator, 
     play_mode: PlayMode
 ) -> f64 {
@@ -56,7 +58,7 @@ pub fn play_blackjack_hand(
             let first = PlayerHand::new(&vec![player_hand.get_cards()[0], deck.deal_card(rng)]);
             let second = PlayerHand::new(&vec![player_hand.get_cards()[1], deck.deal_card(rng)]);
             let mut overall_result = 0.0;
-            overall_result += play_blackjack_hand(player_bet, first, dealer_hand.clone(), deck, player_strategy, rng, play_mode);
+            overall_result += play_blackjack_hand(player_bet, first, dealer_hand.clone(), deck, player_strategy.clone(), rng, play_mode);
             overall_result += play_blackjack_hand(player_bet, second, dealer_hand.clone(), deck, player_strategy, rng, play_mode);
             return overall_result;
         }
