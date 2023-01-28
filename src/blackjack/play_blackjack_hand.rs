@@ -3,9 +3,8 @@ use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::deck::Deck;
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
-use crate::blackjack::blackjack_strategy::BlackjackStrategy;
 use crate::blackjack::rng::RandomNumberGenerator;
-use crate::blackjack::traits::Stringable;
+use crate::blackjack::traits::BlackjackStrategyTrait;
 
 use super::blackjack_analysis::HandSituation;
 use super::blackjack_analysis::SplitSituation;
@@ -41,7 +40,7 @@ pub fn play_blackjack_hand(
     mut player_hand: PlayerHand, 
     mut dealer_hand: DealerHand, 
     deck: &mut Box<dyn Deck>, 
-    player_strategy: &BlackjackStrategy, 
+    player_strategy: &Box<dyn BlackjackStrategyTrait>, 
     rng: &mut RandomNumberGenerator, 
     play_mode: PlayMode
 ) -> f64 {
@@ -52,12 +51,8 @@ pub fn play_blackjack_hand(
     // add code for splitting here
     if play_mode == PlayMode::All && player_hand.is_pair() { // splitting hands is allowed
         let rank = BlackjackRank::new(player_hand.get_cards()[0].rank());
-        let it = player_strategy.split_percentages.get(&SplitSituation::new(rank, dealer_hand.open_card()));
-        if it == None {
-            panic!("Split strategy not found for rank {} ; {}", rank.to_string_internal(), dealer_hand.open_card().to_string_internal())
-        }
-        let do_split = it.unwrap();
-        if *do_split {
+        let do_split = player_strategy.get_split(SplitSituation::new(rank, dealer_hand.open_card()), deck);
+        if do_split {
             let first = PlayerHand::new(&vec![player_hand.get_cards()[0], deck.deal_card(rng)]);
             let second = PlayerHand::new(&vec![player_hand.get_cards()[1], deck.deal_card(rng)]);
             let mut overall_result = 0.0;
@@ -71,11 +66,7 @@ pub fn play_blackjack_hand(
     let mut only_draw_once = false;
     if play_mode == PlayMode::All || play_mode == PlayMode::DoubleDown {
         player_points = evaluate_blackjack_hand(&player_hand.get_blackjack_hand());
-        let it = player_strategy.double_down_percentages.get(&HandSituation::new(player_points, dealer_hand.open_card()));
-        if it == None {
-            panic!("Double down strategy not found {} ; {}", player_points.to_string_internal(), dealer_hand.open_card().to_string_internal());
-        }
-        only_draw_once = *it.unwrap();   
+        only_draw_once = player_strategy.get_double_down(HandSituation::new(player_points, dealer_hand.open_card()), deck);  
         if only_draw_once {
             player_bet *= 2.0;
         }
@@ -91,11 +82,7 @@ pub fn play_blackjack_hand(
         if player_points.lower() > 21 {
             break;
         }
-        let it = player_strategy.drawing_percentages.get(&HandSituation::new(player_points, dealer_hand.open_card()));
-        if it == None {
-            panic!("Drawing strategy not found {} ; {}", player_points.to_string_internal(), dealer_hand.open_card().to_string_internal());
-        }
-        let draw = *it.unwrap();
+        let draw = player_strategy.get_draw(HandSituation::new(player_points, dealer_hand.open_card()), deck);
         if !draw {
             break;
         }
