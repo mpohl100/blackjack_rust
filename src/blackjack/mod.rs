@@ -1,11 +1,11 @@
 pub mod blackjack_analysis;
 pub mod play_blackjack;
+pub mod traits;
 mod blackjack_situation;
 mod blackjack_strategy;
 mod blackjack_points;
 mod blackjack_challenge;
 mod card;
-mod traits;
 mod deck;
 mod hand;
 mod evaluate_blackjack_hand;

@@ -13,13 +13,11 @@ use crate::blackjack::card::Card;
 use crate::blackjack::card::Rank;
 use crate::blackjack::card::Suit;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
-
-use std::rc::Rc;
-struct BlackjackGameSituation {
+struct BlackjackGameSituation<'a> {
     pub hand_situation: Option<HandSituation>,
     pub is_draw: bool,
     pub split_situation: Option<SplitSituation>,
-    pub strat:  Rc<dyn BlackjackStrategyTrait>,
+    pub strat:  &'a mut dyn BlackjackStrategyTrait,
 }
 
 fn get_dealer_rank(challenge_type: BlackjackChallengeType, situation: &BlackjackGameSituation) -> BlackjackRank {
@@ -102,7 +100,7 @@ fn optimize_situation(situation: &mut BlackjackGameSituation, deck: &CountedDeck
         BlackjackChallengeType::DoubleDown
     };
     let boxed_deck = Box::new(deck.clone());
-    let mut challenge = BlackjackChallenge::new(situationtype.clone(), get_dealer_rank(situationtype.clone(), situation), get_player_hand(situationtype.clone(), situation), Rc::clone(&situation.strat), boxed_deck);
+    let mut challenge = BlackjackChallenge::new(situationtype.clone(), get_dealer_rank(situationtype.clone(), situation), get_player_hand(situationtype.clone(), situation), situation.strat, boxed_deck);
     let dont = false;
     let do_it = true;
     let score_dont = challenge.score(dont);
@@ -115,9 +113,9 @@ fn optimize_situation(situation: &mut BlackjackGameSituation, deck: &CountedDeck
     } 
 }
 
-pub fn optimize_blackjack(card_count: i32) -> Rc<dyn BlackjackStrategyTrait>
+pub fn optimize_blackjack(card_count: i32) -> impl BlackjackStrategyTrait
 {
-    let mut result: Rc<dyn BlackjackStrategyTrait> = Rc::new(BlackjackStrategy::new());
+    let mut result = BlackjackStrategy::new();
     let deck = CountedDeck::new( card_count );
     // first optimize drawing
     for i in (2..=21).rev() {
@@ -125,7 +123,7 @@ pub fn optimize_blackjack(card_count: i32) -> Rc<dyn BlackjackStrategyTrait>
         for dealer_rank in blackjack_ranks {
             let mut situation = BlackjackGameSituation {
                 is_draw: true,
-                strat: Rc::clone(&result),
+                strat: &mut result.clone(),
                 hand_situation: None,
                 split_situation: None,
             };
@@ -151,7 +149,7 @@ pub fn optimize_blackjack(card_count: i32) -> Rc<dyn BlackjackStrategyTrait>
         for dealer_rank in blackjack_ranks {
             let mut situation = BlackjackGameSituation {
                 is_draw: false,
-                strat: Rc::clone(&result),
+                strat: &mut result.clone(),
                 hand_situation: None,
                 split_situation: None,
             };
@@ -177,7 +175,7 @@ pub fn optimize_blackjack(card_count: i32) -> Rc<dyn BlackjackStrategyTrait>
         for dealer_rank in blackjack_ranks.clone() {
             let mut situation = BlackjackGameSituation {
                 is_draw: false,
-                strat: Rc::clone(&result),
+                strat: &mut result.clone(),
                 hand_situation: None,
                 split_situation: None,
             };

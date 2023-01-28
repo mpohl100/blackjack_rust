@@ -1,5 +1,6 @@
 mod blackjack;
 
+use crate::blackjack::traits::BlackjackStrategyTrait;
 fn main() {
     //for i in -10..=10 {
         let strat = blackjack::blackjack_analysis::optimize_blackjack(0);

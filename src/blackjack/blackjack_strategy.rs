@@ -5,8 +5,10 @@ use crate::blackjack::blackjack_points::Points;
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::traits::Allable;
 use crate::blackjack::traits::Stringable;
-use crate::blackjack::traits::BlackjackStrategyTrait;
+pub use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::deck::Deck;
+
+
 
 #[derive(Default, Clone)]
 struct BlackjackStrategyData {

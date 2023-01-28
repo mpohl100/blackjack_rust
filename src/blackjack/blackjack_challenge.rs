@@ -8,8 +8,6 @@ use crate::blackjack::play_blackjack_hand::play_blackjack_hand;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 use super::{blackjack_analysis::{HandSituation, SplitSituation}, rng::RandomNumberGenerator};
 
-use std::rc::Rc;
-
 #[derive(Clone, Eq, Ord, PartialEq, PartialOrd, Debug)]
 pub enum BlackjackChallengeType {
     Draw,
@@ -17,20 +15,20 @@ pub enum BlackjackChallengeType {
     Split,
 }
 
-pub struct BlackjackChallenge {
+pub struct BlackjackChallenge<'a> {
     type_: BlackjackChallengeType,
     dealer_rank: BlackjackRank,
     player_hand: PlayerHand,
-    strat: Rc<dyn BlackjackStrategyTrait>,
+    strat: &'a mut dyn BlackjackStrategyTrait,
     deck: Box<dyn Deck>,
 }
 
-impl BlackjackChallenge{
+impl BlackjackChallenge<'_>{
     pub fn new(
         situationtype: BlackjackChallengeType,
         dealer_card: BlackjackRank,
         player_hand: PlayerHand,
-        strat: Rc<dyn BlackjackStrategyTrait>,
+        strat: &mut dyn BlackjackStrategyTrait,
         deck: Box<dyn Deck>,
     ) -> BlackjackChallenge {
         BlackjackChallenge{
@@ -57,7 +55,7 @@ impl BlackjackChallenge{
         for _ in 0..2000 {
             let dealer_hand = DealerHand::new(&vec![self.dealer_rank.get_representative_card(), self.deck.deal_card(&mut rng)]);
             let play_mode = self.get_play_mode();
-            result += play_blackjack_hand(1.0, self.player_hand.clone(), dealer_hand, &mut self.deck, self.strat.clone(), &mut rng, play_mode);
+            result += play_blackjack_hand(1.0, self.player_hand.clone(), dealer_hand, &mut self.deck, self.strat, &mut rng, play_mode);
         }
         result        
     }
