@@ -7,3 +7,11 @@ edition = "2021"
 
 [dependencies]
 rand = { git = "https://github.com/rust-lang-nursery/rand" }
+
+[[bin]]
+name = "build_strat"
+path = "src/main.rs"
+
+[[bin]]
+name = "play_normal"
+path = "src/play_normal.rs"

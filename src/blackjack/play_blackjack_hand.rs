@@ -22,7 +22,7 @@ fn get_play_result(player_bet: f64, player_result: i32, dealer_result: i32, play
         return -player_bet;
     }
     if player_result == 21 && player_hand.get_cards().len() == 2 {
-        return 2.5 * player_bet;
+        return 1.5 * player_bet;
     }
     if dealer_result == -1 {
         return player_bet;

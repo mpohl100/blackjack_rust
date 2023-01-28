@@ -12,7 +12,6 @@ use crate::blackjack::card::Card;
 use crate::blackjack::card::Rank;
 use crate::blackjack::card::Suit;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
-use crate::blackjack::traits::Stringable;
 
 
 struct BlackjackGameSituation {
@@ -147,7 +146,7 @@ pub fn optimize_blackjack(card_count: i32) -> BlackjackStrategy
                 .insert(hand_situation_upper, optimize_situation(&situation, &deck));
         }
     }
-    
+
     // then optimize double down
     for i in (2..=21).rev() {
         let blackjack_ranks = BlackjackRank::create_all();

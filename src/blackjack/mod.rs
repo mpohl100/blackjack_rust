@@ -1,4 +1,5 @@
 pub mod blackjack_analysis;
+pub mod play_blackjack;
 mod blackjack_situation;
 mod blackjack_strategy;
 mod blackjack_points;
