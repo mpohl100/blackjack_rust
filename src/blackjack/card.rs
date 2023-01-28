@@ -1,7 +1,7 @@
 use crate::blackjack::traits::Allable;
 use crate::blackjack::traits::Stringable;
 
-#[derive(Copy, Clone, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Eq, Ord, PartialEq, PartialOrd, Debug)]
 pub enum Rank {
     Deuce,
     Three,
@@ -57,7 +57,7 @@ impl Rank {
     }
 }
 
-#[derive(Copy, Clone, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Eq, Ord, PartialEq, PartialOrd, Debug)]
 pub enum Suit {
     Hearts,
     Diamonds,
@@ -94,6 +94,10 @@ impl Card {
 
     pub fn rank(&self) -> Rank {
         self.rank
+    }
+
+    pub fn suit(&self) -> Suit {
+        self.suit
     }
 
     pub fn to_blackjack_score(&self) -> i32 {

@@ -17,6 +17,25 @@ pub enum PlayMode {
     Draw,
 }
 
+fn get_play_result(player_bet: f64, player_result: i32, dealer_result: i32, player_hand: PlayerHand) -> f64{
+    if player_result > 21 {
+        return -player_bet;
+    }
+    if player_result == 21 && player_hand.get_cards().len() == 2 {
+        return 2.5 * player_bet;
+    }
+    if dealer_result == -1 {
+        return player_bet;
+    }
+    if player_result > dealer_result {
+        return player_bet;
+    }
+    if player_result == dealer_result {
+        return 0.0;
+    }
+    return -player_bet;
+}
+
 pub fn play_blackjack_hand(
     mut player_bet: f64, 
     mut player_hand: PlayerHand, 
@@ -84,22 +103,8 @@ pub fn play_blackjack_hand(
     }
     // deduce player result
     let player_result = player_points.upper();
-
+    let play_result = get_play_result(player_bet, player_result, dealer_result, player_hand);
     // compare player and dealer hands
-    if player_result > 21 {
-        return -player_bet;
-    }
-    if player_result == 21 && player_hand.get_cards().len() == 2 {
-        return 2.5 * player_bet;
-    }
-    if dealer_result == -1 {
-        return player_bet;
-    }
-    if player_result > dealer_result {
-        return player_bet;
-    }
-    if player_result == dealer_result {
-        return 0.0;
-    }
-    return -player_bet;
+    play_result
+
 }

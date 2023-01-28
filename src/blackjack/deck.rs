@@ -38,7 +38,7 @@ impl CountedDeck {
                 return true;
             }).collect();
         }
-        
+
         CountedDeck {
             deck,
         }
@@ -50,9 +50,10 @@ impl Deck for CountedDeck{
         // implementation of the dealCard method
         let max = (self.deck.len() - 1).try_into().unwrap();
         let i = rng.fetch_uniform(0, max, 1).pop();
-        Card::new_with_int(match i{
+        let card = Card::new_with_int(match i{
             Some(value) => { value },
             None => panic!("converting usize to i32 failed"),
-        })
+        });
+        card
     }
 }

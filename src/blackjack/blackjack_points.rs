@@ -9,7 +9,7 @@ pub struct Points {
 impl Points {
     pub fn new(lower: i32, mut upper: i32) -> Points {
         if upper > 21{
-            upper -= 10;
+            upper = lower;
         }
         Points { lower, upper}
     }

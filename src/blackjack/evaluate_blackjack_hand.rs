@@ -14,5 +14,6 @@ pub fn evaluate_blackjack_hand(hand: &BlackjackHand) -> Points {
             encountered_ace = true;
         }
     }
-    Points::new(lower, upper)
+    let points = Points::new(lower, upper);
+    points
 }
