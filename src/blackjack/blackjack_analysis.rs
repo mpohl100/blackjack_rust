@@ -1,7 +1,10 @@
+use std::collections::BTreeMap;
+
 pub use crate::blackjack::traits::BlackjackStrategyTrait;
 pub use crate::blackjack::blackjack_situation::HandSituation;
 pub use crate::blackjack::blackjack_situation::SplitSituation;
 use crate::blackjack::blackjack_strategy::BlackjackStrategy;
+use crate::blackjack::blackjack_strategy::CountedBlackjackStrategy;
 use crate::blackjack::blackjack_challenge::BlackjackChallenge;
 use crate::blackjack::blackjack_challenge::BlackjackChallengeType;
 use crate::blackjack::blackjack_points::Points;
@@ -190,3 +193,11 @@ pub fn optimize_blackjack(card_count: i32) -> impl BlackjackStrategyTrait
     result
 }
 
+pub fn optimize_counted() -> impl BlackjackStrategyTrait{
+    let mut data = BTreeMap::<i32, Box<dyn BlackjackStrategyTrait>>::new();
+    for i in -10..11{
+        let strat = optimize_blackjack(0);
+        data.insert(i, Box::new(strat));
+    }
+    CountedBlackjackStrategy::new(data)
+}

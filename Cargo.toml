@@ -15,3 +15,7 @@ path = "src/main.rs"
 [[bin]]
 name = "play_normal"
 path = "src/play_normal.rs"
+
+[[bin]]
+name = "play_counted"
+path = "src/play_counted.rs"

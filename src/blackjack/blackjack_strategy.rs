@@ -157,3 +157,63 @@ impl BlackjackStrategyTrait for BlackjackStrategy{
         self.data.split_percentages.insert(situation, do_it);
     }
 }
+
+pub struct CountedBlackjackStrategy{
+    counted_strategies: BTreeMap<i32, Box<dyn BlackjackStrategyTrait>>,
+}
+
+impl CountedBlackjackStrategy{
+    pub fn new(data: BTreeMap<i32, Box<dyn BlackjackStrategyTrait>>) -> CountedBlackjackStrategy{
+        CountedBlackjackStrategy{counted_strategies: data}
+    }
+}
+
+impl BlackjackStrategyTrait for CountedBlackjackStrategy{
+    fn get_draw(&self, situation: HandSituation, deck: &Box<dyn Deck>) -> bool
+    {
+        match self.counted_strategies.get(&deck.get_count()){
+            Some(strat) => {strat.get_draw(situation, deck)},
+            _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
+        }
+    }
+
+    fn get_double_down(&self, situation: HandSituation, deck: &Box<dyn Deck>) -> bool
+    {
+        match self.counted_strategies.get(&deck.get_count()){
+            Some(strat) => {strat.get_double_down(situation, deck)},
+            _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
+        }
+    }
+    fn get_split(&self, situation: SplitSituation, deck: &Box<dyn Deck>) -> bool
+    {
+        match self.counted_strategies.get(&deck.get_count()){
+            Some(strat) => {strat.get_split(situation, deck)},
+            _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
+        }
+    }
+
+    fn add_draw(&mut self, _situation: HandSituation, _do_it: bool)
+    {
+        unimplemented!()
+    }
+
+    fn add_double_down(&mut self, _situation: HandSituation, _do_it: bool)
+    {
+        unimplemented!()
+    }
+
+    fn add_split(&mut self, _situation: SplitSituation, _do_it: bool)
+    {
+        unimplemented!()
+    }
+
+    fn to_string_mat2(&self) -> String
+    {
+        let mut ret = String::new();
+        for (count, strat) in &self.counted_strategies{
+            ret.push_str(&("Count ".to_owned() + &count.to_string()));
+            ret.push_str(&("Strategy: ".to_owned() + &strat.to_string_mat2() + &"\n\n".to_string()));
+        }
+        ret
+    }
+}

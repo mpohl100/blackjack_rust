@@ -6,9 +6,16 @@ use crate::blackjack::hand::DealerHand;
 use crate::blackjack::rng::RandomNumberGenerator;
 use crate::blackjack::deck::Deck;
 use crate::blackjack::traits::BlackjackStrategyTrait;
+use crate::blackjack::deck::EightDecks;
 
-pub fn play_blackjack(n: i32, blackjack_strategy: &dyn BlackjackStrategyTrait) -> f64{
-    let mut boxed_deck: Box<dyn Deck> = Box::new(CountedDeck::new(0));
+pub fn play_blackjack(n: i32, blackjack_strategy: &dyn BlackjackStrategyTrait, play_normal: bool) -> f64{
+    let mut boxed_deck: Box<dyn Deck>;
+    if play_normal{
+        boxed_deck = Box::new(EightDecks::new());
+    } 
+    else {
+        boxed_deck = Box::new(CountedDeck::new(0));
+    }
     let mut rng = RandomNumberGenerator::new();
     let mut result = 0.0;
     for _ in 0..n{

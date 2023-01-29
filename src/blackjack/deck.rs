@@ -3,13 +3,17 @@ use crate::blackjack::rng::RandomNumberGenerator;
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::card::Rank;
 
+use rand::thread_rng;
+use rand::seq::SliceRandom;
 pub trait Deck{
-    fn deal_card(&self, rng: &mut RandomNumberGenerator) -> Card;
+    fn deal_card(&mut self, rng: &mut RandomNumberGenerator) -> Card;
+    fn get_count(&self) -> i32;
 }
 
 #[derive(Default, Clone)]
 pub struct CountedDeck {
     deck: Vec<Card>,
+    count: i32,
 }
 
 impl CountedDeck {
@@ -41,13 +45,13 @@ impl CountedDeck {
 
         CountedDeck {
             deck,
+            count
         }
     }
 }
 
 impl Deck for CountedDeck{
-    fn deal_card(&self, rng: &mut RandomNumberGenerator) -> Card {
-        // implementation of the dealCard method
+    fn deal_card(&mut self, rng: &mut RandomNumberGenerator) -> Card {
         let max = (self.deck.len() - 1).try_into().unwrap();
         let i = rng.fetch_uniform(0, max, 1).pop();
         let card = Card::new_with_int(match i{
@@ -55,5 +59,56 @@ impl Deck for CountedDeck{
             None => panic!("converting usize to i32 failed"),
         });
         card
+    }
+
+    fn get_count(&self) -> i32 {
+        self.count
+    }
+}
+
+pub struct EightDecks{
+    decks: Vec<Card>,
+    count: i32,
+}
+
+impl EightDecks{
+    pub fn new() -> EightDecks{
+        let mut deck = EightDecks{decks: Vec::<Card>::new(), count: 0};
+        deck.init();
+        deck
+    }
+
+    fn init(&mut self){
+        self.decks = Vec::<Card>::new();
+        for _ in 0..8{
+            for i in 0..52{
+                self.decks.push(Card::new_with_int(i));
+            }
+        }
+        self.decks.shuffle(&mut thread_rng());
+    }
+}
+
+impl Deck for EightDecks{
+    fn deal_card(&mut self, _rng: &mut RandomNumberGenerator) -> Card {
+        if self.decks.is_empty(){
+            self.init();
+        }
+        let card;
+        match self.decks.pop(){
+            Some(value) => {card = value},
+            _ => panic!("found empty deck"),
+        }
+        if vec![Rank::Ten, Rank::Jack, Rank::Queen, Rank::King].contains(&card.rank()){
+            self.count += 1;
+        }
+        else if vec![Rank::Deuce, Rank::Three, Rank::Four, Rank::Five, Rank::Six].contains(&card.rank()) {
+            self.count -= 1;
+        }
+        card
+    }
+
+    fn get_count(&self) -> i32 {
+        self.count
     }
 }
