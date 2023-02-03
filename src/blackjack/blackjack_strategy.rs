@@ -160,18 +160,45 @@ impl BlackjackStrategyTrait for BlackjackStrategy{
 
 pub struct CountedBlackjackStrategy{
     counted_strategies: BTreeMap<i32, Box<dyn BlackjackStrategyTrait>>,
+    max_count: i32,
+    min_count: i32,
 }
 
 impl CountedBlackjackStrategy{
     pub fn new(data: BTreeMap<i32, Box<dyn BlackjackStrategyTrait>>) -> CountedBlackjackStrategy{
-        CountedBlackjackStrategy{counted_strategies: data}
+        let max_count;
+        match data.keys().next_back(){
+            Some(value) => {max_count = *value},
+            _ => panic!("max_count not found in data"),
+        };
+        let min_count;
+        match data.keys().next(){
+            Some(value) => {min_count = *value},
+            _ => panic!("min_count not found in data"),
+        };
+        CountedBlackjackStrategy{counted_strategies: data, max_count: max_count, min_count: min_count}
+    }
+}
+
+fn get_clamped_count(deck: &Box<dyn Deck>, min_count: i32, max_count: i32) -> i32{
+    let nb_cards = deck.get_nb_cards();
+    let count = deck.get_count();
+    let ratio = (count as f64) / (nb_cards as f64);
+    let count = (ratio * 52.0) as i32;
+    if count > max_count {
+        max_count
+    }
+    else if count < min_count {
+        min_count
+    } else {
+        count
     }
 }
 
 impl BlackjackStrategyTrait for CountedBlackjackStrategy{
     fn get_draw(&self, situation: HandSituation, deck: &Box<dyn Deck>) -> bool
     {
-        match self.counted_strategies.get(&deck.get_count()){
+        match self.counted_strategies.get(&get_clamped_count(&deck, self.min_count, self.max_count)){
             Some(strat) => {strat.get_draw(situation, deck)},
             _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
         }
@@ -179,14 +206,14 @@ impl BlackjackStrategyTrait for CountedBlackjackStrategy{
 
     fn get_double_down(&self, situation: HandSituation, deck: &Box<dyn Deck>) -> bool
     {
-        match self.counted_strategies.get(&deck.get_count()){
+        match self.counted_strategies.get(&get_clamped_count(&deck, self.min_count, self.max_count)){
             Some(strat) => {strat.get_double_down(situation, deck)},
             _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
         }
     }
     fn get_split(&self, situation: SplitSituation, deck: &Box<dyn Deck>) -> bool
     {
-        match self.counted_strategies.get(&deck.get_count()){
+        match self.counted_strategies.get(&get_clamped_count(&deck, self.min_count, self.max_count)){
             Some(strat) => {strat.get_split(situation, deck)},
             _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
         }

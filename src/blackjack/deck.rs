@@ -8,6 +8,7 @@ use rand::seq::SliceRandom;
 pub trait Deck{
     fn deal_card(&mut self, rng: &mut RandomNumberGenerator) -> Card;
     fn get_count(&self) -> i32;
+    fn get_nb_cards(&self) -> i32;
 }
 
 #[derive(Default, Clone)]
@@ -64,6 +65,10 @@ impl Deck for CountedDeck{
     fn get_count(&self) -> i32 {
         self.count
     }
+
+    fn get_nb_cards(&self) -> i32 {
+        52
+    }
 }
 
 pub struct EightDecks{
@@ -110,5 +115,9 @@ impl Deck for EightDecks{
 
     fn get_count(&self) -> i32 {
         self.count
+    }
+
+    fn get_nb_cards(&self) -> i32 {
+        self.decks.len().try_into().unwrap()
     }
 }
