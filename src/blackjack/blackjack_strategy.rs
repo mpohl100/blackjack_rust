@@ -264,7 +264,7 @@ struct BlackjackStrategyDataVec{
 }
 
 #[derive(Default, Clone)]
-struct BlackjackStrategyVec{
+pub struct BlackjackStrategyVec{
     data: BlackjackStrategyDataVec,
     reversed: bool,
 }
