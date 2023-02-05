@@ -118,7 +118,7 @@ fn optimize_situation(situation: &mut BlackjackGameSituation, deck: &CountedDeck
 
 pub fn optimize_blackjack(card_count: i32) -> impl BlackjackStrategyTrait
 {
-    let mut result = BlackjackStrategy::new();
+    let mut result = BlackjackStrategy::new(true);
     let deck = CountedDeck::new( card_count );
     // first optimize drawing
     for i in (2..=21).rev() {

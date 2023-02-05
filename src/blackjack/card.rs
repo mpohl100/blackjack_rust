@@ -77,7 +77,7 @@ impl Suit {
     }
 }
 
-#[derive(Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Card {
     rank: Rank,
     suit: Suit,
@@ -119,26 +119,7 @@ impl Card {
     }
 }
 
-impl Default for Card {
-    fn default() -> Card {
-        Card {
-            rank: Rank::Deuce,
-            suit: Suit::Hearts,
-        }
-    }
-}
-
-impl Clone for Card {
-    fn clone(&self) -> Card {
-        Card {
-            rank: self.rank,
-            suit: self.suit,
-        }
-    }
-}
-
-impl Copy for Card {}
-
+#[derive(Default, Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct BlackjackRank {
     val: i32,
 }
@@ -201,38 +182,3 @@ impl Allable for BlackjackRank{
         BlackjackRank::new(Rank::Ace),]
     }
 }
-
-impl Default for BlackjackRank {
-    fn default() -> BlackjackRank {
-        BlackjackRank { val: -1 }
-    }
-}
-
-impl Clone for BlackjackRank {
-    fn clone(&self) -> BlackjackRank {
-        BlackjackRank { val: self.val }
-    }
-}
-
-impl Copy for BlackjackRank {}
-
-impl PartialEq for BlackjackRank {
-    fn eq(&self, other: &BlackjackRank) -> bool {
-        self.val == other.val
-    }
-}
-
-impl Eq for BlackjackRank {}
-
-impl PartialOrd for BlackjackRank {
-    fn partial_cmp(&self, other: &BlackjackRank) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for BlackjackRank {
-    fn cmp(&self, other: &BlackjackRank) -> std::cmp::Ordering {
-        self.val.cmp(&other.val)
-    }
-}
-

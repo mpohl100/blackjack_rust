@@ -1,6 +1,7 @@
 use super::traits::Allable;
 use super::traits::Stringable;
 
+#[derive(Default, Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Points {
     lower: i32,
     upper: i32,
@@ -37,42 +38,5 @@ impl Allable for Points{
             points.insert(Points::new(i, i + 10 ));
         }
         points.into_iter().collect()
-    }
-}
-
-impl Default for Points {
-    fn default() -> Points {
-        Points { lower: -10000, upper: -10000 }
-    }
-}
-
-impl Clone for Points {
-    fn clone(&self) -> Points {
-        Points { lower: self.lower, upper: self.upper }
-    }
-}
-
-impl Copy for Points {}
-
-impl PartialEq for Points {
-    fn eq(&self, other: &Points) -> bool {
-        self.lower == other.lower && self.upper == other.upper
-    }
-}
-
-impl Eq for Points {}
-
-impl PartialOrd for Points {
-    fn partial_cmp(&self, other: &Points) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for Points {
-    fn cmp(&self, other: &Points) -> std::cmp::Ordering {
-        match self.lower.cmp(&other.lower) {
-            std::cmp::Ordering::Equal => self.upper.cmp(&other.upper),
-            o => o,
-        }
     }
 }

@@ -3,7 +3,7 @@ use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::traits::Allable;
 use crate::blackjack::traits::Stringable;
 
-#[derive(Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct BlackjackSituation<T> {
     situation: T,
     dealer_card: BlackjackRank,
@@ -42,20 +42,6 @@ impl<T: Allable + Clone> BlackjackSituation<T> {
         ret
     }
 }
-
-impl<T: Default> Default for BlackjackSituation<T> {
-    fn default() -> BlackjackSituation<T> {
-        BlackjackSituation { situation: T::default(), dealer_card: BlackjackRank::default() }
-    }
-}
-
-impl<T: Clone> Clone for BlackjackSituation<T> {
-    fn clone(&self) -> BlackjackSituation<T> {
-        BlackjackSituation { situation: self.situation.clone(), dealer_card: self.dealer_card.clone() }
-    }
-}
-
-impl<T: Copy> Copy for BlackjackSituation<T> {}
 
 pub type HandSituation = BlackjackSituation<Points>;
 pub type SplitSituation = BlackjackSituation<BlackjackRank>;

@@ -1,5 +1,6 @@
 use core::panic;
 use std::collections::BTreeMap;
+use std::collections::HashMap;
 use crate::blackjack::blackjack_situation::HandSituation;
 use crate::blackjack::blackjack_situation::SplitSituation;
 use crate::blackjack::blackjack_points::Points;
@@ -19,13 +20,22 @@ struct BlackjackStrategyData {
 }
 
 #[derive(Default, Clone)]
+struct BlackjackStrategyDataHash {
+    pub drawing_percentages: HashMap<HandSituation, bool>,
+    pub double_down_percentages: HashMap<HandSituation, bool>,
+    pub split_percentages: HashMap<SplitSituation, bool>,
+}
+
+#[derive(Default, Clone)]
 pub struct BlackjackStrategy{
     data: BlackjackStrategyData,
+    data_hash: BlackjackStrategyDataHash,
+    use_hash: bool,
 }
 
 impl BlackjackStrategy{
-    pub fn new() -> BlackjackStrategy{
-        BlackjackStrategy{data: BlackjackStrategyData::default()}
+    pub fn new(use_hash: bool) -> BlackjackStrategy{
+        BlackjackStrategy{data: BlackjackStrategyData::default(), data_hash: BlackjackStrategyDataHash::default(), use_hash: use_hash}
     }
 }
 
@@ -115,7 +125,7 @@ impl BlackjackStrategyTrait for BlackjackStrategy{
 
     fn get_draw(&self, situation: HandSituation, _deck: &Box<dyn Deck>) -> bool
     {
-        let it = self.data.drawing_percentages.get(&situation);
+        let it = if !self.use_hash {self.data.drawing_percentages.get(&situation)} else {self.data_hash.drawing_percentages.get(&situation)};
         if it == None {
             panic!("Drawing strategy not found {} ; {}", situation.situation().to_string_internal(), situation.dealer_card().to_string_internal());
         }
@@ -125,7 +135,7 @@ impl BlackjackStrategyTrait for BlackjackStrategy{
 
     fn get_double_down(&self, situation: HandSituation, _deck: &Box<dyn Deck>) -> bool
     {
-        let it = self.data.double_down_percentages.get(&situation);
+        let it = if !self.use_hash {self.data.double_down_percentages.get(&situation)} else {self.data_hash.double_down_percentages.get(&situation)};
         if it == None {
             panic!("Double down strategy not found {} ; {}", situation.situation().to_string_internal(), situation.dealer_card().to_string_internal());
         }
@@ -135,7 +145,7 @@ impl BlackjackStrategyTrait for BlackjackStrategy{
 
     fn get_split(&self, situation: SplitSituation, _deck: &Box<dyn Deck>) -> bool
     {
-        let it = self.data.split_percentages.get(&situation);
+        let it = if !self.use_hash {self.data.split_percentages.get(&situation)} else {self.data_hash.split_percentages.get(&situation)} ;
         if it == None {
             panic!("Split strategy not found for rank {} ; {}", situation.situation().to_string_internal(), situation.dealer_card().to_string_internal())
         }
@@ -146,16 +156,19 @@ impl BlackjackStrategyTrait for BlackjackStrategy{
     fn add_draw(&mut self, situation: HandSituation, do_it: bool)
     {
         self.data.drawing_percentages.insert(situation, do_it);
+        self.data_hash.drawing_percentages.insert(situation, do_it);
     }
 
     fn add_double_down(&mut self, situation: HandSituation, do_it: bool)
     {
         self.data.double_down_percentages.insert(situation, do_it);
+        self.data_hash.double_down_percentages.insert(situation, do_it);   
     }
 
     fn add_split(&mut self, situation: SplitSituation, do_it: bool)
     {
         self.data.split_percentages.insert(situation, do_it);
+        self.data_hash.split_percentages.insert(situation, do_it);
     }
 }
 
@@ -368,7 +381,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec{
 
     fn to_string_mat2(&self) -> String
     {
-        let mut blackjack_strategy_sorted = BlackjackStrategy::new();
+        let mut blackjack_strategy_sorted = BlackjackStrategy::new(false);
         for situation_strategy in &self.data.drawing_percentages{
             blackjack_strategy_sorted.add_draw(situation_strategy.situation, situation_strategy.do_it);
         }
