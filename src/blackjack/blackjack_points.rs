@@ -33,7 +33,7 @@ impl Stringable for Points{
 impl Allable for Points{
     fn create_all() -> Vec<Points> {
         let mut points = std::collections::BTreeSet::new();
-        for i in 4..=21 {
+        for i in 2..=21 {
             points.insert(Points::new(i, i));
             points.insert(Points::new(i, i + 10 ));
         }

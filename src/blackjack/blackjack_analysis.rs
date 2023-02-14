@@ -11,11 +11,11 @@ use crate::blackjack::blackjack_points::Points;
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::deck::CountedDeck;
-use crate::blackjack::traits::Allable;
 use crate::blackjack::card::Card;
 use crate::blackjack::card::Rank;
 use crate::blackjack::card::Suit;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
+use crate::blackjack::traits::Stringable;
 struct BlackjackGameSituation<'a> {
     pub hand_situation: Option<HandSituation>,
     pub is_draw: bool,
@@ -121,74 +121,36 @@ pub fn optimize_blackjack(card_count: i32) -> impl BlackjackStrategyTrait
     let mut result = BlackjackStrategy::new(true);
     let deck = CountedDeck::new( card_count );
     // first optimize drawing
-    for i in (2..=21).rev() {
-        let blackjack_ranks = BlackjackRank::create_all();
-        for dealer_rank in blackjack_ranks {
-            let mut situation = BlackjackGameSituation {
-                is_draw: true,
-                strat: &mut result.clone(),
-                hand_situation: None,
-                split_situation: None,
-            };
-            let hand_situation = HandSituation::new(
-                Points::new(i, i),
-                dealer_rank,
-            );
-            situation.hand_situation = Some(hand_situation);
-            result.add_draw(hand_situation, optimize_situation(&mut situation, &deck));
-
-            let hand_situation_upper = HandSituation::new(
-                Points::new(i, i + 10),
-                dealer_rank,
-            );
-            situation.hand_situation = Some(hand_situation_upper);
-            result.add_draw(hand_situation_upper, optimize_situation(&mut situation, &deck));
-        }
+    for hand_situation in HandSituation::create_all().iter().rev() {
+        let mut situation = BlackjackGameSituation {
+            is_draw: true,
+            strat: &mut result.clone(),
+            hand_situation: Some(*hand_situation),
+            split_situation: None,
+        };
+        result.add_draw(*hand_situation, optimize_situation(&mut situation, &deck));        
     }
-
+    
     // then optimize double down
-    for i in (2..=21).rev() {
-        let blackjack_ranks = BlackjackRank::create_all();
-        for dealer_rank in blackjack_ranks {
-            let mut situation = BlackjackGameSituation {
-                is_draw: false,
-                strat: &mut result.clone(),
-                hand_situation: None,
-                split_situation: None,
-            };
-            let hand_situation = HandSituation::new(
-                Points::new(i, i),
-                dealer_rank,
-            );
-            situation.hand_situation = Some(hand_situation);
-            result.add_double_down(hand_situation, optimize_situation(&mut situation, &deck));
-
-            let hand_situation_upper = HandSituation::new(
-                Points::new(i, i + 10),
-                dealer_rank,
-            );
-            situation.hand_situation = Some(hand_situation_upper);
-            result.add_double_down(hand_situation_upper, optimize_situation(&mut situation, &deck));
-        }
+    for hand_situation in HandSituation::create_all().iter().rev() {
+        let mut situation = BlackjackGameSituation {
+            is_draw: false,
+            strat: &mut result.clone(),
+            hand_situation: Some(*hand_situation),
+            split_situation: None,
+        };
+        result.add_double_down(*hand_situation, optimize_situation(&mut situation, &deck));
     }
 
     // then optimize split
-    let blackjack_ranks = BlackjackRank::create_all();
-    for split_rank in blackjack_ranks.clone() {
-        for dealer_rank in blackjack_ranks.clone() {
-            let mut situation = BlackjackGameSituation {
-                is_draw: false,
-                strat: &mut result.clone(),
-                hand_situation: None,
-                split_situation: None,
-            };
-            let split_situation = SplitSituation::new(
-                split_rank,
-                dealer_rank,
-            );
-            situation.split_situation = Some(split_situation);
-            result.add_split(split_situation, optimize_situation(&mut situation, &deck));
-        }
+    for split_situation in SplitSituation::create_all().iter() {
+        let mut situation = BlackjackGameSituation {
+            is_draw: false,
+            strat: &mut result.clone(),
+            hand_situation: None,
+            split_situation: Some(*split_situation),
+        };
+        result.add_split(*split_situation, optimize_situation(&mut situation, &deck));
     }
     result
 }

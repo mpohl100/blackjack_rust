@@ -30,7 +30,7 @@ impl<T: Allable + Clone> BlackjackSituation<T> {
         BlackjackSituation { situation: sit, dealer_card }
     }
 
-    fn create_all() -> Vec<BlackjackSituation<T>> {
+    pub fn create_all() -> Vec<BlackjackSituation<T>> {
         let all_sits = T::create_all();
         let dealer_cards = BlackjackRank::create_all();
         let mut ret = vec![];
