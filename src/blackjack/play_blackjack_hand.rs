@@ -44,7 +44,6 @@ pub fn play_blackjack_hand(
     rng: &mut RandomNumberGenerator, 
     play_mode: PlayMode
 ) -> f64 {
-    // as a first version we play without double down and without split
     // play dealer hand at the beginning so that recursive versions for splitting use the same dealer outcome
     let dealer_result = dealer_hand.play(deck, rng);
 
@@ -72,26 +71,26 @@ pub fn play_blackjack_hand(
         }
     }
 
-    loop {
-        if only_draw_once {
-            player_hand.add_card(&deck.deal_card(rng));
-            player_points = evaluate_blackjack_hand(&player_hand.get_blackjack_hand());
-            break;
-        }
-        player_points = evaluate_blackjack_hand(&player_hand.get_blackjack_hand());
-        if player_points.lower() > 21 {
-            break;
-        }
-        let draw = player_strategy.get_draw(HandSituation::new(player_points, dealer_hand.open_card()), deck);
-        if !draw {
-            break;
-        }
+    if only_draw_once {
         player_hand.add_card(&deck.deal_card(rng));
+        player_points = evaluate_blackjack_hand(&player_hand.get_blackjack_hand());
+    }
+    else {
+        loop {
+            player_points = evaluate_blackjack_hand(&player_hand.get_blackjack_hand());
+            if player_points.lower() > 21 {
+                break;
+            }
+            let draw = player_strategy.get_draw(HandSituation::new(player_points, dealer_hand.open_card()), deck);
+            if !draw {
+                break;
+            }
+            player_hand.add_card(&deck.deal_card(rng));
+        }
     }
     // deduce player result
     let player_result = player_points.upper();
     let play_result = get_play_result(player_bet, player_result, dealer_result, player_hand);
     // compare player and dealer hands
     play_result
-
 }
