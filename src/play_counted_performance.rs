@@ -8,11 +8,11 @@ use std::time::Instant;
 
 
 fn play<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, n: i32, description: String)
-where BlackjackStrategyType: BlackjackStrategyTrait + Clone
+where BlackjackStrategyType: BlackjackStrategyTrait + Clone + 'static
 {
-    let strat = blackjack::blackjack_analysis::optimize_blackjack(blackjack_strategy, 0);
+    let strat = blackjack::blackjack_analysis::optimize_counted(blackjack_strategy);
     let start = Instant::now();
-    let result = blackjack::play_blackjack::play_blackjack(n, &strat, false);
+    let result = blackjack::play_blackjack::play_blackjack(n, &strat, true);
     let duration = start.elapsed();
     // Print the elapsed time
     println!("{:?} time: {:?}", description, duration);
