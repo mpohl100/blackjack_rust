@@ -3,11 +3,9 @@ use std::collections::BTreeMap;
 pub use crate::blackjack::traits::BlackjackStrategyTrait;
 pub use crate::blackjack::blackjack_situation::HandSituation;
 pub use crate::blackjack::blackjack_situation::SplitSituation;
-use crate::blackjack::blackjack_strategy::BlackjackStrategy;
 use crate::blackjack::blackjack_strategy::CountedBlackjackStrategy;
 use crate::blackjack::blackjack_challenge::BlackjackChallenge;
 use crate::blackjack::blackjack_challenge::BlackjackChallengeType;
-use crate::blackjack::blackjack_points::Points;
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::deck::CountedDeck;
@@ -15,7 +13,6 @@ use crate::blackjack::card::Card;
 use crate::blackjack::card::Rank;
 use crate::blackjack::card::Suit;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
-use crate::blackjack::traits::Stringable;
 struct BlackjackGameSituation<'a> {
     pub hand_situation: Option<HandSituation>,
     pub is_draw: bool,
@@ -116,9 +113,10 @@ fn optimize_situation(situation: &mut BlackjackGameSituation, deck: &CountedDeck
     } 
 }
 
-pub fn optimize_blackjack(card_count: i32) -> impl BlackjackStrategyTrait
+pub fn optimize_blackjack<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, card_count: i32) -> impl BlackjackStrategyTrait
+where BlackjackStrategyType: BlackjackStrategyTrait + Clone
 {
-    let mut result = BlackjackStrategy::new(true);
+    let mut result = blackjack_strategy.clone();
     let deck = CountedDeck::new( card_count );
     // first optimize drawing
     for hand_situation in HandSituation::create_all().iter().rev() {
@@ -155,10 +153,12 @@ pub fn optimize_blackjack(card_count: i32) -> impl BlackjackStrategyTrait
     result
 }
 
-pub fn optimize_counted() -> impl BlackjackStrategyTrait{
+pub fn optimize_counted<BlackjackStrategyType>(blackjack_strategy:BlackjackStrategyType) -> impl BlackjackStrategyTrait
+where BlackjackStrategyType: BlackjackStrategyTrait + Clone + 'static
+{
     let mut data = BTreeMap::<i32, Box<dyn BlackjackStrategyTrait>>::new();
     for i in -10..11{
-        let strat = optimize_blackjack(0);
+        let strat = optimize_blackjack(blackjack_strategy.clone(), i);
         data.insert(i, Box::new(strat));
     }
     CountedBlackjackStrategy::new(data)
