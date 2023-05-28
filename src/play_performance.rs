@@ -1,5 +1,6 @@
 
 mod blackjack;
+mod commandline_params;
 
 use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::blackjack_strategy::BlackjackStrategy;
@@ -20,8 +21,10 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone
 }
 
 fn main() {
+    let description = "Play as many hands as specified with the optimal blackjack strategy and compare the performance of the storage approaches of the blackjack strategy";
+    let app = commandline_params::get_commandline_params("play_normal".to_string(), &description);
     println!("Measure performance:");
-    let n = 1000000;
+    let n = commandline_params::get_number_hands(app).try_into().unwrap();
     play(BlackjackStrategy::new(true), n, "HashMap".to_string());
     play(BlackjackStrategy::new(false), n, "OrderedMap".to_string());
     play(BlackjackStrategyVec::new(false), n, "ReversedVec".to_string());
