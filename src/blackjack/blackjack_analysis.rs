@@ -13,6 +13,8 @@ use crate::blackjack::card::Card;
 use crate::blackjack::card::Rank;
 use crate::blackjack::card::Suit;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
+use crate::blackjack::traits::Stringable;
+
 struct BlackjackGameSituation<'a> {
     pub hand_situation: Option<HandSituation>,
     pub is_draw: bool,
@@ -113,12 +115,31 @@ fn optimize_situation(situation: &mut BlackjackGameSituation, deck: &CountedDeck
     } 
 }
 
-pub fn optimize_blackjack<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, card_count: i32) -> impl BlackjackStrategyTrait
+fn optimize_draw<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, card_count: i32) -> BlackjackStrategyType
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone
 {
     let mut result = blackjack_strategy.clone();
     let deck = CountedDeck::new( card_count );
     // first optimize drawing
+    let all_situations = HandSituation::create_all();
+    let mut buckets = BTreeMap::<BlackjackRank, Vec<HandSituation>>::new();
+    for sit in all_situations{
+        let val = buckets.get_mut(&sit.dealer_card());
+        if let Some(b) = val{
+            b.push(sit);
+        }
+        else{
+            buckets.insert(sit.dealer_card(), vec![sit]);
+        }
+
+    }
+    for (_, bucket) in buckets.iter(){
+        for sit in bucket.iter(){
+            println!("{}", sit.to_string_internal());
+        }
+        println!();
+    }
+
     for hand_situation in HandSituation::create_all().iter().rev() {
         let mut situation = BlackjackGameSituation {
             is_draw: true,
@@ -128,6 +149,14 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone
         };
         result.add_draw(*hand_situation, optimize_situation(&mut situation, &deck));        
     }
+    result
+}
+
+pub fn optimize_blackjack<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, card_count: i32) -> impl BlackjackStrategyTrait
+where BlackjackStrategyType: BlackjackStrategyTrait + Clone
+{
+    let mut result = optimize_draw(blackjack_strategy, card_count).clone();
+    let deck = CountedDeck::new( card_count );
     
     // then optimize double down
     for hand_situation in HandSituation::create_all().iter().rev() {
