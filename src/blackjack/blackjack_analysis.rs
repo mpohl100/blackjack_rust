@@ -115,6 +115,22 @@ fn optimize_situation(situation: &mut BlackjackGameSituation, deck: &CountedDeck
     } 
 }
 
+fn calculate_draw<BlackjackStrategyType>(hand_situations: Vec<HandSituation>, deck: CountedDeck, blackjack_strategy: BlackjackStrategyType) -> BlackjackStrategyType
+where BlackjackStrategyType: BlackjackStrategyTrait + Clone
+{
+    let mut result = blackjack_strategy.clone();
+    for hand_situation in hand_situations.iter().rev() {
+        let mut situation = BlackjackGameSituation {
+            is_draw: true,
+            strat: &mut result.clone(),
+            hand_situation: Some(*hand_situation),
+            split_situation: None,
+        };
+        result.add_draw(*hand_situation, optimize_situation(&mut situation, &deck));        
+    }
+    result
+}
+
 fn optimize_draw<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, card_count: i32) -> BlackjackStrategyType
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone
 {
@@ -131,7 +147,6 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone
         else{
             buckets.insert(sit.dealer_card(), vec![sit]);
         }
-
     }
     for (_, bucket) in buckets.iter(){
         for sit in bucket.iter(){
@@ -139,15 +154,11 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone
         }
         println!();
     }
-
-    for hand_situation in HandSituation::create_all().iter().rev() {
-        let mut situation = BlackjackGameSituation {
-            is_draw: true,
-            strat: &mut result.clone(),
-            hand_situation: Some(*hand_situation),
-            split_situation: None,
-        };
-        result.add_draw(*hand_situation, optimize_situation(&mut situation, &deck));        
+    for (_, bucket ) in buckets.iter(){
+        let bucket_result = calculate_draw(bucket.clone(), deck.clone(), result.clone());
+        print!("{}", bucket_result.to_string_mat2());
+        println!();
+        //result.combine(bucket_result);
     }
     result
 }
