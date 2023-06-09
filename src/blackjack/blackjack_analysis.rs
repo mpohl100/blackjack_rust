@@ -158,7 +158,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone
         let bucket_result = calculate_draw(bucket.clone(), deck.clone(), result.clone());
         print!("{}", bucket_result.to_string_mat2());
         println!();
-        //result.combine(bucket_result);
+        result.combine(&bucket_result.dump());
     }
     result
 }
