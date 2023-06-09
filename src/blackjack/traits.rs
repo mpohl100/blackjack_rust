@@ -1,5 +1,6 @@
 use crate::blackjack::blackjack_analysis::HandSituation;
 use crate::blackjack::blackjack_analysis::SplitSituation;
+use crate::blackjack::blackjack_strategy::BlackjackStrategyData;
 use crate::blackjack::deck::Deck;
 pub trait Allable{
     fn create_all() -> Vec<Self> where Self: Sized;
@@ -19,4 +20,7 @@ pub trait BlackjackStrategyTrait{
     fn add_split(&mut self, situation: SplitSituation, do_it: bool);
 
     fn to_string_mat2(&self) -> String;
+
+    fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData);
+    fn dump(&self) -> BlackjackStrategyData;
 }

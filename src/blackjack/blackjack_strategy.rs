@@ -13,7 +13,7 @@ use crate::blackjack::deck::Deck;
 
 
 #[derive(Default, Clone)]
-struct BlackjackStrategyData {
+pub struct BlackjackStrategyData {
     pub drawing_percentages: BTreeMap<HandSituation, bool>,
     pub double_down_percentages: BTreeMap<HandSituation, bool>,
     pub split_percentages: BTreeMap<SplitSituation, bool>,
@@ -170,6 +170,26 @@ impl BlackjackStrategyTrait for BlackjackStrategy{
         self.data.split_percentages.insert(situation, do_it);
         self.data_hash.split_percentages.insert(situation, do_it);
     }
+
+    fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData)
+    {
+        for (sit, do_it) in blackjack_strategy.drawing_percentages.iter(){
+            self.add_draw(*sit, *do_it);
+        }
+        
+        for (sit, do_it) in blackjack_strategy.double_down_percentages.iter(){
+            self.add_double_down(*sit, *do_it);
+        }
+
+        for (sit, do_it) in blackjack_strategy.split_percentages.iter(){
+            self.add_split(*sit, *do_it);
+        }
+    }
+
+    fn dump(&self) -> BlackjackStrategyData
+    {
+        self.data.clone()
+    }
 }
 
 pub struct CountedBlackjackStrategy{
@@ -256,6 +276,17 @@ impl BlackjackStrategyTrait for CountedBlackjackStrategy{
             ret.push_str(&("Strategy: ".to_owned() + &strat.to_string_mat2() + &"\n\n".to_string()));
         }
         ret
+    }
+
+    
+    fn combine(&mut self, _blackjack_strategy: &BlackjackStrategyData)
+    {
+        unimplemented!()
+    }
+
+    fn dump(&self) -> BlackjackStrategyData
+    {
+        unimplemented!()
     }
 }
 
@@ -392,5 +423,39 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec{
             blackjack_strategy_sorted.add_split(situation_strategy.situation, situation_strategy.do_it);
         }
         blackjack_strategy_sorted.to_string_mat2()
+    }
+
+    
+    fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData)
+    {
+        for (sit, do_it) in blackjack_strategy.drawing_percentages.iter(){
+            self.add_draw(*sit, *do_it);
+        }
+        
+        for (sit, do_it) in blackjack_strategy.double_down_percentages.iter(){
+            self.add_double_down(*sit, *do_it);
+        }
+
+        for (sit, do_it) in blackjack_strategy.split_percentages.iter(){
+            self.add_split(*sit, *do_it);
+        }
+    }
+
+    fn dump(&self) -> BlackjackStrategyData
+    {
+        let mut result = BlackjackStrategyData::default();
+
+        for hand_situation in &self.data.drawing_percentages{
+            result.drawing_percentages.insert(hand_situation.situation, hand_situation.do_it);
+        }
+   
+        for hand_situation in &self.data.double_down_percentages{
+            result.double_down_percentages.insert(hand_situation.situation, hand_situation.do_it);
+        }
+
+        for split_situation in &self.data.split_percentages{
+            result.split_percentages.insert(split_situation.situation, split_situation.do_it);
+        }
+        result
     }
 }
