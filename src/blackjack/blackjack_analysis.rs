@@ -201,6 +201,36 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
     result
 }
 
+fn optimize_split<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, card_count: i32) -> BlackjackStrategyType
+where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
+{
+    let mut result = blackjack_strategy.clone();
+    let deck = CountedDeck::new( card_count );
+    let pool = ThreadPool::new(2);
+    let (transaction, receiver) = channel();
+    for split_situation in SplitSituation::create_all() {
+        let tr_clone = transaction.clone();
+        let deck_clone = deck.clone();
+        let result_clone = result.clone();
+        let split_situation_clone = split_situation.clone();
+        pool.execute(move ||{
+            let mut situation = BlackjackGameSituation {
+                is_draw: false,
+                strat: &mut result_clone.clone(),
+                hand_situation: None,
+                split_situation: Some(split_situation_clone),
+            };
+            let do_it = optimize_situation(&mut situation, &deck_clone);
+            tr_clone.send((split_situation_clone, do_it)).expect("Could not send split result")
+        });
+    }
+    for _ in SplitSituation::create_all() {
+        let (split_situation, do_it) = receiver.recv().expect("Did not receive blackjack strategy split calculation");
+        result.add_split(split_situation, do_it);
+    }
+    result
+}
+
 pub fn optimize_blackjack<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, card_count: i32) -> impl BlackjackStrategyTrait
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
@@ -211,16 +241,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
     result = optimize_double_down(result.clone(), card_count);
 
     // then optimize split
-    for split_situation in SplitSituation::create_all().iter() {
-        let mut situation = BlackjackGameSituation {
-            is_draw: false,
-            strat: &mut result.clone(),
-            hand_situation: None,
-            split_situation: Some(*split_situation),
-        };
-        result.add_split(*split_situation, optimize_situation(&mut situation, &deck));
-    }
-    result
+    optimize_split(result.clone(), card_count)
 }
 
 pub fn optimize_counted<BlackjackStrategyType>(blackjack_strategy:BlackjackStrategyType) -> impl BlackjackStrategyTrait
