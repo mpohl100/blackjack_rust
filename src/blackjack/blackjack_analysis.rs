@@ -171,6 +171,36 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
     result
 }
 
+fn optimize_double_down<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, card_count: i32) -> BlackjackStrategyType
+where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
+{
+    let mut result = blackjack_strategy.clone();
+    let deck = CountedDeck::new( card_count );
+    let pool = ThreadPool::new(2);
+    let (transaction, receiver) = channel();
+    for hand_situation in HandSituation::create_all() {
+        let tr_clone = transaction.clone();
+        let deck_clone = deck.clone();
+        let result_clone = result.clone();
+        let hand_situation_clone = hand_situation.clone();
+        pool.execute(move ||{
+            let mut situation = BlackjackGameSituation {
+                is_draw: false,
+                strat: &mut result_clone.clone(),
+                hand_situation: Some(hand_situation_clone),
+                split_situation: None,
+            };
+            let do_it = optimize_situation(&mut situation, &deck_clone);
+            tr_clone.send((hand_situation_clone, do_it)).expect("Could not send double down result")
+        });
+    }
+    for _ in HandSituation::create_all() {
+        let (hand_situation, do_it) = receiver.recv().expect("Did not receive blackjack strategy double down calculation");
+        result.add_double_down(hand_situation, do_it);
+    }
+    result
+}
+
 pub fn optimize_blackjack<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, card_count: i32) -> impl BlackjackStrategyTrait
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
@@ -178,15 +208,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
     let deck = CountedDeck::new( card_count );
     
     // then optimize double down
-    for hand_situation in HandSituation::create_all().iter().rev() {
-        let mut situation = BlackjackGameSituation {
-            is_draw: false,
-            strat: &mut result.clone(),
-            hand_situation: Some(*hand_situation),
-            split_situation: None,
-        };
-        result.add_double_down(*hand_situation, optimize_situation(&mut situation, &deck));
-    }
+    result = optimize_double_down(result.clone(), card_count);
 
     // then optimize split
     for split_situation in SplitSituation::create_all().iter() {
