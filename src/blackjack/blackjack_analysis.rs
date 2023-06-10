@@ -13,7 +13,8 @@ use crate::blackjack::card::Card;
 use crate::blackjack::card::Rank;
 use crate::blackjack::card::Suit;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
-use crate::blackjack::traits::Stringable;
+use std::sync::mpsc::channel;
+use threadpool::ThreadPool;
 
 struct BlackjackGameSituation<'a> {
     pub hand_situation: Option<HandSituation>,
@@ -138,6 +139,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone
     let deck = CountedDeck::new( card_count );
     // first optimize drawing
     let all_situations = HandSituation::create_all();
+    // bucketize
     let mut buckets = BTreeMap::<BlackjackRank, Vec<HandSituation>>::new();
     for sit in all_situations{
         let val = buckets.get_mut(&sit.dealer_card());
@@ -148,16 +150,22 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone
             buckets.insert(sit.dealer_card(), vec![sit]);
         }
     }
-    for (_, bucket) in buckets.iter(){
-        for sit in bucket.iter(){
-            println!("{}", sit.to_string_internal());
-        }
-        println!();
-    }
+    // schedule work
+    let pool = ThreadPool::new(2);
+    let (transaction, receiver) = channel();
     for (_, bucket ) in buckets.iter(){
-        let bucket_result = calculate_draw(bucket.clone(), deck.clone(), result.clone());
-        print!("{}", bucket_result.to_string_mat2());
-        println!();
+        let tr_clone = transaction.clone();
+        let bucket_clone = bucket.clone();
+        let deck_clone = deck.clone();
+        let result_clone = result.clone();
+        pool.execute(move || {
+            let bucket_result = calculate_draw(bucket_clone, deck_clone, result_clone);
+            tr_clone.send(bucket_result).expect("Could not send bucket");
+        });
+    }
+    // receive results
+    for (_,_) in buckets.iter(){
+        let bucket_result = receiver.recv().expect("Did not receive blackjack strategy bucket calculation");
         result.combine(&bucket_result.dump());
     }
     result
