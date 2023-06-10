@@ -133,7 +133,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone
 }
 
 fn optimize_draw<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, card_count: i32) -> BlackjackStrategyType
-where BlackjackStrategyType: BlackjackStrategyTrait + Clone
+where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
     let mut result = blackjack_strategy.clone();
     let deck = CountedDeck::new( card_count );
@@ -172,7 +172,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone
 }
 
 pub fn optimize_blackjack<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, card_count: i32) -> impl BlackjackStrategyTrait
-where BlackjackStrategyType: BlackjackStrategyTrait + Clone
+where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
     let mut result = optimize_draw(blackjack_strategy, card_count).clone();
     let deck = CountedDeck::new( card_count );
@@ -202,7 +202,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone
 }
 
 pub fn optimize_counted<BlackjackStrategyType>(blackjack_strategy:BlackjackStrategyType) -> impl BlackjackStrategyTrait
-where BlackjackStrategyType: BlackjackStrategyTrait + Clone + 'static
+where BlackjackStrategyType: BlackjackStrategyTrait + Clone + 'static + Send
 {
     let mut data = BTreeMap::<i32, Box<dyn BlackjackStrategyTrait>>::new();
     for i in -10..11{
