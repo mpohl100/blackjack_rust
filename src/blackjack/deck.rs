@@ -2,6 +2,7 @@ pub use crate::blackjack::card::Card;
 use crate::blackjack::rng::RandomNumberGenerator;
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::card::Rank;
+use crate::blackjack::traits::Stringable;
 
 use rand::thread_rng;
 use rand::seq::SliceRandom;
@@ -26,7 +27,7 @@ impl CountedDeck {
         if count > 0 {
             let mut cnt = count;
             deck = deck.into_iter().filter(|card| {
-                if cnt > 0 && BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ten) {
+                if cnt > 0 && BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ten) || BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ace) {
                     cnt -= 1;
                     return false;
                 }
@@ -87,10 +88,17 @@ impl EightDecks{
         self.decks = Vec::<Card>::new();
         for _ in 0..8{
             for i in 0..52{
-                self.decks.push(Card::new_with_int(i));
+                let card = Card::new_with_int(i);
+                //println!("{:?} {:?}", card.rank().to_string_internal(), card.suit().to_string_internal());
+                self.decks.push(card);
             }
         }
+        //println!();
         self.decks.shuffle(&mut thread_rng());
+        //for card in &self.decks{
+        //    println!("{:?} {:?}", card.rank().to_string_internal(), card.suit().to_string_internal());
+        //}
+        self.count = 0;
     }
 }
 
@@ -104,7 +112,7 @@ impl Deck for EightDecks{
             Some(value) => {card = value},
             _ => panic!("found empty deck"),
         }
-        if vec![Rank::Ten, Rank::Jack, Rank::Queen, Rank::King].contains(&card.rank()){
+        if vec![Rank::Ten, Rank::Jack, Rank::Queen, Rank::King, Rank::Ace].contains(&card.rank()){
             self.count += 1;
         }
         else if vec![Rank::Deuce, Rank::Three, Rank::Four, Rank::Five, Rank::Six].contains(&card.rank()) {
