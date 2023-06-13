@@ -13,11 +13,14 @@ use std::time::Instant;
 fn play<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, play_config: PlayConfiguration, strat_config: StrategyConfiguration, description: String)
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
-    let strat = blackjack::blackjack_analysis::optimize_blackjack(blackjack_strategy, strat_config, 0);
+    let strat_start = Instant::now();
+    let strat = blackjack::blackjack_analysis::optimize_blackjack(blackjack_strategy, strat_config.clone(), 0);
+    let strat_duration = strat_start.elapsed();
     let start = Instant::now();
     let result = blackjack::play_blackjack::play_blackjack(play_config.clone(), &strat);
     let duration = start.elapsed();
     // Print the elapsed time
+    println!("strategy time: {:?} on {:?} threads", strat_duration, strat_config.nb_threads);
     println!("{:?} time: {:?}", description, duration);
     println!("result: {} after {} hands", result, play_config.nb_hands);
 }
