@@ -57,6 +57,26 @@ impl Rank {
     }
 }
 
+impl Stringable for Rank{
+    fn to_string_internal(&self) -> String {
+        match self {
+            Rank::Deuce => return "2".to_string(),
+            Rank::Three => return "3".to_string(),
+            Rank::Four => return "4".to_string(),
+            Rank::Five => return "5".to_string(),
+            Rank::Six => return "6".to_string(),
+            Rank::Seven => return "7".to_string(),
+            Rank::Eight => return "8".to_string(),
+            Rank::Nine => return "9".to_string(),
+            Rank::Ten => return "T".to_string(),
+            Rank::Jack => return "J".to_string(),
+            Rank::Queen => return "Q".to_string(),
+            Rank::King => return "K".to_string(),
+            Rank::Ace => return "A".to_string(),
+        }
+    }
+}
+
 #[derive(Copy, Clone, Eq, Ord, PartialEq, PartialOrd, Debug)]
 pub enum Suit {
     Hearts,
@@ -73,6 +93,17 @@ impl Suit {
             2 => return Suit::Spades,
             3 => return Suit::Clubs,
             _ => panic!("wrong i32 for Suit"),
+        }
+    }
+}
+
+impl Stringable for Suit{
+    fn to_string_internal(&self) -> String{
+        match self {
+            Suit::Hearts => return "h".to_string(),
+            Suit::Diamonds => return "d".to_string(),
+            Suit::Spades => return "s".to_string(),
+            Suit::Clubs => return "c".to_string(),
         }
     }
 }
