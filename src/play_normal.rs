@@ -10,7 +10,8 @@ fn main() {
     let strat = blackjack::blackjack_analysis::optimize_blackjack(BlackjackStrategy::new(true), strat_config,0);
     println!("Card count {}", 0);
     println!("{}\n", strat.to_string_mat2());
-    let play_config = commandline_params::get_play_config(app);
+    let mut play_config = commandline_params::get_play_config(app);
+    play_config.play_normal = false;
     let result = blackjack::play_blackjack::play_blackjack(play_config.clone(), &strat);
     println!("result: {} after {} hands", result, play_config.nb_hands);
 }
