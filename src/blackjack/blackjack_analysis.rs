@@ -249,8 +249,19 @@ pub fn optimize_counted<BlackjackStrategyType>(blackjack_strategy: BlackjackStra
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + 'static + Send
 {
     let mut data = BTreeMap::<i32, Box<dyn BlackjackStrategyTrait>>::new();
+    let pool = ThreadPool::new(strat_config.nb_threads.try_into().unwrap());
+    let (transaction, receiver) = channel();
     for i in -10..11{
-        let strat = optimize_blackjack(blackjack_strategy.clone(), strat_config.clone(), i);
+        let tr = transaction.clone();
+        let strat_config_clone = strat_config.clone();
+        let blackjack_strategy_clone = blackjack_strategy.clone();
+        pool.execute(move || {
+            let strat = optimize_blackjack(blackjack_strategy_clone, strat_config_clone, i);
+            tr.send((i, strat)).expect("Could not send strategy");
+        });
+    }
+    for _ in -10..11{
+        let (i, strat) = receiver.recv().expect("Could not receive strategy");
         data.insert(i, Box::new(strat));
     }
     CountedBlackjackStrategy::new(data)
