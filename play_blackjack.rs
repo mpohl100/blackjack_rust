@@ -1,6 +1,5 @@
 use crate::blackjack::play_blackjack_hand::play_blackjack_hand;
 use crate::blackjack::play_blackjack_hand::PlayMode;
-use crate::blackjack::blackjack_configuration::PlayConfiguration;
 use crate::blackjack::deck::CountedDeck;
 use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::hand::DealerHand;
@@ -8,6 +7,7 @@ use crate::blackjack::rng::RandomNumberGenerator;
 use crate::blackjack::deck::Deck;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::deck::EightDecks;
+use crate::blackjack::blackjack_configuration::PlayConfiguration;
 
 pub fn play_blackjack(play_config: PlayConfiguration, blackjack_strategy: &dyn BlackjackStrategyTrait) -> f64{
     let mut boxed_deck: Box<dyn Deck>;

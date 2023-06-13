@@ -6,6 +6,7 @@ pub use crate::blackjack::blackjack_situation::SplitSituation;
 use crate::blackjack::blackjack_strategy::CountedBlackjackStrategy;
 use crate::blackjack::blackjack_challenge::BlackjackChallenge;
 use crate::blackjack::blackjack_challenge::BlackjackChallengeType;
+use crate::blackjack::blackjack_configuration::StrategyConfiguration;
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::deck::CountedDeck;
@@ -132,7 +133,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone
     result
 }
 
-fn optimize_draw<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, card_count: i32) -> BlackjackStrategyType
+fn optimize_draw<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType,  strat_config: StrategyConfiguration, card_count: i32) -> BlackjackStrategyType
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
     let mut result = blackjack_strategy.clone();
@@ -151,7 +152,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
         }
     }
     // schedule work
-    let pool = ThreadPool::new(2);
+    let pool = ThreadPool::new(strat_config.nb_threads.try_into().unwrap());
     let (transaction, receiver) = channel();
     for (_, bucket ) in buckets.iter(){
         let tr_clone = transaction.clone();
@@ -171,12 +172,12 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
     result
 }
 
-fn optimize_double_down<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, card_count: i32) -> BlackjackStrategyType
+fn optimize_double_down<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType,  strat_config: StrategyConfiguration, card_count: i32) -> BlackjackStrategyType
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
     let mut result = blackjack_strategy.clone();
     let deck = CountedDeck::new( card_count );
-    let pool = ThreadPool::new(2);
+    let pool = ThreadPool::new(strat_config.nb_threads.try_into().unwrap());
     let (transaction, receiver) = channel();
     for hand_situation in HandSituation::create_all() {
         let tr_clone = transaction.clone();
@@ -201,12 +202,12 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
     result
 }
 
-fn optimize_split<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, card_count: i32) -> BlackjackStrategyType
+fn optimize_split<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType,  strat_config: StrategyConfiguration, card_count: i32) -> BlackjackStrategyType
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
     let mut result = blackjack_strategy.clone();
     let deck = CountedDeck::new( card_count );
-    let pool = ThreadPool::new(2);
+    let pool = ThreadPool::new(strat_config.nb_threads.try_into().unwrap());
     let (transaction, receiver) = channel();
     for split_situation in SplitSituation::create_all() {
         let tr_clone = transaction.clone();
@@ -231,25 +232,25 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
     result
 }
 
-pub fn optimize_blackjack<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, card_count: i32) -> impl BlackjackStrategyTrait
+pub fn optimize_blackjack<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, strat_config: StrategyConfiguration, card_count: i32) -> impl BlackjackStrategyTrait
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
-    let mut result = optimize_draw(blackjack_strategy, card_count).clone();
+    let mut result = optimize_draw(blackjack_strategy, strat_config.clone(), card_count).clone();
     let deck = CountedDeck::new( card_count );
     
     // then optimize double down
-    result = optimize_double_down(result.clone(), card_count);
+    result = optimize_double_down(result.clone(), strat_config.clone(), card_count);
 
     // then optimize split
-    optimize_split(result.clone(), card_count)
+    optimize_split(result.clone(), strat_config, card_count)
 }
 
-pub fn optimize_counted<BlackjackStrategyType>(blackjack_strategy:BlackjackStrategyType) -> impl BlackjackStrategyTrait
+pub fn optimize_counted<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, strat_config: StrategyConfiguration) -> impl BlackjackStrategyTrait
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + 'static + Send
 {
     let mut data = BTreeMap::<i32, Box<dyn BlackjackStrategyTrait>>::new();
     for i in -10..11{
-        let strat = optimize_blackjack(blackjack_strategy.clone(), i);
+        let strat = optimize_blackjack(blackjack_strategy.clone(), strat_config.clone(), i);
         data.insert(i, Box::new(strat));
     }
     CountedBlackjackStrategy::new(data)
