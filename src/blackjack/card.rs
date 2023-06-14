@@ -213,3 +213,257 @@ impl Allable for BlackjackRank{
         BlackjackRank::new(Rank::Ace),]
     }
 }
+
+#[cfg(test)]
+mod rank_tests {
+    use super::*;
+
+    #[test]
+    fn test_new_from_int() {
+        assert_eq!(Rank::new_from_int(0), Rank::Deuce);
+        assert_eq!(Rank::new_from_int(1), Rank::Three);
+        assert_eq!(Rank::new_from_int(2), Rank::Four);
+        assert_eq!(Rank::new_from_int(3), Rank::Five);
+        assert_eq!(Rank::new_from_int(4), Rank::Six);
+        assert_eq!(Rank::new_from_int(5), Rank::Seven);
+        assert_eq!(Rank::new_from_int(6), Rank::Eight);
+        assert_eq!(Rank::new_from_int(7), Rank::Nine);
+        assert_eq!(Rank::new_from_int(8), Rank::Ten);
+        assert_eq!(Rank::new_from_int(9), Rank::Jack);
+        assert_eq!(Rank::new_from_int(10), Rank::Queen);
+        assert_eq!(Rank::new_from_int(11), Rank::King);
+        assert_eq!(Rank::new_from_int(12), Rank::Ace);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_from_int_panic()
+    {
+        // Test for an invalid input
+        let rank = Rank::new_from_int(13);
+    }
+
+    #[test]
+    fn test_to_blackjack_score() {
+        assert_eq!(Rank::Deuce.to_blackjack_score(), 2);
+        assert_eq!(Rank::Three.to_blackjack_score(), 3);
+        assert_eq!(Rank::Four.to_blackjack_score(), 4);
+        assert_eq!(Rank::Five.to_blackjack_score(), 5);
+        assert_eq!(Rank::Six.to_blackjack_score(), 6);
+        assert_eq!(Rank::Seven.to_blackjack_score(), 7);
+        assert_eq!(Rank::Eight.to_blackjack_score(), 8);
+        assert_eq!(Rank::Nine.to_blackjack_score(), 9);
+        assert_eq!(Rank::Ten.to_blackjack_score(), 10);
+        assert_eq!(Rank::Jack.to_blackjack_score(), 10);
+        assert_eq!(Rank::Queen.to_blackjack_score(), 10);
+        assert_eq!(Rank::King.to_blackjack_score(), 10);
+        assert_eq!(Rank::Ace.to_blackjack_score(), 11);
+    }
+
+    #[test]
+    fn test_to_string_internal() {
+        assert_eq!(Rank::Deuce.to_string_internal(), "2");
+        assert_eq!(Rank::Three.to_string_internal(), "3");
+        assert_eq!(Rank::Four.to_string_internal(), "4");
+        assert_eq!(Rank::Five.to_string_internal(), "5");
+        assert_eq!(Rank::Six.to_string_internal(), "6");
+        assert_eq!(Rank::Seven.to_string_internal(), "7");
+        assert_eq!(Rank::Eight.to_string_internal(), "8");
+        assert_eq!(Rank::Nine.to_string_internal(), "9");
+        assert_eq!(Rank::Ten.to_string_internal(), "T");
+        assert_eq!(Rank::Jack.to_string_internal(), "J");
+        assert_eq!(Rank::Queen.to_string_internal(), "Q");
+        assert_eq!(Rank::King.to_string_internal(), "K");
+        assert_eq!(Rank::Ace.to_string_internal(), "A");
+    }
+}
+
+#[cfg(test)]
+mod suit_tests {
+    use super::*;
+
+    #[test]
+    fn test_new_from_int() {
+        assert_eq!(Suit::new_from_int(0), Suit::Hearts);
+        assert_eq!(Suit::new_from_int(1), Suit::Diamonds);
+        assert_eq!(Suit::new_from_int(2), Suit::Spades);
+        assert_eq!(Suit::new_from_int(3), Suit::Clubs);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_from_int_panics() {
+        // Test for an invalid input
+        let suit = Suit::new_from_int(4);
+    }
+
+    #[test]
+    fn test_to_string_internal() {
+        assert_eq!(Suit::Hearts.to_string_internal(), "h");
+        assert_eq!(Suit::Diamonds.to_string_internal(), "d");
+        assert_eq!(Suit::Spades.to_string_internal(), "s");
+        assert_eq!(Suit::Clubs.to_string_internal(), "c");
+    }
+}
+
+#[cfg(test)]
+mod card_tests {
+    use super::*;
+
+    #[test]
+    fn test_new() {
+        let rank = Rank::Ace;
+        let suit = Suit::Hearts;
+        let card = Card::new(rank, suit);
+
+        assert_eq!(card.rank(), rank);
+        assert_eq!(card.suit(), suit);
+    }
+
+    #[test]
+    fn test_new_with_int() {
+        let card = Card::new_with_int(0);
+        assert_eq!(card.rank(), Rank::Deuce);
+        assert_eq!(card.suit(), Suit::Hearts);
+
+        let card = Card::new_with_int(12);
+        assert_eq!(card.rank(), Rank::Ace);
+        assert_eq!(card.suit(), Suit::Hearts);
+
+        let card = Card::new_with_int(13);
+        assert_eq!(card.rank(), Rank::Deuce);
+        assert_eq!(card.suit(), Suit::Diamonds);
+
+        let card = Card::new_with_int(51);
+        assert_eq!(card.rank(), Rank::Ace);
+        assert_eq!(card.suit(), Suit::Clubs);
+    }
+
+    #[test]
+    fn test_to_blackjack_score() {
+        let card = Card::new(Rank::Ace, Suit::Hearts);
+        assert_eq!(card.to_blackjack_score(), 1);
+
+        let card = Card::new(Rank::Deuce, Suit::Hearts);
+        assert_eq!(card.to_blackjack_score(), 2);
+
+        let card = Card::new(Rank::Three, Suit::Hearts);
+        assert_eq!(card.to_blackjack_score(), 3);
+
+        let card = Card::new(Rank::Four, Suit::Hearts);
+        assert_eq!(card.to_blackjack_score(), 4);
+
+        let card = Card::new(Rank::Five, Suit::Hearts);
+        assert_eq!(card.to_blackjack_score(), 5);
+
+        let card = Card::new(Rank::Six, Suit::Hearts);
+        assert_eq!(card.to_blackjack_score(), 6);
+
+        let card = Card::new(Rank::Seven, Suit::Hearts);
+        assert_eq!(card.to_blackjack_score(), 7);
+
+        let card = Card::new(Rank::Eight, Suit::Hearts);
+        assert_eq!(card.to_blackjack_score(), 8);
+
+        let card = Card::new(Rank::Nine, Suit::Hearts);
+        assert_eq!(card.to_blackjack_score(), 9);
+
+        let card = Card::new(Rank::Ten, Suit::Hearts);
+        assert_eq!(card.to_blackjack_score(), 10);
+
+        let card = Card::new(Rank::Jack, Suit::Hearts);
+        assert_eq!(card.to_blackjack_score(), 10);
+
+        let card = Card::new(Rank::Queen, Suit::Hearts);
+        assert_eq!(card.to_blackjack_score(), 10);
+
+        let card = Card::new(Rank::King, Suit::Hearts);
+        assert_eq!(card.to_blackjack_score(), 10);
+    }
+}
+
+#[cfg(test)]
+mod blackjack_rank_tests {
+    use super::*;
+
+    #[test]
+    fn test_new() {
+        let ranks: Vec<Rank> = (0..13).map(|i| Rank::new_from_int(i)).collect();
+        for rank in ranks {
+            let blackjack_rank = BlackjackRank::new(rank);
+            assert_eq!(blackjack_rank.val, rank.to_blackjack_score());
+        }
+    }
+
+    #[test]
+    fn test_get_representative_card() {
+        let blackjack_ranks = BlackjackRank::create_all();
+        for blackjack_rank in blackjack_ranks {
+            let card = blackjack_rank.get_representative_card();
+            let expected_rank = match blackjack_rank.val {
+                2 => Rank::Deuce,
+                3 => Rank::Three,
+                4 => Rank::Four,
+                5 => Rank::Five,
+                6 => Rank::Six,
+                7 => Rank::Seven,
+                8 => Rank::Eight,
+                9 => Rank::Nine,
+                10 => Rank::Ten,
+                11 => Rank::Ace,
+                _ => Rank::Deuce,
+            };
+            assert_eq!(card.rank(), expected_rank);
+            assert_eq!(card.suit(), Suit::Spades);
+        }
+    }
+
+    #[test]
+    fn test_to_string_internal() {
+        let blackjack_ranks = BlackjackRank::create_all();
+        for blackjack_rank in blackjack_ranks {
+            let expected_string = match blackjack_rank.val {
+                1 => "1",
+                2 => "2",
+                3 => "3",
+                4 => "4",
+                5 => "5",
+                6 => "6",
+                7 => "7",
+                8 => "8",
+                9 => "9",
+                10 => "10",
+                11 => "11",
+                _ => "invalid",
+            };
+            assert_eq!(blackjack_rank.to_string_internal(), expected_string);
+        }
+    }
+
+    #[test]
+    fn test_create_all() {
+        let all_blackjack_ranks = BlackjackRank::create_all();
+
+        // Assert that the length of the created vector is as expected
+        assert_eq!(all_blackjack_ranks.len(), 10);
+
+        let expected_ranks = [
+            Rank::Deuce,
+            Rank::Three,
+            Rank::Four,
+            Rank::Five,
+            Rank::Six,
+            Rank::Seven,
+            Rank::Eight,
+            Rank::Nine,
+            Rank::Ten,
+            Rank::Ace,
+        ];
+
+        for (index, blackjack_rank) in all_blackjack_ranks.iter().enumerate() {
+            assert_eq!(blackjack_rank.val, expected_ranks[index].to_blackjack_score());
+        }
+    }
+}
+
+
