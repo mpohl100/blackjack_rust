@@ -2,10 +2,10 @@ pub use crate::blackjack::card::Card;
 use crate::blackjack::rng::RandomNumberGenerator;
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::card::Rank;
-use crate::blackjack::traits::Stringable;
 
 use rand::thread_rng;
 use rand::seq::SliceRandom;
+
 pub trait Deck{
     fn deal_card(&mut self, rng: &mut RandomNumberGenerator) -> Card;
     fn get_count(&self) -> i32;
