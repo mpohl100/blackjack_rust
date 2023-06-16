@@ -55,7 +55,7 @@ impl CountedDeck {
 impl Deck for CountedDeck{
     fn deal_card(&mut self, rng: &mut RandomNumberGenerator) -> Card {
         let max = (self.deck.len() - 1).try_into().unwrap();
-        let i: usize = match (rng.fetch_uniform(0, max, 1).pop()){
+        let i: usize = match rng.fetch_uniform(0, max, 1).pop(){
             Some(index) => index.try_into().unwrap(),
             _ => panic!("Did not receive one element from fetch_uniform")
         };
@@ -207,3 +207,69 @@ mod counted_deck_tests {
         assert_eq!(deck.get_nb_cards(), 52);
     }
 }
+
+#[cfg(test)]
+mod eight_decks_tests {
+    use super::*;
+
+    #[test]
+    fn test_eight_decks_new() {
+        let eight_decks = EightDecks::new();
+        assert_eq!(eight_decks.decks.len(), 8 * 52);
+        assert_eq!(eight_decks.count, 0);
+    }
+
+    #[test]
+    fn test_eight_decks_deal_card() {
+        let mut eight_decks = EightDecks::new();
+        let mut rng = RandomNumberGenerator::new();
+
+        for i in (0..8*52).rev(){
+            let card = eight_decks.deal_card(&mut rng);
+            assert_eq!(eight_decks.decks.len(), i);
+        }
+
+        assert_eq!(eight_decks.count, 0);
+
+        for i in (0..8*52).rev(){
+            let card = eight_decks.deal_card(&mut rng);
+            assert_eq!(eight_decks.decks.len(), i);
+        }
+
+        assert_eq!(eight_decks.count, 0);
+    }
+
+    #[test]
+    fn test_eight_decks_get_count() {
+        let mut eight_decks = EightDecks::new();
+        let mut rng = RandomNumberGenerator::new();
+        assert_eq!(eight_decks.get_count(), 0);
+        let mut expected_count = 0;
+        for i in 0..eight_decks.decks.len(){
+            let card = eight_decks.deal_card(&mut rng);
+            if card.to_blackjack_score() == 10 || card.to_blackjack_score() == 1{
+                expected_count += 1;
+            }
+            
+            if card.to_blackjack_score() >= 2 && card.to_blackjack_score() <= 6{
+                expected_count -= 1;
+            }
+            assert_eq!(eight_decks.get_count(), expected_count);
+        }
+        assert_eq!(eight_decks.get_count(), 0);
+    }
+
+    #[test]
+    fn test_eight_decks_get_nb_cards() {
+        let mut eight_decks = EightDecks::new();
+        let mut rng = RandomNumberGenerator::new();
+        assert_eq!(eight_decks.get_nb_cards(), 8 * 52);
+
+        for i in 0..eight_decks.decks.len(){
+            let card = eight_decks.deal_card(&mut rng);
+            let nb_cards: usize = eight_decks.get_nb_cards().try_into().unwrap();
+            assert_eq!(nb_cards, eight_decks.decks.len());
+        }
+    }
+}
+
