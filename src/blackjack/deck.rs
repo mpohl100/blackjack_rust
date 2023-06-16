@@ -27,7 +27,7 @@ impl CountedDeck {
         if count > 0 {
             let mut cnt = count;
             deck = deck.into_iter().filter(|card| {
-                if cnt > 0 && BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ten) || BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ace) {
+                if cnt > 0 && (BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ten) || BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ace)) {
                     cnt -= 1;
                     return false;
                 }
@@ -127,5 +127,81 @@ impl Deck for EightDecks{
 
     fn get_nb_cards(&self) -> i32 {
         self.decks.len().try_into().unwrap()
+    }
+}
+
+#[cfg(test)]
+mod counted_deck_tests {
+    use super::*;
+
+    #[test]
+    fn test_counted_deck_new() {
+        let deck = CountedDeck::new(2);
+        assert_eq!(deck.deck.len(), 50);
+        assert_eq!(deck.count, 2);
+
+        let deck = CountedDeck::new(-1);
+        assert_eq!(deck.deck.len(), 51);
+        assert_eq!(deck.count, -1);
+
+        let deck = CountedDeck::new(0);
+        assert_eq!(deck.deck.len(), 52);
+        assert_eq!(deck.count, 0);
+    }
+
+    #[test]
+    fn test_counted_deck_deal_card() {
+        let mut deck = CountedDeck::new(2);
+        let mut rng = RandomNumberGenerator::new();
+
+        let card = deck.deal_card(&mut rng);
+        assert_eq!(deck.deck.len(), 50); // a card should not be removed from the container
+
+        let card = deck.deal_card(&mut rng);
+        assert_eq!(deck.deck.len(), 50); // a card should not be removed from the container
+    }
+
+    #[test]
+    fn test_counted_deck_get_count() {
+        let deck = CountedDeck::new(2);
+        assert_eq!(deck.get_count(), 2);
+
+        let deck = CountedDeck::new(-1);
+        assert_eq!(deck.get_count(), -1);
+
+        let deck = CountedDeck::new(0);
+        assert_eq!(deck.get_count(), 0);
+    }
+
+    #[test]
+    fn test_counted_deck_get_nb_cards() {
+        let deck = CountedDeck::new(2);
+        assert_eq!(deck.deck.len(), 50);
+        assert_eq!(deck.get_nb_cards(), 52);
+
+        let deck = CountedDeck::new(-2);
+        assert_eq!(deck.deck.len(), 50);
+        assert_eq!(deck.get_nb_cards(), 52);
+
+        let deck = CountedDeck::new(0);
+        assert_eq!(deck.deck.len(), 52);
+        assert_eq!(deck.get_nb_cards(), 52);
+
+        let deck = CountedDeck::new(20);
+        assert_eq!(deck.deck.len(), 32);
+        assert_eq!(deck.get_nb_cards(), 52);
+
+        let deck = CountedDeck::new(-20);
+        assert_eq!(deck.deck.len(), 32);
+        assert_eq!(deck.get_nb_cards(), 52);
+
+        // can not remove more than 20 cards
+        let deck = CountedDeck::new(21);
+        assert_eq!(deck.deck.len(), 32);
+        assert_eq!(deck.get_nb_cards(), 52);
+
+        let deck = CountedDeck::new(-21);
+        assert_eq!(deck.deck.len(), 32);
+        assert_eq!(deck.get_nb_cards(), 52);
     }
 }
