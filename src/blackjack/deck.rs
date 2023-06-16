@@ -55,12 +55,14 @@ impl CountedDeck {
 impl Deck for CountedDeck{
     fn deal_card(&mut self, rng: &mut RandomNumberGenerator) -> Card {
         let max = (self.deck.len() - 1).try_into().unwrap();
-        let i = rng.fetch_uniform(0, max, 1).pop();
-        let card = Card::new_with_int(match i{
-            Some(value) => { value },
-            None => panic!("converting usize to i32 failed"),
-        });
-        card
+        let i: usize = match (rng.fetch_uniform(0, max, 1).pop()){
+            Some(index) => index.try_into().unwrap(),
+            _ => panic!("Did not receive one element from fetch_uniform")
+        };
+        match self.deck.get(i){
+            Some(card) => *card,
+            _ => panic!("Card at index {:?} not found", i)
+        }
     }
 
     fn get_count(&self) -> i32 {
