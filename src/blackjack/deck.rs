@@ -24,8 +24,8 @@ impl CountedDeck {
         for i in 0..52 {
             deck.push(Card::new_with_int(i));
         }
-        if count < 0 {
-            let mut cnt = -count;
+        if count > 0 {
+            let mut cnt = count;
             deck = deck.into_iter().filter(|card| {
                 if cnt > 0 && (BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ten) || BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ace)) {
                     cnt -= 1;
@@ -33,8 +33,8 @@ impl CountedDeck {
                 }
                 return true;
             }).collect();
-        } else if count > 0 {
-            let mut cnt = count;
+        } else if count < 0 {
+            let mut cnt = -count;
             deck = deck.into_iter().filter(|card| {
                 let blackjack_rank = BlackjackRank::new(card.rank());
                 if cnt > 0 && blackjack_rank >= BlackjackRank::new(Rank::Deuce) && blackjack_rank <= BlackjackRank::new(Rank::Six) {
@@ -178,7 +178,8 @@ mod counted_deck_tests {
                     observed_count -= 1;
                 }
             }
-            assert_eq!(deck.get_count(), observed_count);
+            // the count observed in the deck is the negative one of the count observed by the removed cards
+            assert_eq!(deck.get_count(), -observed_count);
         }
     }
 
