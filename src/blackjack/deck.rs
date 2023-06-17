@@ -24,8 +24,8 @@ impl CountedDeck {
         for i in 0..52 {
             deck.push(Card::new_with_int(i));
         }
-        if count > 0 {
-            let mut cnt = count;
+        if count < 0 {
+            let mut cnt = -count;
             deck = deck.into_iter().filter(|card| {
                 if cnt > 0 && (BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ten) || BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ace)) {
                     cnt -= 1;
@@ -33,8 +33,8 @@ impl CountedDeck {
                 }
                 return true;
             }).collect();
-        } else if count < 0 {
-            let mut cnt = -count;
+        } else if count > 0 {
+            let mut cnt = count;
             deck = deck.into_iter().filter(|card| {
                 let blackjack_rank = BlackjackRank::new(card.rank());
                 if cnt > 0 && blackjack_rank >= BlackjackRank::new(Rank::Deuce) && blackjack_rank <= BlackjackRank::new(Rank::Six) {
@@ -165,14 +165,21 @@ mod counted_deck_tests {
 
     #[test]
     fn test_counted_deck_get_count() {
-        let deck = CountedDeck::new(2);
-        assert_eq!(deck.get_count(), 2);
-
-        let deck = CountedDeck::new(-1);
-        assert_eq!(deck.get_count(), -1);
-
-        let deck = CountedDeck::new(0);
-        assert_eq!(deck.get_count(), 0);
+        for i in -20..21{
+            let deck = CountedDeck::new(i);
+            assert_eq!(deck.get_count(), i);
+            let mut observed_count = 0;
+            for card in &deck.deck{
+                if card.to_blackjack_score() == 10 || card.to_blackjack_score() == 1{
+                    observed_count += 1;
+                }
+                
+                if card.to_blackjack_score() >= 2 && card.to_blackjack_score() <= 6{
+                    observed_count -= 1;
+                }
+            }
+            assert_eq!(deck.get_count(), observed_count);
+        }
     }
 
     #[test]
