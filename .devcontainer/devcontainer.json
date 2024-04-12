@@ -8,7 +8,8 @@
         "vscode": {
             "extensions": [
                 "ms-vscode.git",  // Include Git extension
-                "rust-lang.rust-analyzer"
+                "rust-lang.rust-analyzer",
+                "GitHub.copilot"
               ],
               "settings": {
                 "terminal.integrated.shell.linux": "/bin/bash",
