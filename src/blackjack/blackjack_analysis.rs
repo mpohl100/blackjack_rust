@@ -133,7 +133,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone
     result
 }
 
-fn optimize_draw<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType,  strat_config: StrategyConfiguration, thread_pool: &ThreadPool, card_count: i32) -> BlackjackStrategyType
+fn optimize_draw<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, thread_pool: &ThreadPool, card_count: i32) -> BlackjackStrategyType
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
     let mut result = blackjack_strategy.clone();
@@ -152,14 +152,13 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
         }
     }
     // schedule work
-    let pool = ThreadPool::new(strat_config.nb_threads.try_into().unwrap());
     let (transaction, receiver) = channel();
     for (_, bucket ) in buckets.iter(){
         let tr_clone = transaction.clone();
         let bucket_clone = bucket.clone();
         let deck_clone = deck.clone();
         let result_clone = result.clone();
-        pool.execute(move || {
+        thread_pool.execute(move || {
             let bucket_result = calculate_draw(bucket_clone, deck_clone, result_clone);
             tr_clone.send(bucket_result).expect("Could not send bucket");
         });
@@ -172,7 +171,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
     result
 }
 
-fn optimize_double_down<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType,  strat_config: StrategyConfiguration, thread_pool: &ThreadPool, card_count: i32) -> BlackjackStrategyType
+fn optimize_double_down<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, thread_pool: &ThreadPool, card_count: i32) -> BlackjackStrategyType
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
     let mut result = blackjack_strategy.clone();
@@ -201,7 +200,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
     result
 }
 
-fn optimize_split<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType,  strat_config: StrategyConfiguration, thread_pool: &ThreadPool, card_count: i32) -> BlackjackStrategyType
+fn optimize_split<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, thread_pool: &ThreadPool, card_count: i32) -> BlackjackStrategyType
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
     let mut result = blackjack_strategy.clone();
@@ -230,17 +229,17 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
     result
 }
 
-pub fn optimize_blackjack<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, strat_config: StrategyConfiguration, thread_pool: &ThreadPool, card_count: i32) -> impl BlackjackStrategyTrait
+pub fn optimize_blackjack<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, thread_pool: &ThreadPool, card_count: i32) -> impl BlackjackStrategyTrait
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
-    let mut result = optimize_draw(blackjack_strategy, strat_config.clone(), &thread_pool, card_count).clone();
-    let deck = CountedDeck::new( card_count );
+    let mut result = optimize_draw(blackjack_strategy, &thread_pool, card_count).clone();
+    let _deck = CountedDeck::new( card_count );
     
     // then optimize double down
-    result = optimize_double_down(result.clone(), strat_config.clone(), &thread_pool,card_count);
+    result = optimize_double_down(result.clone(), &thread_pool, card_count);
 
     // then optimize split
-    optimize_split(result.clone(), strat_config, &thread_pool, card_count)
+    optimize_split(result.clone(), &thread_pool, card_count)
 }
 
 pub fn optimize_counted<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, strat_config: StrategyConfiguration, thread_pool: &ThreadPool) -> impl BlackjackStrategyTrait
@@ -254,7 +253,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + 'static + Send
         let blackjack_strategy_clone = blackjack_strategy.clone();
         thread_pool.execute(move || {
             let pool = ThreadPool::new(strat_config_clone.nb_threads.try_into().unwrap());
-            let strat = optimize_blackjack(blackjack_strategy_clone, strat_config_clone, &pool, i);
+            let strat = optimize_blackjack(blackjack_strategy_clone, &pool, i);
             tr.send((i, strat)).expect("Could not send strategy");
         });
     }
