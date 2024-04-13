@@ -26,23 +26,23 @@ impl CountedDeck {
         }
         if count > 0 {
             let mut cnt = count;
-            deck = deck.into_iter().filter(|card| {
+            deck.retain(|card| {
                 if cnt > 0 && (BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ten) || BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ace)) {
                     cnt -= 1;
                     return false;
                 }
-                return true;
-            }).collect();
+                true
+            });
         } else if count < 0 {
             let mut cnt = -count;
-            deck = deck.into_iter().filter(|card| {
+            deck.retain(|card| {
                 let blackjack_rank = BlackjackRank::new(card.rank());
                 if cnt > 0 && blackjack_rank >= BlackjackRank::new(Rank::Deuce) && blackjack_rank <= BlackjackRank::new(Rank::Six) {
                     cnt -= 1;
                     return false;
                 }
-                return true;
-            }).collect();
+                true
+            });
         }
 
         CountedDeck {
@@ -109,15 +109,15 @@ impl Deck for EightDecks{
         if self.decks.is_empty(){
             self.init();
         }
-        let card;
-        match self.decks.pop(){
-            Some(value) => {card = value},
+        
+        let card = match self.decks.pop(){
+            Some(value) => {value},
             _ => panic!("found empty deck"),
-        }
-        if vec![Rank::Ten, Rank::Jack, Rank::Queen, Rank::King, Rank::Ace].contains(&card.rank()){
+        };
+        if [Rank::Ten, Rank::Jack, Rank::Queen, Rank::King, Rank::Ace].contains(&card.rank()){
             self.count += 1;
         }
-        else if vec![Rank::Deuce, Rank::Three, Rank::Four, Rank::Five, Rank::Six].contains(&card.rank()) {
+        else if [Rank::Deuce, Rank::Three, Rank::Four, Rank::Five, Rank::Six].contains(&card.rank()) {
             self.count -= 1;
         }
         card

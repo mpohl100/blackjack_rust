@@ -21,38 +21,38 @@ pub enum Rank {
 impl Rank {
     fn new_from_int(i: i32) -> Rank{
         match i{
-            0 => return Rank::Deuce,
-            1 => return Rank::Three,
-            2 => return Rank::Four,
-            3 => return Rank::Five,
-            4 => return Rank::Six,
-            5 => return Rank::Seven,
-            6 => return Rank::Eight,
-            7 => return Rank::Nine,
-            8 => return Rank::Ten,
-            9 => return Rank::Jack,
-            10 => return Rank::Queen,
-            11 => return Rank::King,
-            12 => return Rank::Ace,
+            0 => Rank::Deuce,
+            1 => Rank::Three,
+            2 => Rank::Four,
+            3 => Rank::Five,
+            4 => Rank::Six,
+            5 => Rank::Seven,
+            6 => Rank::Eight,
+            7 => Rank::Nine,
+            8 => Rank::Ten,
+            9 => Rank::Jack,
+            10 => Rank::Queen,
+            11 => Rank::King,
+            12 => Rank::Ace,
             _ => panic!("wrong int for Rank"),
         }
     } 
 
     fn to_blackjack_score(&self) -> i32 {
         match self {
-            Rank::Deuce => return 2,
-            Rank::Three => return 3,
-            Rank::Four => return 4,
-            Rank::Five => return 5,
-            Rank::Six => return 6,
-            Rank::Seven => return 7,
-            Rank::Eight => return 8,
-            Rank::Nine => return 9,
-            Rank::Ten => return 10,
-            Rank::Jack => return 10,
-            Rank::Queen => return 10,
-            Rank::King => return 10,
-            Rank::Ace => return 11, // case eleven is handled outside
+            Rank::Deuce => 2,
+            Rank::Three => 3,
+            Rank::Four => 4,
+            Rank::Five => 5,
+            Rank::Six => 6,
+            Rank::Seven => 7,
+            Rank::Eight => 8,
+            Rank::Nine => 9,
+            Rank::Ten => 10,
+            Rank::Jack => 10,
+            Rank::Queen => 10,
+            Rank::King => 10,
+            Rank::Ace => 11, // case eleven is handled outside
         }
     }
 }
@@ -60,19 +60,19 @@ impl Rank {
 impl Stringable for Rank{
     fn to_string_internal(&self) -> String {
         match self {
-            Rank::Deuce => return "2".to_string(),
-            Rank::Three => return "3".to_string(),
-            Rank::Four => return "4".to_string(),
-            Rank::Five => return "5".to_string(),
-            Rank::Six => return "6".to_string(),
-            Rank::Seven => return "7".to_string(),
-            Rank::Eight => return "8".to_string(),
-            Rank::Nine => return "9".to_string(),
-            Rank::Ten => return "T".to_string(),
-            Rank::Jack => return "J".to_string(),
-            Rank::Queen => return "Q".to_string(),
-            Rank::King => return "K".to_string(),
-            Rank::Ace => return "A".to_string(),
+            Rank::Deuce => "2".to_string(),
+            Rank::Three => "3".to_string(),
+            Rank::Four => "4".to_string(),
+            Rank::Five => "5".to_string(),
+            Rank::Six => "6".to_string(),
+            Rank::Seven => "7".to_string(),
+            Rank::Eight => "8".to_string(),
+            Rank::Nine => "9".to_string(),
+            Rank::Ten => "T".to_string(),
+            Rank::Jack => "J".to_string(),
+            Rank::Queen => "Q".to_string(),
+            Rank::King => "K".to_string(),
+            Rank::Ace => "A".to_string(),
         }
     }
 }
@@ -88,10 +88,10 @@ pub enum Suit {
 impl Suit {
     fn new_from_int(i: i32) -> Suit{
         match i {
-            0 => return Suit::Hearts,
-            1 => return Suit::Diamonds,
-            2 => return Suit::Spades,
-            3 => return Suit::Clubs,
+            0 => Suit::Hearts,
+            1 => Suit::Diamonds,
+            2 => Suit::Spades,
+            3 => Suit::Clubs,
             _ => panic!("wrong i32 for Suit"),
         }
     }
@@ -100,10 +100,10 @@ impl Suit {
 impl Stringable for Suit{
     fn to_string_internal(&self) -> String{
         match self {
-            Suit::Hearts => return "h".to_string(),
-            Suit::Diamonds => return "d".to_string(),
-            Suit::Spades => return "s".to_string(),
-            Suit::Clubs => return "c".to_string(),
+            Suit::Hearts => "h".to_string(),
+            Suit::Diamonds => "d".to_string(),
+            Suit::Spades => "s".to_string(),
+            Suit::Clubs => "c".to_string(),
         }
     }
 }

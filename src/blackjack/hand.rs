@@ -14,7 +14,7 @@ pub struct BlackjackHand {
 
 impl BlackjackHand{
     pub fn add_card(&mut self, card: &Card) {
-        self.cards.push(card.clone());
+        self.cards.push(*card);
     }
 
     pub fn is_pair(&self) -> bool {
@@ -86,7 +86,7 @@ impl DealerHand {
         if result > 21 {
             return -1;
         }
-        return result;
+        result
     }
 
     pub fn open_card(&self) -> BlackjackRank {

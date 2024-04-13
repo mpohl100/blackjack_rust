@@ -10,7 +10,7 @@ fn validate_positive_integer(value: String) -> Result<(), String> {
     }
 }
 
-pub fn get_commandline_params<'a>(binary_name: String, description: &'a str) -> clap::App<'a, 'a> 
+pub fn get_commandline_params(binary_name: String, description: &str) -> clap::App<'_, '_> 
 {
     // Define the command line interface using Clap
     let matches = clap::App::new(binary_name)
@@ -53,8 +53,8 @@ fn get_number_hands(app: clap::App<'_,'_>) -> u64
 
 pub fn get_play_config(app: clap::App<'_,'_>) -> PlayConfiguration
 {
-    let play_config = PlayConfiguration{nb_hands: get_number_hands(app).try_into().unwrap(), play_normal: true};
-    play_config
+    
+    PlayConfiguration{nb_hands: get_number_hands(app).try_into().unwrap(), play_normal: true}
 }
 
 fn get_number_threads(app: clap::App<'_,'_>) -> u64
@@ -73,6 +73,6 @@ fn get_number_threads(app: clap::App<'_,'_>) -> u64
 
 pub fn get_strat_config(app: clap::App<'_,'_>) -> StrategyConfiguration
 {
-    let strat_config = StrategyConfiguration{nb_threads: get_number_threads(app).try_into().unwrap()};
-    strat_config
+    
+    StrategyConfiguration{nb_threads: get_number_threads(app).try_into().unwrap()}
 }
