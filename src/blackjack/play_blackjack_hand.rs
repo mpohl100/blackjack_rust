@@ -32,7 +32,7 @@ fn get_play_result(player_bet: f64, player_result: i32, dealer_result: i32, play
     if player_result == dealer_result {
         return 0.0;
     }
-    return -player_bet;
+    -player_bet
 }
 
 pub fn play_blackjack_hand(
@@ -90,7 +90,7 @@ pub fn play_blackjack_hand(
     }
     // deduce player result
     let player_result = player_points.upper();
-    let play_result = get_play_result(player_bet, player_result, dealer_result, player_hand);
+    
     // compare player and dealer hands
-    play_result
+    get_play_result(player_bet, player_result, dealer_result, player_hand)
 }

@@ -26,7 +26,7 @@ impl Points {
 
 impl Stringable for Points{
     fn to_string_internal(&self) -> String {
-        self.lower.to_string() + &"/".to_string() + &self.upper.to_string()
+        self.lower.to_string() + "/" + &self.upper.to_string()
     }
 }
 

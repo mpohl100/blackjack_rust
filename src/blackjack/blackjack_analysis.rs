@@ -181,7 +181,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
         let tr_clone = transaction.clone();
         let deck_clone = deck.clone();
         let result_clone = result.clone();
-        let hand_situation_clone = hand_situation.clone();
+        let hand_situation_clone = hand_situation;
         thread_pool.execute(move ||{
             let mut situation = BlackjackGameSituation {
                 is_draw: false,
@@ -210,7 +210,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
         let tr_clone = transaction.clone();
         let deck_clone = deck.clone();
         let result_clone = result.clone();
-        let split_situation_clone = split_situation.clone();
+        let split_situation_clone = split_situation;
         thread_pool.execute(move ||{
             let mut situation = BlackjackGameSituation {
                 is_draw: false,
@@ -232,14 +232,14 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 pub fn optimize_blackjack<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, thread_pool: &ThreadPool, card_count: i32) -> impl BlackjackStrategyTrait
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
-    let mut result = optimize_draw(blackjack_strategy, &thread_pool, card_count).clone();
+    let mut result = optimize_draw(blackjack_strategy, thread_pool, card_count).clone();
     let _deck = CountedDeck::new( card_count );
     
     // then optimize double down
-    result = optimize_double_down(result.clone(), &thread_pool, card_count);
+    result = optimize_double_down(result.clone(), thread_pool, card_count);
 
     // then optimize split
-    optimize_split(result.clone(), &thread_pool, card_count)
+    optimize_split(result.clone(), thread_pool, card_count)
 }
 
 pub fn optimize_counted<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, strat_config: StrategyConfiguration, thread_pool: &ThreadPool) -> impl BlackjackStrategyTrait

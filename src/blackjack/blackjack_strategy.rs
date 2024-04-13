@@ -35,7 +35,7 @@ pub struct BlackjackStrategy{
 
 impl BlackjackStrategy{
     pub fn new(use_hash: bool) -> BlackjackStrategy{
-        BlackjackStrategy{data: BlackjackStrategyData::default(), data_hash: BlackjackStrategyDataHash::default(), use_hash: use_hash}
+        BlackjackStrategy{data: BlackjackStrategyData::default(), data_hash: BlackjackStrategyDataHash::default(), use_hash}
     }
 }
 
@@ -49,68 +49,66 @@ impl BlackjackStrategyTrait for BlackjackStrategy{
             let points = situation.situation();
             if points.upper() == points.lower() { 
                 if *do_it {
-                    hard_strat.insert(situation.clone(), "D".to_string());
+                    hard_strat.insert(*situation, "D".to_string());
                 } else if *self.data.drawing_percentages.get(situation).unwrap() {
-                    hard_strat.insert(situation.clone(), "H".to_string());
+                    hard_strat.insert(*situation, "H".to_string());
                 } else {
-                    hard_strat.insert(situation.clone(), "S".to_string());
+                    hard_strat.insert(*situation, "S".to_string());
                 }
             } 
-            else { 
-                if *do_it {
-                    soft_strat.insert(situation.clone(), "D".to_string());
-                } else if *self.data.drawing_percentages.get(situation).unwrap() {
-                    soft_strat.insert(situation.clone(), "H".to_string());
-                } else {
-                    soft_strat.insert(situation.clone(), "S".to_string());
-                }
+            else if *do_it {
+                soft_strat.insert(*situation, "D".to_string());
+            } else if *self.data.drawing_percentages.get(situation).unwrap() {
+                soft_strat.insert(*situation, "H".to_string());
+            } else {
+                soft_strat.insert(*situation, "S".to_string());
             };
 
         }
 
         let mut ret = "Hard hands strategy:\n".to_string();
         let mut first_points = Points::default();
-        ret.push_str(";");
+        ret.push(';');
         for rank in BlackjackRank::create_all() {
-            ret.push_str(&(rank.to_string_internal() + &";".to_string()));
+            ret.push_str(&(rank.to_string_internal() + ";"));
         }
         for (situation, action) in hard_strat {
             let points = situation.situation();
             if points != first_points {
-                ret.push_str("\n");
-                ret.push_str(&(points.to_string_internal() + &";".to_string()));
+                ret.push('\n');
+                ret.push_str(&(points.to_string_internal() + ";"));
                 first_points = points;
             }
-            ret.push_str(&(action + &";".to_string()));
+            ret.push_str(&(action + ";"));
         }
 
         ret.push_str("\nSoft hands strategy:\n");
         first_points = Points::default();
-        ret.push_str(";");
+        ret.push(';');
         for rank in BlackjackRank::create_all() {
-            ret.push_str(&(rank.to_string_internal() + &";".to_string()));
+            ret.push_str(&(rank.to_string_internal() + ";"));
         }
         for (situation, action) in soft_strat {
             let points = situation.situation();
             if points != first_points {
-                ret.push_str("\n");
-                ret.push_str(&(points.to_string_internal() + &";".to_string()));
+                ret.push('\n');
+                ret.push_str(&(points.to_string_internal() + ";"));
                 first_points = points;
             }
-            ret.push_str(&(action + &";".to_string()));
+            ret.push_str(&(action + ";"));
         }
         
         ret.push_str("\nSplitting Strategy:\n");
         let mut first_rank = BlackjackRank::default();
-        ret.push_str(";");
+        ret.push(';');
         for rank in BlackjackRank::create_all() {
-            ret.push_str(&(rank.to_string_internal() + &";".to_string()));
+            ret.push_str(&(rank.to_string_internal() + ";"));
         }
         for (situation, do_it) in self.data.split_percentages.iter() {
             let hand_rank = situation.situation();
             if hand_rank != first_rank {
-                ret.push_str("\n");
-                ret.push_str(&(hand_rank.to_string_internal() + &";".to_string()));
+                ret.push('\n');
+                ret.push_str(&(hand_rank.to_string_internal() + ";"));
                 first_rank = hand_rank;
             }
             if *do_it {
@@ -126,31 +124,31 @@ impl BlackjackStrategyTrait for BlackjackStrategy{
     fn get_draw(&self, situation: HandSituation, _deck: &Box<dyn Deck>) -> bool
     {
         let it = if !self.use_hash {self.data.drawing_percentages.get(&situation)} else {self.data_hash.drawing_percentages.get(&situation)};
-        if it == None {
+        if it.is_none() {
             panic!("Drawing strategy not found {} ; {}", situation.situation().to_string_internal(), situation.dealer_card().to_string_internal());
         }
-        let draw = *it.unwrap();
-        draw
+        
+        *it.unwrap()
     }
 
     fn get_double_down(&self, situation: HandSituation, _deck: &Box<dyn Deck>) -> bool
     {
         let it = if !self.use_hash {self.data.double_down_percentages.get(&situation)} else {self.data_hash.double_down_percentages.get(&situation)};
-        if it == None {
+        if it.is_none() {
             panic!("Double down strategy not found {} ; {}", situation.situation().to_string_internal(), situation.dealer_card().to_string_internal());
         }
-        let only_draw_once = *it.unwrap(); 
-        only_draw_once
+         
+        *it.unwrap()
     }
 
     fn get_split(&self, situation: SplitSituation, _deck: &Box<dyn Deck>) -> bool
     {
         let it = if !self.use_hash {self.data.split_percentages.get(&situation)} else {self.data_hash.split_percentages.get(&situation)} ;
-        if it == None {
+        if it.is_none() {
             panic!("Split strategy not found for rank {} ; {}", situation.situation().to_string_internal(), situation.dealer_card().to_string_internal())
         }
-        let do_split = *it.unwrap();
-        do_split
+        
+        *it.unwrap()
     }
 
     fn add_draw(&mut self, situation: HandSituation, do_it: bool)
@@ -200,17 +198,17 @@ pub struct CountedBlackjackStrategy{
 
 impl CountedBlackjackStrategy{
     pub fn new(data: BTreeMap<i32, Box<dyn BlackjackStrategyTrait>>) -> CountedBlackjackStrategy{
-        let max_count;
-        match data.keys().next_back(){
-            Some(value) => {max_count = *value},
+        
+        let max_count = match data.keys().next_back(){
+            Some(value) => {*value},
             _ => panic!("max_count not found in data"),
         };
-        let min_count;
-        match data.keys().next(){
-            Some(value) => {min_count = *value},
+        
+        let min_count = match data.keys().next(){
+            Some(value) => {*value},
             _ => panic!("min_count not found in data"),
         };
-        CountedBlackjackStrategy{counted_strategies: data, max_count: max_count, min_count: min_count}
+        CountedBlackjackStrategy{counted_strategies: data, max_count, min_count}
     }
 }
 
@@ -232,7 +230,7 @@ fn get_clamped_count(deck: &Box<dyn Deck>, min_count: i32, max_count: i32) -> i3
 impl BlackjackStrategyTrait for CountedBlackjackStrategy{
     fn get_draw(&self, situation: HandSituation, deck: &Box<dyn Deck>) -> bool
     {
-        match self.counted_strategies.get(&get_clamped_count(&deck, self.min_count, self.max_count)){
+        match self.counted_strategies.get(&get_clamped_count(deck, self.min_count, self.max_count)){
             Some(strat) => {strat.get_draw(situation, deck)},
             _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
         }
@@ -240,14 +238,14 @@ impl BlackjackStrategyTrait for CountedBlackjackStrategy{
 
     fn get_double_down(&self, situation: HandSituation, deck: &Box<dyn Deck>) -> bool
     {
-        match self.counted_strategies.get(&get_clamped_count(&deck, self.min_count, self.max_count)){
+        match self.counted_strategies.get(&get_clamped_count(deck, self.min_count, self.max_count)){
             Some(strat) => {strat.get_double_down(situation, deck)},
             _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
         }
     }
     fn get_split(&self, situation: SplitSituation, deck: &Box<dyn Deck>) -> bool
     {
-        match self.counted_strategies.get(&get_clamped_count(&deck, self.min_count, self.max_count)){
+        match self.counted_strategies.get(&get_clamped_count(deck, self.min_count, self.max_count)){
             Some(strat) => {strat.get_split(situation, deck)},
             _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
         }
@@ -273,7 +271,7 @@ impl BlackjackStrategyTrait for CountedBlackjackStrategy{
         let mut ret = String::new();
         for (count, strat) in &self.counted_strategies{
             ret.push_str(&("Count ".to_owned() + &count.to_string()));
-            ret.push_str(&("Strategy: ".to_owned() + &strat.to_string_mat2() + &"\n\n".to_string()));
+            ret.push_str(&("Strategy: ".to_owned() + &strat.to_string_mat2() + "\n\n"));
         }
         ret
     }
@@ -315,7 +313,7 @@ pub struct BlackjackStrategyVec{
 
 impl BlackjackStrategyVec{
     pub fn new(reversed: bool) -> BlackjackStrategyVec{
-        BlackjackStrategyVec { data: BlackjackStrategyDataVec::default(), reversed: reversed }
+        BlackjackStrategyVec { data: BlackjackStrategyDataVec::default(), reversed }
     }
 }
 
@@ -386,7 +384,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec{
         let res = iter.find(|x| x.situation == situation);
         match res{
             Some(value) => { value.do_it = do_it; },
-            _ => { self.data.drawing_percentages.push(HandSituationStrategy{situation: situation, do_it: do_it})},
+            _ => { self.data.drawing_percentages.push(HandSituationStrategy{situation, do_it})},
         }
     }
 
@@ -396,7 +394,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec{
         let res = iter.find(|x| x.situation == situation);
         match res{
             Some(value) => { value.do_it = do_it; },
-            _ => { self.data.double_down_percentages.push(HandSituationStrategy{situation: situation, do_it: do_it})},
+            _ => { self.data.double_down_percentages.push(HandSituationStrategy{situation, do_it})},
         }
     }
 
@@ -406,7 +404,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec{
         let res = iter.find(|x| x.situation == situation);
         match res{
             Some(value) => { value.do_it = do_it; },
-            _ => { self.data.split_percentages.push(SplitSituationStrategy{situation: situation, do_it: do_it})},
+            _ => { self.data.split_percentages.push(SplitSituationStrategy{situation, do_it})},
         }
     }
 

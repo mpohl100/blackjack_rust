@@ -35,8 +35,8 @@ impl BlackjackChallenge<'_>{
             type_: situationtype,
             dealer_rank: dealer_card,
             player_hand: player_hand.clone(),
-            strat: strat,
-            deck: deck,
+            strat,
+            deck,
         }
     }
 
@@ -44,11 +44,11 @@ impl BlackjackChallenge<'_>{
     {
         let points = evaluate_blackjack_hand(&self.player_hand.get_blackjack_hand());
         if self.type_ == BlackjackChallengeType::Draw {
-            self.strat.add_draw(HandSituation::new(points, self.dealer_rank.clone()), do_it);
+            self.strat.add_draw(HandSituation::new(points, self.dealer_rank), do_it);
         } else if self.type_ == BlackjackChallengeType::DoubleDown {
-            self.strat.add_double_down(HandSituation::new(points, self.dealer_rank.clone()), do_it);
+            self.strat.add_double_down(HandSituation::new(points, self.dealer_rank), do_it);
         } else if self.type_ == BlackjackChallengeType::Split {
-            self.strat.add_split(SplitSituation::new(BlackjackRank::new(self.player_hand.get_cards()[0].rank()), self.dealer_rank.clone()), do_it);
+            self.strat.add_split(SplitSituation::new(BlackjackRank::new(self.player_hand.get_cards()[0].rank()), self.dealer_rank), do_it);
         }
         let mut rng = RandomNumberGenerator::new();
         let mut result = 0.0;
