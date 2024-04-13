@@ -8,13 +8,14 @@ use crate::blackjack::blackjack_strategy::BlackjackStrategyVec;
 use crate::commandline_params::PlayConfiguration;
 use crate::commandline_params::StrategyConfiguration;
 use std::time::Instant;
+use threadpool::ThreadPool;
 
 
-fn play<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, play_config: PlayConfiguration, strat_config: StrategyConfiguration, description: String)
+fn play<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, play_config: PlayConfiguration, strat_config: StrategyConfiguration, thread_pool: &ThreadPool, description: String)
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
     let strat_start = Instant::now();
-    let strat = blackjack::blackjack_analysis::optimize_counted(blackjack_strategy, strat_config.clone());
+    let strat = blackjack::blackjack_analysis::optimize_counted(blackjack_strategy, strat_config.clone(), &thread_pool);
     let strat_duration = strat_start.elapsed();
     let start = Instant::now();
     let result = blackjack::play_blackjack::play_blackjack(play_config.clone(), &strat);
@@ -31,8 +32,9 @@ fn main() {
     println!("Measure performance:");
     let strat_config = commandline_params::get_strat_config(app.clone());
     let play_config = commandline_params::get_play_config(app);
-    play(BlackjackStrategy::new(true), play_config.clone(), strat_config.clone(), "HashMap".to_string());
-    play(BlackjackStrategy::new(false), play_config.clone(), strat_config.clone(), "OrderedMap".to_string());
-    play(BlackjackStrategyVec::new(false), play_config.clone(), strat_config.clone(), "ReversedVec".to_string());
-    play(BlackjackStrategyVec::new(true), play_config, strat_config, "Vec".to_string());
+    let thread_pool = ThreadPool::new(strat_config.nb_threads.try_into().unwrap());
+    play(BlackjackStrategy::new(true), play_config.clone(), strat_config.clone(), &thread_pool,"HashMap".to_string());
+    play(BlackjackStrategy::new(false), play_config.clone(), strat_config.clone(), &thread_pool, "OrderedMap".to_string());
+    play(BlackjackStrategyVec::new(false), play_config.clone(), strat_config.clone(), &thread_pool, "ReversedVec".to_string());
+    play(BlackjackStrategyVec::new(true), play_config, strat_config, &thread_pool, "Vec".to_string());
 }
