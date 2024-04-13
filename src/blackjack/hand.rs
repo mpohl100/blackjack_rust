@@ -97,6 +97,8 @@ impl DealerHand {
 #[cfg(test)]
 mod blackjack_hand_tests {
     use super::*;
+    use crate::blackjack::card::Rank;
+    use crate::blackjack::card::Suit;
 
     #[test]
     fn test_add_card() {
@@ -135,6 +137,8 @@ mod blackjack_hand_tests {
 #[cfg(test)]
 mod player_hand_tests {
     use super::*;
+    use crate::blackjack::card::Rank;
+    use crate::blackjack::card::Suit;
 
     #[test]
     fn test_new() {
@@ -205,6 +209,8 @@ mod player_hand_tests {
 #[cfg(test)]
 mod dealer_hand_tests {
     use super::*;
+    use crate::blackjack::card::Rank;
+    use crate::blackjack::card::Suit;
 
     pub struct DeterministicDeck {
         cards: Vec<Card>,

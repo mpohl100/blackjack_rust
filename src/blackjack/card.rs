@@ -127,6 +127,10 @@ impl Card {
         self.rank
     }
 
+    pub fn suit(&self) -> Suit {
+        self.suit
+    }
+
     pub fn to_blackjack_score(&self) -> i32 {
         match self.rank {
             Rank::Ace => 1, // case 11 is handled outside

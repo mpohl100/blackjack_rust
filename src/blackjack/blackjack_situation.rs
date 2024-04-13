@@ -50,6 +50,8 @@ pub type SplitSituation = BlackjackSituation<BlackjackRank>;
 #[cfg(test)]
 mod hand_situation_tests {
     use super::*;
+    use crate::blackjack::card::Suit;
+    use crate::blackjack::card::Rank;
     
     #[test]
     fn test_situation() {
@@ -110,6 +112,8 @@ mod hand_situation_tests {
 #[cfg(test)]
 mod split_situation_tests {
     use super::*;
+    use crate::blackjack::card::Suit;
+    use crate::blackjack::card::Rank;
     
     #[test]
     fn test_situation() {
