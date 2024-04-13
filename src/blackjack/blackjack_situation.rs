@@ -1,6 +1,6 @@
 use crate::blackjack::blackjack_points::Points;
 use crate::blackjack::card::BlackjackRank;
-use crate::blackjack::card::Rank;
+
 use crate::blackjack::traits::Allable;
 use crate::blackjack::traits::Stringable;
 

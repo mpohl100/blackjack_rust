@@ -15,7 +15,7 @@ fn play<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, play_c
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
     let strat_start = Instant::now();
-    let strat = blackjack::blackjack_analysis::optimize_blackjack(blackjack_strategy, strat_config.clone(), &thread_pool, 0);
+    let strat = blackjack::blackjack_analysis::optimize_blackjack(blackjack_strategy, &thread_pool, 0);
     let strat_duration = strat_start.elapsed();
     let start = Instant::now();
     let result = blackjack::play_blackjack::play_blackjack(play_config.clone(), &strat);
@@ -37,5 +37,5 @@ fn main() {
     play(BlackjackStrategy::new(true), play_config.clone(), strat_config.clone(), &thread_pool, "HashMap".to_string());
     play(BlackjackStrategy::new(false), play_config.clone(), strat_config.clone(), &thread_pool,"OrderedMap".to_string());
     play(BlackjackStrategyVec::new(false), play_config.clone(), strat_config.clone(), &thread_pool,"ReversedVec".to_string());
-    play(BlackjackStrategyVec::new(true), play_config, strat_config, &thread_pool,"Vec".to_string());
+    play(BlackjackStrategyVec::new(true), play_config, strat_config.clone(), &thread_pool,"Vec".to_string());
 }

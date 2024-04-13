@@ -55,7 +55,7 @@ pub fn play_blackjack_hand(
             let first = PlayerHand::new(&vec![player_hand.get_cards()[0], deck.deal_card(rng)]);
             let second = PlayerHand::new(&vec![player_hand.get_cards()[1], deck.deal_card(rng)]);
             let mut overall_result = 0.0;
-            overall_result += play_blackjack_hand(player_bet, first, dealer_hand.clone(), deck, player_strategy.clone(), rng, play_mode);
+            overall_result += play_blackjack_hand(player_bet, first, dealer_hand.clone(), deck, player_strategy, rng, play_mode);
             overall_result += play_blackjack_hand(player_bet, second, dealer_hand.clone(), deck, player_strategy, rng, play_mode);
             return overall_result;
         }

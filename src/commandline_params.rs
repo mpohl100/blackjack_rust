@@ -40,7 +40,7 @@ pub fn get_commandline_params<'a>(binary_name: String, description: &'a str) -> 
 fn get_number_hands(app: clap::App<'_,'_>) -> u64
 {
     let matches = app.get_matches(); 
-    let number_str = matches.value_of("number_hands");
+    let _number_str = matches.value_of("number_hands");
     if let Some(_number) = matches.value_of("number_hands") {
         let parsed_number: u64 = clap::value_t!(matches.value_of("number_hands"), u64).unwrap();
         parsed_number
@@ -60,7 +60,7 @@ pub fn get_play_config(app: clap::App<'_,'_>) -> PlayConfiguration
 fn get_number_threads(app: clap::App<'_,'_>) -> u64
 {
     let matches = app.get_matches(); 
-    let number_str = matches.value_of("number_threads");
+    let _number_str = matches.value_of("number_threads");
     if let Some(_number) = matches.value_of("number_threads") {
         let parsed_number: u64 = clap::value_t!(matches.value_of("number_threads"), u64).unwrap();
         parsed_number
