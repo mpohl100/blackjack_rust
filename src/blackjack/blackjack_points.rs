@@ -9,10 +9,10 @@ pub struct Points {
 
 impl Points {
     pub fn new(lower: i32, mut upper: i32) -> Points {
-        if upper > 21{
+        if upper > 21 {
             upper = lower;
         }
-        Points { lower, upper}
+        Points { lower, upper }
     }
 
     pub fn lower(&self) -> i32 {
@@ -24,18 +24,18 @@ impl Points {
     }
 }
 
-impl Stringable for Points{
+impl Stringable for Points {
     fn to_string_internal(&self) -> String {
         self.lower.to_string() + "/" + &self.upper.to_string()
     }
 }
 
-impl Allable for Points{
+impl Allable for Points {
     fn create_all() -> Vec<Points> {
         let mut points = std::collections::BTreeSet::new();
         for i in 2..=21 {
             points.insert(Points::new(i, i));
-            points.insert(Points::new(i, i + 10 ));
+            points.insert(Points::new(i, i + 10));
         }
         points.into_iter().collect()
     }
@@ -81,7 +81,11 @@ mod points_tests {
             expected_points.insert(Points::new(i, i + 10));
         }
         let expected_points_vec: Vec<Points> = expected_points.into_iter().collect();
-        println!("Len comp.: {:?} {:?}", all_points.len(), expected_points_vec.len());
+        println!(
+            "Len comp.: {:?} {:?}",
+            all_points.len(),
+            expected_points_vec.len()
+        );
         assert_eq!(all_points, expected_points_vec);
     }
 }

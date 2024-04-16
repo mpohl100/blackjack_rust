@@ -1,6 +1,5 @@
 use crate::blackjack::card::Card;
 
-
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::deck::Deck;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
@@ -12,19 +11,18 @@ pub struct BlackjackHand {
     pub cards: Vec<Card>,
 }
 
-impl BlackjackHand{
+impl BlackjackHand {
     pub fn add_card(&mut self, card: &Card) {
         self.cards.push(*card);
     }
 
     pub fn is_pair(&self) -> bool {
-        if self.cards.len() != 2{
+        if self.cards.len() != 2 {
             false
-        }
-        else{
+        } else {
             self.cards[0].rank() == self.cards[1].rank()
         }
-    } 
+    }
 }
 
 #[derive(Default, Clone)]
@@ -34,7 +32,11 @@ pub struct PlayerHand {
 
 impl PlayerHand {
     pub fn new(cards: &Vec<Card>) -> PlayerHand {
-        PlayerHand { blackjack_hand: BlackjackHand { cards: cards.clone() } }
+        PlayerHand {
+            blackjack_hand: BlackjackHand {
+                cards: cards.clone(),
+            },
+        }
     }
 
     pub fn is_pair(&self) -> bool {
@@ -45,11 +47,11 @@ impl PlayerHand {
         self.blackjack_hand.add_card(card);
     }
 
-    pub fn get_cards(&self) -> Vec<Card>{
+    pub fn get_cards(&self) -> Vec<Card> {
         self.blackjack_hand.cards.clone()
     }
 
-    pub fn get_blackjack_hand(&self) -> BlackjackHand{
+    pub fn get_blackjack_hand(&self) -> BlackjackHand {
         self.blackjack_hand.clone()
     }
 }
@@ -61,10 +63,14 @@ pub struct DealerHand {
 
 impl DealerHand {
     pub fn new(cards: &Vec<Card>) -> DealerHand {
-        DealerHand { blackjack_hand: BlackjackHand { cards: cards.clone() } }
+        DealerHand {
+            blackjack_hand: BlackjackHand {
+                cards: cards.clone(),
+            },
+        }
     }
 
-    fn get_cards(&self) -> Vec<Card>{
+    fn get_cards(&self) -> Vec<Card> {
         self.blackjack_hand.cards.clone()
     }
 
@@ -216,7 +222,7 @@ mod dealer_hand_tests {
         cards: Vec<Card>,
         current_index: usize,
     }
-    
+
     impl DeterministicDeck {
         pub fn new(cards: Vec<Card>) -> DeterministicDeck {
             DeterministicDeck {
@@ -225,7 +231,7 @@ mod dealer_hand_tests {
             }
         }
     }
-    
+
     impl Deck for DeterministicDeck {
         fn deal_card(&mut self, _rng: &mut RandomNumberGenerator) -> Card {
             let card = self.cards[self.current_index];
@@ -233,11 +239,11 @@ mod dealer_hand_tests {
             card
         }
 
-        fn get_count(&self) -> i32{
+        fn get_count(&self) -> i32 {
             0
         }
 
-        fn get_nb_cards(&self) -> i32{
+        fn get_nb_cards(&self) -> i32 {
             (self.cards.len() - self.current_index).try_into().unwrap()
         }
     }
@@ -305,6 +311,3 @@ mod dealer_hand_tests {
         assert_eq!(open_card, BlackjackRank::new(Rank::Ace));
     }
 }
-
-
-

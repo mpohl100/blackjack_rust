@@ -1,5 +1,5 @@
-use rand::prelude::*;
 use rand::distributions::Uniform;
+use rand::prelude::*;
 use std::vec::Vec;
 
 pub struct RandomNumberGenerator {

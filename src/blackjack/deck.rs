@@ -1,12 +1,12 @@
-pub use crate::blackjack::card::Card;
-use crate::blackjack::rng::RandomNumberGenerator;
 use crate::blackjack::card::BlackjackRank;
+pub use crate::blackjack::card::Card;
 use crate::blackjack::card::Rank;
+use crate::blackjack::rng::RandomNumberGenerator;
 
-use rand::thread_rng;
 use rand::seq::SliceRandom;
+use rand::thread_rng;
 
-pub trait Deck{
+pub trait Deck {
     fn deal_card(&mut self, rng: &mut RandomNumberGenerator) -> Card;
     fn get_count(&self) -> i32;
     fn get_nb_cards(&self) -> i32;
@@ -27,7 +27,10 @@ impl CountedDeck {
         if count > 0 {
             let mut cnt = count;
             deck.retain(|card| {
-                if cnt > 0 && (BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ten) || BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ace)) {
+                if cnt > 0
+                    && (BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ten)
+                        || BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ace))
+                {
                     cnt -= 1;
                     return false;
                 }
@@ -37,7 +40,10 @@ impl CountedDeck {
             let mut cnt = -count;
             deck.retain(|card| {
                 let blackjack_rank = BlackjackRank::new(card.rank());
-                if cnt > 0 && blackjack_rank >= BlackjackRank::new(Rank::Deuce) && blackjack_rank <= BlackjackRank::new(Rank::Six) {
+                if cnt > 0
+                    && blackjack_rank >= BlackjackRank::new(Rank::Deuce)
+                    && blackjack_rank <= BlackjackRank::new(Rank::Six)
+                {
                     cnt -= 1;
                     return false;
                 }
@@ -45,23 +51,20 @@ impl CountedDeck {
             });
         }
 
-        CountedDeck {
-            deck,
-            count
-        }
+        CountedDeck { deck, count }
     }
 }
 
-impl Deck for CountedDeck{
+impl Deck for CountedDeck {
     fn deal_card(&mut self, rng: &mut RandomNumberGenerator) -> Card {
         let max = (self.deck.len() - 1).try_into().unwrap();
-        let i: usize = match rng.fetch_uniform(0, max, 1).pop(){
+        let i: usize = match rng.fetch_uniform(0, max, 1).pop() {
             Some(index) => index.try_into().unwrap(),
-            _ => panic!("Did not receive one element from fetch_uniform")
+            _ => panic!("Did not receive one element from fetch_uniform"),
         };
-        match self.deck.get(i){
+        match self.deck.get(i) {
             Some(card) => *card,
-            _ => panic!("Card at index {:?} not found", i)
+            _ => panic!("Card at index {:?} not found", i),
         }
     }
 
@@ -74,22 +77,25 @@ impl Deck for CountedDeck{
     }
 }
 
-pub struct EightDecks{
+pub struct EightDecks {
     decks: Vec<Card>,
     count: i32,
 }
 
-impl EightDecks{
-    pub fn new() -> EightDecks{
-        let mut deck = EightDecks{decks: Vec::<Card>::new(), count: 0};
+impl EightDecks {
+    pub fn new() -> EightDecks {
+        let mut deck = EightDecks {
+            decks: Vec::<Card>::new(),
+            count: 0,
+        };
         deck.init();
         deck
     }
 
-    fn init(&mut self){
+    fn init(&mut self) {
         self.decks = Vec::<Card>::new();
-        for _ in 0..8{
-            for i in 0..52{
+        for _ in 0..8 {
+            for i in 0..52 {
                 let card = Card::new_with_int(i);
                 //println!("{:?} {:?}", card.rank().to_string_internal(), card.suit().to_string_internal());
                 self.decks.push(card);
@@ -104,20 +110,21 @@ impl EightDecks{
     }
 }
 
-impl Deck for EightDecks{
+impl Deck for EightDecks {
     fn deal_card(&mut self, _rng: &mut RandomNumberGenerator) -> Card {
-        if self.decks.is_empty(){
+        if self.decks.is_empty() {
             self.init();
         }
-        
-        let card = match self.decks.pop(){
-            Some(value) => {value},
+
+        let card = match self.decks.pop() {
+            Some(value) => value,
             _ => panic!("found empty deck"),
         };
-        if [Rank::Ten, Rank::Jack, Rank::Queen, Rank::King, Rank::Ace].contains(&card.rank()){
+        if [Rank::Ten, Rank::Jack, Rank::Queen, Rank::King, Rank::Ace].contains(&card.rank()) {
             self.count += 1;
-        }
-        else if [Rank::Deuce, Rank::Three, Rank::Four, Rank::Five, Rank::Six].contains(&card.rank()) {
+        } else if [Rank::Deuce, Rank::Three, Rank::Four, Rank::Five, Rank::Six]
+            .contains(&card.rank())
+        {
             self.count -= 1;
         }
         card
@@ -165,16 +172,16 @@ mod counted_deck_tests {
 
     #[test]
     fn test_counted_deck_get_count() {
-        for i in -20..21{
+        for i in -20..21 {
             let deck = CountedDeck::new(i);
             assert_eq!(deck.get_count(), i);
             let mut observed_count = 0;
-            for card in &deck.deck{
-                if card.to_blackjack_score() == 10 || card.to_blackjack_score() == 1{
+            for card in &deck.deck {
+                if card.to_blackjack_score() == 10 || card.to_blackjack_score() == 1 {
                     observed_count += 1;
                 }
-                
-                if card.to_blackjack_score() >= 2 && card.to_blackjack_score() <= 6{
+
+                if card.to_blackjack_score() >= 2 && card.to_blackjack_score() <= 6 {
                     observed_count -= 1;
                 }
             }
@@ -232,14 +239,14 @@ mod eight_decks_tests {
         let mut eight_decks = EightDecks::new();
         let mut rng = RandomNumberGenerator::new();
 
-        for i in (0..8*52).rev(){
+        for i in (0..8 * 52).rev() {
             let _card = eight_decks.deal_card(&mut rng);
             assert_eq!(eight_decks.decks.len(), i);
         }
 
         assert_eq!(eight_decks.count, 0);
 
-        for i in (0..8*52).rev(){
+        for i in (0..8 * 52).rev() {
             let _card = eight_decks.deal_card(&mut rng);
             assert_eq!(eight_decks.decks.len(), i);
         }
@@ -253,13 +260,13 @@ mod eight_decks_tests {
         let mut rng = RandomNumberGenerator::new();
         assert_eq!(eight_decks.get_count(), 0);
         let mut expected_count = 0;
-        for _i in 0..eight_decks.decks.len(){
+        for _i in 0..eight_decks.decks.len() {
             let card = eight_decks.deal_card(&mut rng);
-            if card.to_blackjack_score() == 10 || card.to_blackjack_score() == 1{
+            if card.to_blackjack_score() == 10 || card.to_blackjack_score() == 1 {
                 expected_count += 1;
             }
-            
-            if card.to_blackjack_score() >= 2 && card.to_blackjack_score() <= 6{
+
+            if card.to_blackjack_score() >= 2 && card.to_blackjack_score() <= 6 {
                 expected_count -= 1;
             }
             assert_eq!(eight_decks.get_count(), expected_count);
@@ -273,11 +280,10 @@ mod eight_decks_tests {
         let mut rng = RandomNumberGenerator::new();
         assert_eq!(eight_decks.get_nb_cards(), 8 * 52);
 
-        for _i in 0..eight_decks.decks.len(){
+        for _i in 0..eight_decks.decks.len() {
             let _card = eight_decks.deal_card(&mut rng);
             let nb_cards: usize = eight_decks.get_nb_cards().try_into().unwrap();
             assert_eq!(nb_cards, eight_decks.decks.len());
         }
     }
 }
-

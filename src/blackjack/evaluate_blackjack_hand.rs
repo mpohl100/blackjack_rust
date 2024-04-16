@@ -1,6 +1,6 @@
-use crate::blackjack::hand::BlackjackHand;
 use crate::blackjack::blackjack_points::Points;
 use crate::blackjack::card::Rank;
+use crate::blackjack::hand::BlackjackHand;
 
 pub fn evaluate_blackjack_hand(hand: &BlackjackHand) -> Points {
     let mut encountered_ace = false;
@@ -14,6 +14,6 @@ pub fn evaluate_blackjack_hand(hand: &BlackjackHand) -> Points {
             encountered_ace = true;
         }
     }
-    
+
     Points::new(lower, upper)
 }

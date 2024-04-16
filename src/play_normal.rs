@@ -4,9 +4,9 @@ mod commandline_params;
 use threadpool::ThreadPool;
 
 use crate::blackjack::blackjack_analysis::optimize_blackjack;
+use crate::blackjack::blackjack_strategy::BlackjackStrategy;
 use crate::blackjack::play_blackjack::play_blackjack;
 use crate::blackjack::traits::BlackjackStrategyTrait;
-use crate::blackjack::blackjack_strategy::BlackjackStrategy;
 use crate::commandline_params::get_commandline_params;
 use crate::commandline_params::get_play_config;
 use crate::commandline_params::get_strat_config;
