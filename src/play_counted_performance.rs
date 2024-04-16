@@ -22,7 +22,7 @@ fn play<BlackjackStrategyType>(
     BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static,
 {
     let strat_start = Instant::now();
-    let strat = blackjack::blackjack_analysis::optimize_counted(
+    let strat = blackjack::analysis::blackjack_analysis::optimize_counted(
         blackjack_strategy,
         strat_config.clone(),
         thread_pool,

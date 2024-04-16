@@ -6,8 +6,8 @@ use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::rng::RandomNumberGenerator;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 
-use super::blackjack_analysis::HandSituation;
-use super::blackjack_analysis::SplitSituation;
+use super::analysis::blackjack_analysis::HandSituation;
+use super::analysis::blackjack_analysis::SplitSituation;
 
 #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
 pub enum PlayMode {

@@ -1,7 +1,7 @@
 mod blackjack;
 mod commandline_params;
 
-use crate::blackjack::blackjack_analysis::optimize_blackjack;
+use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
 use crate::blackjack::play_blackjack::play_blackjack;
 use crate::blackjack::strategy::blackjack_strategy_combined_vec::BlackjackStrategyCombinedVec;
 use crate::blackjack::strategy::blackjack_strategy_combined_hash_map::BlackjackStrategyCombinedHashMap;

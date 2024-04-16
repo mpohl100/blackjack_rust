@@ -1,5 +1,5 @@
-use crate::blackjack::blackjack_analysis::HandSituation;
-use crate::blackjack::blackjack_analysis::SplitSituation;
+use crate::blackjack::blackjack_situation::HandSituation;
+use crate::blackjack::blackjack_situation::SplitSituation;
 use crate::blackjack::deck::Deck;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
 pub trait Allable {
