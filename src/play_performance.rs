@@ -8,7 +8,9 @@ use blackjack_rust::blackjack::strategy::blackjack_strategy_vec::BlackjackStrate
 use blackjack_rust::blackjack::traits::BlackjackStrategyTrait;
 use blackjack_rust::commandline_params::PlayConfiguration;
 use blackjack_rust::commandline_params::StrategyConfiguration;
-use blackjack_rust::commandline_params::{get_commandline_params, get_play_config, get_strat_config};
+use blackjack_rust::commandline_params::{
+    get_commandline_params, get_play_config, get_strat_config,
+};
 use std::time::Instant;
 use threadpool::ThreadPool;
 
