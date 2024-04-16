@@ -3,9 +3,9 @@ use std::collections::BTreeMap;
 pub use crate::blackjack::traits::BlackjackStrategyTrait;
 pub use crate::blackjack::blackjack_situation::HandSituation;
 pub use crate::blackjack::blackjack_situation::SplitSituation;
+use crate::blackjack::blackjack_situation::GameSituation;
 use crate::blackjack::blackjack_strategy::CountedBlackjackStrategy;
 use crate::blackjack::blackjack_challenge::BlackjackChallenge;
-use crate::blackjack::blackjack_challenge::BlackjackChallengeType;
 use crate::blackjack::blackjack_configuration::StrategyConfiguration;
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::hand::PlayerHand;
@@ -18,45 +18,29 @@ use std::sync::mpsc::channel;
 use threadpool::ThreadPool;
 
 struct BlackjackGameSituation<'a> {
-    pub hand_situation: Option<HandSituation>,
-    pub is_draw: bool,
-    pub split_situation: Option<SplitSituation>,
+    pub game_situation: GameSituation,
     pub strat:  &'a mut dyn BlackjackStrategyTrait,
 }
 
-fn get_dealer_rank(challenge_type: BlackjackChallengeType, situation: &BlackjackGameSituation) -> BlackjackRank {
-    match challenge_type {
-        BlackjackChallengeType::Split => match situation.split_situation {
-            Some(value) => { value.dealer_card() }
-            None => panic!("no split situation found.")
-        }
-        _ => match situation.hand_situation {
-            Some(value) => { value.dealer_card() }
-            None => panic!("no hand situation found.")
-        }
+fn get_dealer_rank(game_situation: GameSituation) -> BlackjackRank {
+    match game_situation {
+        GameSituation::Draw(hand_situation) => hand_situation.dealer_card(),
+        GameSituation::DoubleDown(hand_situation) => hand_situation.dealer_card(),
+        GameSituation::Split(split_situation) => split_situation.dealer_card(),
     }
 }
 
-fn get_player_hand(challenge_type: BlackjackChallengeType, situation: &BlackjackGameSituation) -> PlayerHand {
+fn get_player_hand(game_situation: GameSituation) -> PlayerHand {
     let mut ret = PlayerHand::default();
-    match challenge_type {
-        BlackjackChallengeType::Split => {
-            let representative_card = match situation.split_situation { 
-                Some(value) => { value.situation().get_representative_card() }
-                None => panic!("no split situation found")
-            };
+    match game_situation {
+        GameSituation::Split(value) => {
+            let representative_card = value.situation().get_representative_card();
             ret.add_card(&representative_card.clone());
             ret.add_card(&representative_card.clone());
         },
-        _ => {
-            let mut goal_points = match situation.hand_situation {
-                Some(value) => { value.situation().lower() }
-                None => panic!("no hand situation found")
-            };
-            let upper_points = match situation.hand_situation {
-                Some(value) => { value.situation().upper() }
-                None => panic!("no hand situation found")
-            };
+        GameSituation::Draw(value) | GameSituation::DoubleDown (value) => {
+            let mut goal_points = value.situation().lower();
+            let upper_points = value.situation().upper();
             if goal_points != upper_points {
                 ret.add_card(&Card::new(Rank::Ace, Suit::Hearts));
                 goal_points -= 1;
@@ -82,10 +66,7 @@ fn get_player_hand(challenge_type: BlackjackChallengeType, situation: &Blackjack
                 }
             }
             let to_check = evaluate_blackjack_hand(&ret.get_blackjack_hand());
-            if to_check != match situation.hand_situation {
-                Some(value) => { value.situation() } 
-                None => panic!("no hand_situation found!")
-            } {
+            if to_check != value.situation() {
                 panic!("incorrect player hand formed.");
             }
         },
@@ -96,15 +77,8 @@ fn get_player_hand(challenge_type: BlackjackChallengeType, situation: &Blackjack
 
 fn optimize_situation(situation: &mut BlackjackGameSituation, deck: &CountedDeck) -> bool
 {
-    let situationtype = if situation.split_situation.is_some() {
-        BlackjackChallengeType::Split
-    } else if situation.is_draw {
-        BlackjackChallengeType::Draw
-    } else {
-        BlackjackChallengeType::DoubleDown
-    };
     let boxed_deck = Box::new(deck.clone());
-    let mut challenge = BlackjackChallenge::new(situationtype.clone(), get_dealer_rank(situationtype.clone(), situation), get_player_hand(situationtype.clone(), situation), situation.strat, boxed_deck);
+    let mut challenge = BlackjackChallenge::new(situation.game_situation.clone(), get_dealer_rank(situation.game_situation.clone()), get_player_hand(situation.game_situation), situation.strat, boxed_deck);
     let dont = false;
     let do_it = true;
     let score_dont = challenge.score(dont);
@@ -123,10 +97,8 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone
     let mut result = blackjack_strategy.clone();
     for hand_situation in hand_situations.iter().rev() {
         let mut situation = BlackjackGameSituation {
-            is_draw: true,
+            game_situation: GameSituation::Draw(*hand_situation),
             strat: &mut result.clone(),
-            hand_situation: Some(*hand_situation),
-            split_situation: None,
         };
         result.add_draw(*hand_situation, optimize_situation(&mut situation, &deck));        
     }
@@ -184,10 +156,8 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
         let hand_situation_clone = hand_situation;
         thread_pool.execute(move ||{
             let mut situation = BlackjackGameSituation {
-                is_draw: false,
+                game_situation: GameSituation::DoubleDown(hand_situation_clone),
                 strat: &mut result_clone.clone(),
-                hand_situation: Some(hand_situation_clone),
-                split_situation: None,
             };
             let do_it = optimize_situation(&mut situation, &deck_clone);
             tr_clone.send((hand_situation_clone, do_it)).expect("Could not send double down result")
@@ -213,10 +183,8 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
         let split_situation_clone = split_situation;
         thread_pool.execute(move ||{
             let mut situation = BlackjackGameSituation {
-                is_draw: false,
+                game_situation: GameSituation::Split(split_situation_clone),
                 strat: &mut result_clone.clone(),
-                hand_situation: None,
-                split_situation: Some(split_situation_clone),
             };
             let do_it = optimize_situation(&mut situation, &deck_clone);
             tr_clone.send((split_situation_clone, do_it)).expect("Could not send split result")

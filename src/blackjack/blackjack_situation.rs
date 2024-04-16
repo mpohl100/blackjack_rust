@@ -47,6 +47,13 @@ impl<T: Allable + Clone> BlackjackSituation<T> {
 pub type HandSituation = BlackjackSituation<Points>;
 pub type SplitSituation = BlackjackSituation<BlackjackRank>;
 
+#[derive(Debug, Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub enum GameSituation{
+    Draw(HandSituation),
+    DoubleDown(HandSituation),
+    Split(SplitSituation),
+}
+
 #[cfg(test)]
 mod hand_situation_tests {
     use super::*;
