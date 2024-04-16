@@ -459,6 +459,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec{
     }
 }
 
+#[derive(Default, Clone)]
 pub struct BlackjackStrategyCombinedHashMap{
     data: HashMap<GameSituation, bool>,
 }
@@ -544,8 +545,15 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedHashMap{
     }
 }
 
+#[derive(Default, Clone)]
 pub struct BlackjackStrategyCombinedOrderedHashMap{
     data: BTreeMap<GameSituation, bool>,
+}
+
+impl BlackjackStrategyCombinedOrderedHashMap{
+    pub fn new() -> BlackjackStrategyCombinedOrderedHashMap{
+        BlackjackStrategyCombinedOrderedHashMap{data: BTreeMap::new()}
+    }
 }
 
 impl BlackjackStrategyTrait for BlackjackStrategyCombinedOrderedHashMap{
@@ -621,6 +629,8 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedOrderedHashMap{
         result
     }
 }
+
+#[derive(Default, Clone)]
 pub struct BlackjackStrategyCombinedVec{
     data: Vec<(GameSituation, bool)>,
     reversed: bool,
