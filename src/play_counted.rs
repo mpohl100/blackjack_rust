@@ -11,7 +11,7 @@ fn main() {
     let app = commandline_params::get_commandline_params("play_normal".to_string(), description);
     let strat_config = commandline_params::get_strat_config(app.clone());
     let thread_pool = ThreadPool::new(strat_config.nb_threads.try_into().unwrap());
-    let counted_strat = blackjack::blackjack_analysis::optimize_counted(
+    let counted_strat = blackjack::analysis::blackjack_analysis::optimize_counted(
         BlackjackStrategy::new(true),
         strat_config,
         &thread_pool,

@@ -3,7 +3,7 @@ mod commandline_params;
 
 use threadpool::ThreadPool;
 
-use crate::blackjack::blackjack_analysis::optimize_blackjack;
+use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
 use crate::blackjack::play_blackjack::play_blackjack;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
 use crate::blackjack::traits::BlackjackStrategyTrait;

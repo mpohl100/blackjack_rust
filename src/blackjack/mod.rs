@@ -1,4 +1,4 @@
-pub mod blackjack_analysis;
+pub mod analysis;
 mod blackjack_challenge;
 pub mod blackjack_configuration;
 mod blackjack_points;
