@@ -9,7 +9,7 @@ use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::blackjack_strategy::BlackjackStrategy;
 fn main() {
     let description = "Play as many hands as possible with the optimal blackjack strategy with card counting";
-    let app = commandline_params::get_commandline_params("play_normal".to_string(), &description);
+    let app = commandline_params::get_commandline_params("play_normal".to_string(), description);
     let strat_config = commandline_params::get_strat_config(app.clone());
     let thread_pool = ThreadPool::new(strat_config.nb_threads.try_into().unwrap());
     let counted_strat = blackjack::blackjack_analysis::optimize_counted(BlackjackStrategy::new(true), strat_config, &thread_pool);

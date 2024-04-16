@@ -17,7 +17,7 @@ pub fn play<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, pl
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
     let strat_start = Instant::now();
-    let strat = optimize_blackjack(blackjack_strategy, &thread_pool, 0);
+    let strat = optimize_blackjack(blackjack_strategy, thread_pool, 0);
     let strat_duration = strat_start.elapsed();
     let start = Instant::now();
     let result = play_blackjack(play_config.clone(), &strat);
@@ -31,7 +31,7 @@ where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 
 fn main() {
     let description = "Play as many hands as specified with the optimal blackjack strategy and compare the performance of the storage approaches of the blackjack strategy";
-    let app = get_commandline_params("play_normal".to_string(), &description);
+    let app = get_commandline_params("play_normal".to_string(), description);
     println!("Measure performance:");
     let mut play_config = get_play_config(app.clone());
     play_config.play_normal = false;

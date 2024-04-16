@@ -6,6 +6,12 @@ pub struct RandomNumberGenerator {
     rd: ThreadRng,
 }
 
+impl Default for RandomNumberGenerator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl RandomNumberGenerator {
     pub fn new() -> RandomNumberGenerator {
         RandomNumberGenerator {

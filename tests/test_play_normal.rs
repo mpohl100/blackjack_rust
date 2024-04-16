@@ -6,7 +6,6 @@ use blackjack_rust::{
     blackjack::blackjack_configuration::StrategyConfiguration,
     blackjack::traits::BlackjackStrategyTrait,
     blackjack::blackjack_strategy::BlackjackStrategy,
-    blackjack::blackjack_strategy::BlackjackStrategyVec,
     blackjack::blackjack_analysis::optimize_blackjack,
     blackjack::play_blackjack::play_blackjack,
 };
@@ -15,7 +14,7 @@ pub fn play<BlackjackStrategyType>(blackjack_strategy: BlackjackStrategyType, pl
 where BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static
 {
     let strat_start = Instant::now();
-    let strat = optimize_blackjack(blackjack_strategy, &thread_pool, 0);
+    let strat = optimize_blackjack(blackjack_strategy, thread_pool, 0);
     let strat_duration = strat_start.elapsed();
     let start = Instant::now();
     let result = play_blackjack(play_config.clone(), &strat);

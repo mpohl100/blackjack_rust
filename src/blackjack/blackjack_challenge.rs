@@ -7,7 +7,7 @@ use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 use crate::blackjack::play_blackjack_hand::play_blackjack_hand;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::blackjack_situation::GameSituation;
-use super::{blackjack_analysis::{HandSituation, SplitSituation}, rng::RandomNumberGenerator};
+use super::{rng::RandomNumberGenerator};
 
 pub struct BlackjackChallenge<'a> {
     game_situation_: GameSituation,
@@ -36,7 +36,7 @@ impl BlackjackChallenge<'_>{
 
     pub fn score(&mut self, do_it: bool) -> f64
     {
-        let points = evaluate_blackjack_hand(&self.player_hand.get_blackjack_hand());
+        let _points = evaluate_blackjack_hand(&self.player_hand.get_blackjack_hand());
         match self.game_situation_ {
             GameSituation::Draw(hand_situation) => { self.strat.add_draw(hand_situation, do_it)},
             GameSituation::DoubleDown(hand_situation) => { self.strat.add_double_down(hand_situation, do_it)},
