@@ -59,8 +59,8 @@ pub fn play_blackjack_hand(
         let do_split =
             player_strategy.get_split(SplitSituation::new(rank, dealer_hand.open_card()), deck);
         if do_split {
-            let first = PlayerHand::new(&vec![player_hand.get_cards()[0], deck.deal_card(rng)]);
-            let second = PlayerHand::new(&vec![player_hand.get_cards()[1], deck.deal_card(rng)]);
+            let first = PlayerHand::new(&[player_hand.get_cards()[0], deck.deal_card(rng)]);
+            let second = PlayerHand::new(&[player_hand.get_cards()[1], deck.deal_card(rng)]);
             let mut overall_result = 0.0;
             overall_result += play_blackjack_hand(
                 player_bet,

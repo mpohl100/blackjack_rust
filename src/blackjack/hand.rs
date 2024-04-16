@@ -31,10 +31,10 @@ pub struct PlayerHand {
 }
 
 impl PlayerHand {
-    pub fn new(cards: &Vec<Card>) -> PlayerHand {
+    pub fn new(cards: &[Card]) -> PlayerHand {
         PlayerHand {
             blackjack_hand: BlackjackHand {
-                cards: cards.clone(),
+                cards: cards.to_owned(),
             },
         }
     }
@@ -62,10 +62,10 @@ pub struct DealerHand {
 }
 
 impl DealerHand {
-    pub fn new(cards: &Vec<Card>) -> DealerHand {
+    pub fn new(cards: &[Card]) -> DealerHand {
         DealerHand {
             blackjack_hand: BlackjackHand {
-                cards: cards.clone(),
+                cards: cards.to_owned(),
             },
         }
     }

@@ -46,7 +46,7 @@ impl BlackjackChallenge<'_> {
         let mut rng = RandomNumberGenerator::new();
         let mut result = 0.0;
         for _ in 0..2000 {
-            let dealer_hand = DealerHand::new(&vec![
+            let dealer_hand = DealerHand::new(&[
                 self.dealer_rank.get_representative_card(),
                 self.deck.deal_card(&mut rng),
             ]);
