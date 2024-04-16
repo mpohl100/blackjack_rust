@@ -23,7 +23,7 @@ impl<T: Copy> BlackjackSituation<T> {
 impl<T: Copy + Stringable> Stringable for BlackjackSituation<T> {
     fn to_string_internal(&self) -> String {
         <T as Stringable>::to_string_internal(&self.situation())
-            + &"|"
+            + "|"
             + &self.dealer_card().to_string_internal()
     }
 }
