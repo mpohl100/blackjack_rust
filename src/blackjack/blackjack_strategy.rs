@@ -491,14 +491,14 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedHashMap{
         }
     }
 
-    fn get_double_down(&self, situation: HandSituation, deck: &Box<dyn Deck>) -> bool {
+    fn get_double_down(&self, situation: HandSituation, _deck: &Box<dyn Deck>) -> bool {
         match self.data.get(&GameSituation::DoubleDown(situation)){
             Some(value) => {*value},
             _ => panic!("Couldn't find double down situation in double down percentages"),
         }
     }
 
-    fn get_split(&self, situation: SplitSituation, deck: &Box<dyn Deck>) -> bool {
+    fn get_split(&self, situation: SplitSituation, _deck: &Box<dyn Deck>) -> bool {
         match self.data.get(&GameSituation::Split(situation)){
             Some(value) => {*value},
             _ => panic!("Couldn't find split situation in split percentages"),
@@ -569,21 +569,21 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedOrderedHashMap{
         self.data.insert(GameSituation::Split(situation), do_it);
     }
 
-    fn get_draw(&self, situation: HandSituation, deck: &Box<dyn Deck>) -> bool {
+    fn get_draw(&self, situation: HandSituation, _deck: &Box<dyn Deck>) -> bool {
         match self.data.get(&GameSituation::Draw(situation)){
             Some(value) => {*value},
             _ => panic!("Couldn't find draw hand situation in drawing percentages"),
         }
     }
 
-    fn get_double_down(&self, situation: HandSituation, deck: &Box<dyn Deck>) -> bool {
+    fn get_double_down(&self, situation: HandSituation, _deck: &Box<dyn Deck>) -> bool {
         match self.data.get(&GameSituation::DoubleDown(situation)){
             Some(value) => {*value},
             _ => panic!("Couldn't find double down situation in double down percentages"),
         }
     }
 
-    fn get_split(&self, situation: SplitSituation, deck: &Box<dyn Deck>) -> bool {
+    fn get_split(&self, situation: SplitSituation, _deck: &Box<dyn Deck>) -> bool {
         match self.data.get(&GameSituation::Split(situation)){
             Some(value) => {*value},
             _ => panic!("Couldn't find split situation in split percentages"),
@@ -670,7 +670,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec{
         }
     }
 
-    fn get_draw(&self, situation: HandSituation, deck: &Box<dyn Deck>) -> bool {
+    fn get_draw(&self, situation: HandSituation, _deck: &Box<dyn Deck>) -> bool {
         if !self.reversed {
             let mut iter = self.data.iter();
             let res = iter.find(|x| x.0 == GameSituation::Draw(situation));
@@ -689,7 +689,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec{
         }
     }
 
-    fn get_double_down(&self, situation: HandSituation, deck: &Box<dyn Deck>) -> bool {
+    fn get_double_down(&self, situation: HandSituation, _deck: &Box<dyn Deck>) -> bool {
         if !self.reversed{
             let mut iter = self.data.iter();
             let res = iter.find(|x| x.0 == GameSituation::DoubleDown(situation));
@@ -708,7 +708,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec{
         }
     }
 
-    fn get_split(&self, situation: SplitSituation, deck: &Box<dyn Deck>) -> bool {
+    fn get_split(&self, situation: SplitSituation, _deck: &Box<dyn Deck>) -> bool {
         if !self.reversed{   
             let mut iter = self.data.iter();
             let res = iter.find(|x| x.0 == GameSituation::Split(situation));
