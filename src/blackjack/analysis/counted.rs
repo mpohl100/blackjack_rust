@@ -1,7 +1,7 @@
-use crate::blackjack::blackjack_configuration::StrategyConfiguration;
-use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
+use crate::blackjack::blackjack_configuration::StrategyConfiguration;
 use crate::blackjack::strategy::counted_blackjack_strategy::CountedBlackjackStrategy;
+use crate::blackjack::traits::BlackjackStrategyTrait;
 use std::collections::BTreeMap;
 use std::sync::mpsc::channel;
 use threadpool::ThreadPool;
