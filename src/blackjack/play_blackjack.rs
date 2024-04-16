@@ -22,11 +22,11 @@ pub fn play_blackjack(
     let mut rng = RandomNumberGenerator::new();
     let mut result = 0.0;
     for _ in 0..play_config.nb_hands {
-        let player_hand = PlayerHand::new(&vec![
+        let player_hand = PlayerHand::new(&[
             boxed_deck.deal_card(&mut rng),
             boxed_deck.deal_card(&mut rng),
         ]);
-        let dealer_hand = DealerHand::new(&vec![
+        let dealer_hand = DealerHand::new(&[
             boxed_deck.deal_card(&mut rng),
             boxed_deck.deal_card(&mut rng),
         ]);
