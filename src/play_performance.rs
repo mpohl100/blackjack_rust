@@ -3,9 +3,9 @@ mod commandline_params;
 
 use crate::blackjack::blackjack_analysis::optimize_blackjack;
 use crate::blackjack::play_blackjack::play_blackjack;
-use crate::blackjack::strategy::blackjack_strategy::BlackjackStrategyCombinedHashMap;
 use crate::blackjack::strategy::blackjack_strategy::BlackjackStrategyCombinedOrderedHashMap;
 use crate::blackjack::strategy::blackjack_strategy::BlackjackStrategyCombinedVec;
+use crate::blackjack::strategy::blackjack_strategy_combined_hash_map::BlackjackStrategyCombinedHashMap;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
 use crate::blackjack::strategy::blackjack_strategy_vec::BlackjackStrategyVec;
 use crate::blackjack::traits::BlackjackStrategyTrait;

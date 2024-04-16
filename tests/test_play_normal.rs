@@ -6,7 +6,7 @@ use blackjack_rust::{
     blackjack::blackjack_configuration::PlayConfiguration,
     blackjack::blackjack_configuration::StrategyConfiguration,
     blackjack::play_blackjack::play_blackjack,
-    blackjack::strategy::blackjack_strategy::BlackjackStrategy,
+    blackjack::strategy::blackjack_strategy_map::BlackjackStrategy,
     blackjack::traits::BlackjackStrategyTrait,
 };
 
