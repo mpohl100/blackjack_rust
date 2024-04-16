@@ -5,8 +5,8 @@ use blackjack_rust::{
     blackjack::blackjack_analysis::optimize_blackjack,
     blackjack::blackjack_configuration::PlayConfiguration,
     blackjack::blackjack_configuration::StrategyConfiguration,
-    blackjack::strategy::blackjack_strategy::BlackjackStrategy, 
     blackjack::play_blackjack::play_blackjack,
+    blackjack::strategy::blackjack_strategy::BlackjackStrategy,
     blackjack::traits::BlackjackStrategyTrait,
 };
 
