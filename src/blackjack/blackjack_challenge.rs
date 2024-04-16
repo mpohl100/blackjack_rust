@@ -6,17 +6,11 @@ use crate::blackjack::play_blackjack_hand::PlayMode;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 use crate::blackjack::play_blackjack_hand::play_blackjack_hand;
 use crate::blackjack::traits::BlackjackStrategyTrait;
+use crate::blackjack::blackjack_situation::GameSituation;
 use super::{blackjack_analysis::{HandSituation, SplitSituation}, rng::RandomNumberGenerator};
 
-#[derive(Clone, Eq, Ord, PartialEq, PartialOrd, Debug)]
-pub enum BlackjackChallengeType {
-    Draw,
-    DoubleDown,
-    Split,
-}
-
 pub struct BlackjackChallenge<'a> {
-    type_: BlackjackChallengeType,
+    game_situation_: GameSituation,
     dealer_rank: BlackjackRank,
     player_hand: PlayerHand,
     strat: &'a mut dyn BlackjackStrategyTrait,
@@ -25,14 +19,14 @@ pub struct BlackjackChallenge<'a> {
 
 impl BlackjackChallenge<'_>{
     pub fn new(
-        situationtype: BlackjackChallengeType,
+        game_situation: GameSituation,
         dealer_card: BlackjackRank,
         player_hand: PlayerHand,
         strat: &mut dyn BlackjackStrategyTrait,
         deck: Box<dyn Deck>,
     ) -> BlackjackChallenge {
         BlackjackChallenge{
-            type_: situationtype,
+            game_situation_: game_situation,
             dealer_rank: dealer_card,
             player_hand: player_hand.clone(),
             strat,
@@ -43,12 +37,10 @@ impl BlackjackChallenge<'_>{
     pub fn score(&mut self, do_it: bool) -> f64
     {
         let points = evaluate_blackjack_hand(&self.player_hand.get_blackjack_hand());
-        if self.type_ == BlackjackChallengeType::Draw {
-            self.strat.add_draw(HandSituation::new(points, self.dealer_rank), do_it);
-        } else if self.type_ == BlackjackChallengeType::DoubleDown {
-            self.strat.add_double_down(HandSituation::new(points, self.dealer_rank), do_it);
-        } else if self.type_ == BlackjackChallengeType::Split {
-            self.strat.add_split(SplitSituation::new(BlackjackRank::new(self.player_hand.get_cards()[0].rank()), self.dealer_rank), do_it);
+        match self.game_situation_ {
+            GameSituation::Draw(hand_situation) => { self.strat.add_draw(hand_situation, do_it)},
+            GameSituation::DoubleDown(hand_situation) => { self.strat.add_double_down(hand_situation, do_it)},
+            GameSituation::Split(split_situation) => { self.strat.add_split(split_situation, do_it)},
         }
         let mut rng = RandomNumberGenerator::new();
         let mut result = 0.0;
@@ -62,10 +54,10 @@ impl BlackjackChallenge<'_>{
 
     fn get_play_mode(&self) -> PlayMode
     {
-        match self.type_{
-            BlackjackChallengeType::Draw => PlayMode::Draw,
-            BlackjackChallengeType::DoubleDown => PlayMode::DoubleDown,
-            BlackjackChallengeType::Split => PlayMode::All,
+        match self.game_situation_{
+            GameSituation::Draw(_) => PlayMode::Draw,
+            GameSituation::DoubleDown(_) => PlayMode::DoubleDown,
+            GameSituation::Split(_) => PlayMode::All,
         }
     }
 }
