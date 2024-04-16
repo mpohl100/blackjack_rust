@@ -5,7 +5,7 @@ use crate::blackjack::blackjack_configuration::StrategyConfiguration;
 use crate::blackjack::blackjack_situation::GameSituation;
 pub use crate::blackjack::blackjack_situation::HandSituation;
 pub use crate::blackjack::blackjack_situation::SplitSituation;
-use crate::blackjack::blackjack_strategy::CountedBlackjackStrategy;
+use crate::blackjack::strategy::blackjack_strategy::CountedBlackjackStrategy;
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::card::Card;
 use crate::blackjack::card::Rank;
