@@ -1,17 +1,14 @@
-mod blackjack;
-mod commandline_params;
-
-use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
-use crate::blackjack::play_blackjack::play_blackjack;
-use crate::blackjack::strategy::blackjack_strategy_combined_hash_map::BlackjackStrategyCombinedHashMap;
-use crate::blackjack::strategy::blackjack_strategy_combined_ordered_hash_map::BlackjackStrategyCombinedOrderedHashMap;
-use crate::blackjack::strategy::blackjack_strategy_combined_vec::BlackjackStrategyCombinedVec;
-use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
-use crate::blackjack::strategy::blackjack_strategy_vec::BlackjackStrategyVec;
-use crate::blackjack::traits::BlackjackStrategyTrait;
-use crate::commandline_params::PlayConfiguration;
-use crate::commandline_params::StrategyConfiguration;
-use crate::commandline_params::{get_commandline_params, get_play_config, get_strat_config};
+use blackjack_rust::blackjack::analysis::blackjack_analysis::optimize_blackjack;
+use blackjack_rust::blackjack::play_blackjack::play_blackjack;
+use blackjack_rust::blackjack::strategy::blackjack_strategy_combined_hash_map::BlackjackStrategyCombinedHashMap;
+use blackjack_rust::blackjack::strategy::blackjack_strategy_combined_ordered_hash_map::BlackjackStrategyCombinedOrderedHashMap;
+use blackjack_rust::blackjack::strategy::blackjack_strategy_combined_vec::BlackjackStrategyCombinedVec;
+use blackjack_rust::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
+use blackjack_rust::blackjack::strategy::blackjack_strategy_vec::BlackjackStrategyVec;
+use blackjack_rust::blackjack::traits::BlackjackStrategyTrait;
+use blackjack_rust::commandline_params::PlayConfiguration;
+use blackjack_rust::commandline_params::StrategyConfiguration;
+use blackjack_rust::commandline_params::{get_commandline_params, get_play_config, get_strat_config};
 use std::time::Instant;
 use threadpool::ThreadPool;
 

@@ -1,15 +1,12 @@
-mod blackjack;
-mod commandline_params;
-
 use threadpool::ThreadPool;
 
-use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
-use crate::blackjack::play_blackjack::play_blackjack;
-use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
-use crate::blackjack::traits::BlackjackStrategyTrait;
-use crate::commandline_params::get_commandline_params;
-use crate::commandline_params::get_play_config;
-use crate::commandline_params::get_strat_config;
+use blackjack_rust::blackjack::analysis::blackjack_analysis::optimize_blackjack;
+use blackjack_rust::blackjack::play_blackjack::play_blackjack;
+use blackjack_rust::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
+use blackjack_rust::blackjack::traits::BlackjackStrategyTrait;
+use blackjack_rust::commandline_params::get_commandline_params;
+use blackjack_rust::commandline_params::get_play_config;
+use blackjack_rust::commandline_params::get_strat_config;
 
 fn main() {
     let description = "Play as many hands as specified with the optimal blackjack strategy";
