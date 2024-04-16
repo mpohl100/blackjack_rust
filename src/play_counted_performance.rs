@@ -1,16 +1,16 @@
+use blackjack_rust::blackjack::analysis::counted::optimize_counted;
+use blackjack_rust::blackjack::play_blackjack::play_blackjack;
 use blackjack_rust::blackjack::strategy::blackjack_strategy_combined_hash_map::BlackjackStrategyCombinedHashMap;
 use blackjack_rust::blackjack::strategy::blackjack_strategy_combined_ordered_hash_map::BlackjackStrategyCombinedOrderedHashMap;
 use blackjack_rust::blackjack::strategy::blackjack_strategy_combined_vec::BlackjackStrategyCombinedVec;
 use blackjack_rust::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
 use blackjack_rust::blackjack::strategy::blackjack_strategy_vec::BlackjackStrategyVec;
-use blackjack_rust::blackjack::analysis::counted::optimize_counted;
-use blackjack_rust::blackjack::play_blackjack::play_blackjack;
 use blackjack_rust::blackjack::traits::BlackjackStrategyTrait;
-use blackjack_rust::commandline_params::PlayConfiguration;
-use blackjack_rust::commandline_params::StrategyConfiguration;
 use blackjack_rust::commandline_params::get_commandline_params;
 use blackjack_rust::commandline_params::get_play_config;
 use blackjack_rust::commandline_params::get_strat_config;
+use blackjack_rust::commandline_params::PlayConfiguration;
+use blackjack_rust::commandline_params::StrategyConfiguration;
 use std::time::Instant;
 use threadpool::ThreadPool;
 
@@ -24,11 +24,7 @@ fn play<BlackjackStrategyType>(
     BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static,
 {
     let strat_start = Instant::now();
-    let strat = optimize_counted(
-        blackjack_strategy,
-        strat_config.clone(),
-        thread_pool,
-    );
+    let strat = optimize_counted(blackjack_strategy, strat_config.clone(), thread_pool);
     let strat_duration = strat_start.elapsed();
     let start = Instant::now();
     let result = play_blackjack(play_config.clone(), &strat);
