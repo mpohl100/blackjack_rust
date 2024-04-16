@@ -3,7 +3,7 @@ mod commandline_params;
 
 use threadpool::ThreadPool;
 
-use crate::blackjack::blackjack_strategy::BlackjackStrategy;
+use crate::blackjack::strategy::blackjack_strategy::BlackjackStrategy;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 fn main() {
     let description =

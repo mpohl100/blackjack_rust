@@ -1,6 +1,6 @@
 use crate::blackjack::blackjack_analysis::HandSituation;
 use crate::blackjack::blackjack_analysis::SplitSituation;
-use crate::blackjack::blackjack_strategy::BlackjackStrategyData;
+use crate::blackjack::strategy::blackjack_strategy::BlackjackStrategyData;
 use crate::blackjack::deck::Deck;
 pub trait Allable {
     fn create_all() -> Vec<Self>

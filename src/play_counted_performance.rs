@@ -1,11 +1,11 @@
 mod blackjack;
 mod commandline_params;
 
-use crate::blackjack::blackjack_strategy::BlackjackStrategy;
-use crate::blackjack::blackjack_strategy::BlackjackStrategyCombinedHashMap;
-use crate::blackjack::blackjack_strategy::BlackjackStrategyCombinedOrderedHashMap;
-use crate::blackjack::blackjack_strategy::BlackjackStrategyCombinedVec;
-use crate::blackjack::blackjack_strategy::BlackjackStrategyVec;
+use crate::blackjack::strategy::blackjack_strategy::BlackjackStrategy;
+use crate::blackjack::strategy::blackjack_strategy::BlackjackStrategyCombinedHashMap;
+use crate::blackjack::strategy::blackjack_strategy::BlackjackStrategyCombinedOrderedHashMap;
+use crate::blackjack::strategy::blackjack_strategy::BlackjackStrategyCombinedVec;
+use crate::blackjack::strategy::blackjack_strategy::BlackjackStrategyVec;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::commandline_params::PlayConfiguration;
 use crate::commandline_params::StrategyConfiguration;

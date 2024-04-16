@@ -3,7 +3,7 @@ mod blackjack_challenge;
 pub mod blackjack_configuration;
 mod blackjack_points;
 mod blackjack_situation;
-pub mod blackjack_strategy;
+pub mod strategy;
 mod card;
 mod deck;
 mod evaluate_blackjack_hand;
