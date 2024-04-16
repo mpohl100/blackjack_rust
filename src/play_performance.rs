@@ -4,6 +4,9 @@ mod commandline_params;
 use crate::blackjack::blackjack_analysis::optimize_blackjack;
 use crate::blackjack::blackjack_strategy::BlackjackStrategy;
 use crate::blackjack::blackjack_strategy::BlackjackStrategyVec;
+use crate::blackjack::blackjack_strategy::BlackjackStrategyCombinedHashMap;
+use crate::blackjack::blackjack_strategy::BlackjackStrategyCombinedOrderedHashMap;
+use crate::blackjack::blackjack_strategy::BlackjackStrategyCombinedVec;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::play_blackjack::play_blackjack;
 use crate::commandline_params::StrategyConfiguration;
@@ -40,5 +43,9 @@ fn main() {
     play(BlackjackStrategy::new(true), play_config.clone(), strat_config.clone(), &thread_pool, "HashMap".to_string());
     play(BlackjackStrategy::new(false), play_config.clone(), strat_config.clone(), &thread_pool,"OrderedMap".to_string());
     play(BlackjackStrategyVec::new(false), play_config.clone(), strat_config.clone(), &thread_pool,"ReversedVec".to_string());
-    play(BlackjackStrategyVec::new(true), play_config, strat_config.clone(), &thread_pool,"Vec".to_string());
+    play(BlackjackStrategyVec::new(true), play_config.clone(), strat_config.clone(), &thread_pool,"Vec".to_string());
+    play(BlackjackStrategyCombinedHashMap::new(), play_config.clone(), strat_config.clone(), &thread_pool,"CombinedHashMap".to_string());
+    play(BlackjackStrategyCombinedOrderedHashMap::new(), play_config.clone(), strat_config.clone(), &thread_pool,"CombinedOrderedHashMap".to_string());
+    play(BlackjackStrategyCombinedVec::new(false), play_config.clone(), strat_config.clone(), &thread_pool,"CombinedVec".to_string());
+    play(BlackjackStrategyCombinedVec::new(true), play_config, strat_config, &thread_pool,"CombinedReversedVec".to_string());
 }
