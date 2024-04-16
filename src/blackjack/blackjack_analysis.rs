@@ -12,7 +12,7 @@ use crate::blackjack::card::Suit;
 use crate::blackjack::deck::CountedDeck;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 use crate::blackjack::hand::PlayerHand;
-use crate::blackjack::strategy::blackjack_strategy::CountedBlackjackStrategy;
+use crate::blackjack::strategy::counted_blackjack_strategy::CountedBlackjackStrategy;
 pub use crate::blackjack::traits::BlackjackStrategyTrait;
 use std::sync::mpsc::channel;
 use threadpool::ThreadPool;
