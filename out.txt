@@ -1,25 +1,25 @@
 Measure performance:
-strategy time: 1.03444976s on 4 threads
-"HashMap" time: 526.549069ms
-result: -5859.5 after 1000000 hands
-strategy time: 779.797273ms on 4 threads
-"OrderedMap" time: 438.769502ms
-result: -6285 after 1000000 hands
-strategy time: 966.682653ms on 4 threads
-"ReversedVec" time: 602.115054ms
-result: -3605 after 1000000 hands
-strategy time: 914.792925ms on 4 threads
-"Vec" time: 578.055238ms
-result: -4766.5 after 1000000 hands
-strategy time: 1.15118761s on 4 threads
-"CombinedHashMap" time: 477.298187ms
-result: -4959.5 after 1000000 hands
-strategy time: 850.824959ms on 4 threads
-"CombinedOrderedHashMap" time: 468.602467ms
-result: -3338.5 after 1000000 hands
-strategy time: 1.418424361s on 4 threads
-"CombinedVec" time: 986.575077ms
-result: -5559.5 after 1000000 hands
-strategy time: 1.517122734s on 4 threads
-"CombinedReversedVec" time: 1.008895713s
-result: -5354 after 1000000 hands
+strategy time: 948.308921ms on 4 threads
+"HashMap" time: 533.653723ms
+result: -5378.5 after 1000000 hands
+strategy time: 741.853217ms on 4 threads
+"OrderedMap" time: 439.731595ms
+result: -4527.5 after 1000000 hands
+strategy time: 899.572088ms on 4 threads
+"ReversedVec" time: 625.022537ms
+result: -2875 after 1000000 hands
+strategy time: 852.269965ms on 4 threads
+"Vec" time: 474.884149ms
+result: -5734.5 after 1000000 hands
+strategy time: 1.041287646s on 4 threads
+"CombinedHashMap" time: 459.638901ms
+result: -6615.5 after 1000000 hands
+strategy time: 797.516429ms on 4 threads
+"CombinedOrderedHashMap" time: 445.17262ms
+result: -6507 after 1000000 hands
+strategy time: 1.47867802s on 4 threads
+"CombinedVec" time: 814.722487ms
+result: -4633 after 1000000 hands
+strategy time: 1.231519258s on 4 threads
+"CombinedReversedVec" time: 943.869939ms
+result: -6804 after 1000000 hands
