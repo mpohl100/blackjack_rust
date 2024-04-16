@@ -1,4 +1,4 @@
-pub mod blackjack_strategy;
+pub mod blackjack_strategy_combined_vec;
 pub mod blackjack_strategy_combined_hash_map;
 pub mod blackjack_strategy_combined_ordered_hash_map;
 pub mod blackjack_strategy_map;
