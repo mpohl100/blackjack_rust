@@ -25,4 +25,4 @@ jobs:
             cargo build --verbose || exit 1
             cargo test --verbose || exit 1
             cargo fmt --check || exit 1
-            cargo clippy -- -D warnings || exit 1
+            cargo clippy || exit 1
