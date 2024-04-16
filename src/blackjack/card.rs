@@ -19,8 +19,8 @@ pub enum Rank {
 }
 
 impl Rank {
-    fn new_from_int(i: i32) -> Rank{
-        match i{
+    fn new_from_int(i: i32) -> Rank {
+        match i {
             0 => Rank::Deuce,
             1 => Rank::Three,
             2 => Rank::Four,
@@ -36,7 +36,7 @@ impl Rank {
             12 => Rank::Ace,
             _ => panic!("wrong int for Rank"),
         }
-    } 
+    }
 
     fn to_blackjack_score(&self) -> i32 {
         match self {
@@ -57,7 +57,7 @@ impl Rank {
     }
 }
 
-impl Stringable for Rank{
+impl Stringable for Rank {
     fn to_string_internal(&self) -> String {
         match self {
             Rank::Deuce => "2".to_string(),
@@ -86,7 +86,7 @@ pub enum Suit {
 }
 
 impl Suit {
-    fn new_from_int(i: i32) -> Suit{
+    fn new_from_int(i: i32) -> Suit {
         match i {
             0 => Suit::Hearts,
             1 => Suit::Diamonds,
@@ -97,8 +97,8 @@ impl Suit {
     }
 }
 
-impl Stringable for Suit{
-    fn to_string_internal(&self) -> String{
+impl Stringable for Suit {
+    fn to_string_internal(&self) -> String {
         match self {
             Suit::Hearts => "h".to_string(),
             Suit::Diamonds => "d".to_string(),
@@ -119,7 +119,7 @@ impl Card {
         Card { rank, suit }
     }
 
-    pub fn new_with_int(i: i32) -> Card{
+    pub fn new_with_int(i: i32) -> Card {
         Card::new(Rank::new_from_int(i % 13), Suit::new_from_int(i / 13))
     }
 
@@ -175,14 +175,13 @@ impl BlackjackRank {
             10 => Card::new(Rank::Ten, Suit::Spades),
             11 => Card::new(Rank::Ace, Suit::Spades),
             _ => Card::new(Rank::Deuce, Suit::Spades),
-
         }
     }
 }
 
-impl Stringable for BlackjackRank{
+impl Stringable for BlackjackRank {
     fn to_string_internal(&self) -> String {
-        match self.val{
+        match self.val {
             1 => "1",
             2 => "2",
             3 => "3",
@@ -195,22 +194,25 @@ impl Stringable for BlackjackRank{
             10 => "10",
             11 => "11",
             _ => "invalid",
-        }.to_string()
+        }
+        .to_string()
     }
 }
 
-impl Allable for BlackjackRank{
+impl Allable for BlackjackRank {
     fn create_all() -> Vec<BlackjackRank> {
-        vec![BlackjackRank::new(Rank::Deuce),
-        BlackjackRank::new(Rank::Three),
-        BlackjackRank::new(Rank::Four),
-        BlackjackRank::new(Rank::Five),
-        BlackjackRank::new(Rank::Six),
-        BlackjackRank::new(Rank::Seven),
-        BlackjackRank::new(Rank::Eight),
-        BlackjackRank::new(Rank::Nine),
-        BlackjackRank::new(Rank::Ten),
-        BlackjackRank::new(Rank::Ace),]
+        vec![
+            BlackjackRank::new(Rank::Deuce),
+            BlackjackRank::new(Rank::Three),
+            BlackjackRank::new(Rank::Four),
+            BlackjackRank::new(Rank::Five),
+            BlackjackRank::new(Rank::Six),
+            BlackjackRank::new(Rank::Seven),
+            BlackjackRank::new(Rank::Eight),
+            BlackjackRank::new(Rank::Nine),
+            BlackjackRank::new(Rank::Ten),
+            BlackjackRank::new(Rank::Ace),
+        ]
     }
 }
 
@@ -237,8 +239,7 @@ mod rank_tests {
 
     #[test]
     #[should_panic]
-    fn test_new_from_int_panic()
-    {
+    fn test_new_from_int_panic() {
         // Test for an invalid input
         let _rank = Rank::new_from_int(13);
     }
@@ -461,9 +462,10 @@ mod blackjack_rank_tests {
         ];
 
         for (index, blackjack_rank) in all_blackjack_ranks.iter().enumerate() {
-            assert_eq!(blackjack_rank.val, expected_ranks[index].to_blackjack_score());
+            assert_eq!(
+                blackjack_rank.val,
+                expected_ranks[index].to_blackjack_score()
+            );
         }
     }
 }
-
-
