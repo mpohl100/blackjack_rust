@@ -117,20 +117,20 @@ mod blackjack_hand_tests {
         // Test when hand has 2 cards with the same rank
         hand.add_card(&Card::new(Rank::Ace, Suit::Hearts));
         hand.add_card(&Card::new(Rank::Ace, Suit::Diamonds));
-        assert_eq!(hand.is_pair(), true);
+        assert!(hand.is_pair());
 
         // Test when hand has 2 cards with different ranks
         hand.cards.clear();
         hand.add_card(&Card::new(Rank::King, Suit::Spades));
         hand.add_card(&Card::new(Rank::Queen, Suit::Clubs));
-        assert_eq!(hand.is_pair(), false);
+        assert!(!hand.is_pair());
 
         // Test when hand has more than 2 cards
         hand.cards.clear();
         hand.add_card(&Card::new(Rank::Deuce, Suit::Hearts));
         hand.add_card(&Card::new(Rank::Deuce, Suit::Diamonds));
         hand.add_card(&Card::new(Rank::Deuce, Suit::Spades));
-        assert_eq!(hand.is_pair(), false);
+        assert!(!hand.is_pair());
     }
 }
 
@@ -158,18 +158,18 @@ mod player_hand_tests {
         // Test when hand has 2 cards with the same rank
         player_hand.add_card(&Card::new(Rank::Ace, Suit::Hearts));
         player_hand.add_card(&Card::new(Rank::Ace, Suit::Diamonds));
-        assert_eq!(player_hand.is_pair(), true);
+        assert!(player_hand.is_pair());
 
         // Test when hand has 2 cards with different ranks
         player_hand.add_card(&Card::new(Rank::King, Suit::Spades));
         player_hand.add_card(&Card::new(Rank::Queen, Suit::Clubs));
-        assert_eq!(player_hand.is_pair(), false);
+        assert!(!player_hand.is_pair());
 
         // Test when hand has more than 2 cards
         player_hand.add_card(&Card::new(Rank::Deuce, Suit::Hearts));
         player_hand.add_card(&Card::new(Rank::Deuce, Suit::Diamonds));
         player_hand.add_card(&Card::new(Rank::Deuce, Suit::Spades));
-        assert_eq!(player_hand.is_pair(), false);
+        assert!(!player_hand.is_pair());
     }
 
     #[test]

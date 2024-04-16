@@ -156,10 +156,10 @@ mod counted_deck_tests {
         let mut deck = CountedDeck::new(2);
         let mut rng = RandomNumberGenerator::new();
 
-        let card = deck.deal_card(&mut rng);
+        let _card = deck.deal_card(&mut rng);
         assert_eq!(deck.deck.len(), 50); // a card should not be removed from the container
 
-        let card = deck.deal_card(&mut rng);
+        let _card = deck.deal_card(&mut rng);
         assert_eq!(deck.deck.len(), 50); // a card should not be removed from the container
     }
 
@@ -233,14 +233,14 @@ mod eight_decks_tests {
         let mut rng = RandomNumberGenerator::new();
 
         for i in (0..8*52).rev(){
-            let card = eight_decks.deal_card(&mut rng);
+            let _card = eight_decks.deal_card(&mut rng);
             assert_eq!(eight_decks.decks.len(), i);
         }
 
         assert_eq!(eight_decks.count, 0);
 
         for i in (0..8*52).rev(){
-            let card = eight_decks.deal_card(&mut rng);
+            let _card = eight_decks.deal_card(&mut rng);
             assert_eq!(eight_decks.decks.len(), i);
         }
 
@@ -253,7 +253,7 @@ mod eight_decks_tests {
         let mut rng = RandomNumberGenerator::new();
         assert_eq!(eight_decks.get_count(), 0);
         let mut expected_count = 0;
-        for i in 0..eight_decks.decks.len(){
+        for _i in 0..eight_decks.decks.len(){
             let card = eight_decks.deal_card(&mut rng);
             if card.to_blackjack_score() == 10 || card.to_blackjack_score() == 1{
                 expected_count += 1;
@@ -273,8 +273,8 @@ mod eight_decks_tests {
         let mut rng = RandomNumberGenerator::new();
         assert_eq!(eight_decks.get_nb_cards(), 8 * 52);
 
-        for i in 0..eight_decks.decks.len(){
-            let card = eight_decks.deal_card(&mut rng);
+        for _i in 0..eight_decks.decks.len(){
+            let _card = eight_decks.deal_card(&mut rng);
             let nb_cards: usize = eight_decks.get_nb_cards().try_into().unwrap();
             assert_eq!(nb_cards, eight_decks.decks.len());
         }

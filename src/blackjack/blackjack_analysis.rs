@@ -78,7 +78,7 @@ fn get_player_hand(game_situation: GameSituation) -> PlayerHand {
 fn optimize_situation(situation: &mut BlackjackGameSituation, deck: &CountedDeck) -> bool
 {
     let boxed_deck = Box::new(deck.clone());
-    let mut challenge = BlackjackChallenge::new(situation.game_situation.clone(), get_dealer_rank(situation.game_situation.clone()), get_player_hand(situation.game_situation), situation.strat, boxed_deck);
+    let mut challenge = BlackjackChallenge::new(situation.game_situation, get_dealer_rank(situation.game_situation), get_player_hand(situation.game_situation), situation.strat, boxed_deck);
     let dont = false;
     let do_it = true;
     let score_dont = challenge.score(dont);

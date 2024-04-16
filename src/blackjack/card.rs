@@ -240,7 +240,7 @@ mod rank_tests {
     fn test_new_from_int_panic()
     {
         // Test for an invalid input
-        let rank = Rank::new_from_int(13);
+        let _rank = Rank::new_from_int(13);
     }
 
     #[test]
@@ -294,7 +294,7 @@ mod suit_tests {
     #[should_panic]
     fn test_new_from_int_panics() {
         // Test for an invalid input
-        let suit = Suit::new_from_int(4);
+        let _suit = Suit::new_from_int(4);
     }
 
     #[test]
@@ -388,7 +388,7 @@ mod blackjack_rank_tests {
 
     #[test]
     fn test_new() {
-        let ranks: Vec<Rank> = (0..13).map(|i| Rank::new_from_int(i)).collect();
+        let ranks: Vec<Rank> = (0..13).map(Rank::new_from_int).collect();
         for rank in ranks {
             let blackjack_rank = BlackjackRank::new(rank);
             assert_eq!(blackjack_rank.val, rank.to_blackjack_score());
