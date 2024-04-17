@@ -119,19 +119,19 @@ impl GameStrategy {
 }
 
 impl BlackjackStrategyTrait for GameStrategy {
-    fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
+    fn add_draw(&mut self, _situation: HandSituation, _do_it: bool) {
         unimplemented!()
     }
 
-    fn add_double_down(&mut self, situation: HandSituation, do_it: bool) {
+    fn add_double_down(&mut self, _situation: HandSituation, _do_it: bool) {
         unimplemented!()
     }
 
-    fn add_split(&mut self, situation: SplitSituation, do_it: bool) {
+    fn add_split(&mut self, _situation: SplitSituation, _do_it: bool) {
         unimplemented!()
     }
 
-    fn get_draw(&self, situation: HandSituation, deck: &dyn Deck) -> bool {
+    fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
@@ -155,7 +155,7 @@ impl BlackjackStrategyTrait for GameStrategy {
         input.trim() == "y"
     }
 
-    fn get_double_down(&self, situation: HandSituation, deck: &dyn Deck) -> bool {
+    fn get_double_down(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
@@ -179,7 +179,7 @@ impl BlackjackStrategyTrait for GameStrategy {
         input.trim() == "y"
     }
 
-    fn get_split(&self, situation: SplitSituation, deck: &dyn Deck) -> bool {
+    fn get_split(&self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
@@ -202,7 +202,7 @@ impl BlackjackStrategyTrait for GameStrategy {
         input.trim() == "y"
     }
 
-    fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData) {
+    fn combine(&mut self, _blackjack_strategy: &BlackjackStrategyData) {
         unimplemented!()
     }
 
