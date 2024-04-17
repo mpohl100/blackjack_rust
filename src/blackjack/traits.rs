@@ -13,9 +13,9 @@ pub trait Stringable {
 }
 
 pub trait BlackjackStrategyTrait {
-    fn get_draw(&self, situation: HandSituation, deck: &Box<dyn Deck>) -> bool;
-    fn get_double_down(&self, situation: HandSituation, deck: &Box<dyn Deck>) -> bool;
-    fn get_split(&self, situation: SplitSituation, deck: &Box<dyn Deck>) -> bool;
+    fn get_draw(&self, situation: HandSituation, deck: &dyn Deck) -> bool;
+    fn get_double_down(&self, situation: HandSituation, deck: &dyn Deck) -> bool;
+    fn get_split(&self, situation: SplitSituation, deck: &dyn Deck) -> bool;
 
     fn add_draw(&mut self, situation: HandSituation, do_it: bool);
     fn add_double_down(&mut self, situation: HandSituation, do_it: bool);

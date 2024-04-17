@@ -119,7 +119,7 @@ impl BlackjackStrategyTrait for BlackjackStrategy {
         ret
     }
 
-    fn get_draw(&self, situation: HandSituation, _deck: &Box<dyn Deck>) -> bool {
+    fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         let it = if !self.use_hash {
             self.data.drawing_percentages.get(&situation)
         } else {
@@ -136,7 +136,7 @@ impl BlackjackStrategyTrait for BlackjackStrategy {
         *it.unwrap()
     }
 
-    fn get_double_down(&self, situation: HandSituation, _deck: &Box<dyn Deck>) -> bool {
+    fn get_double_down(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         let it = if !self.use_hash {
             self.data.double_down_percentages.get(&situation)
         } else {
@@ -153,7 +153,7 @@ impl BlackjackStrategyTrait for BlackjackStrategy {
         *it.unwrap()
     }
 
-    fn get_split(&self, situation: SplitSituation, _deck: &Box<dyn Deck>) -> bool {
+    fn get_split(&self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
         let it = if !self.use_hash {
             self.data.split_percentages.get(&situation)
         } else {

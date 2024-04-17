@@ -13,12 +13,10 @@ pub fn play_blackjack(
     play_config: PlayConfiguration,
     blackjack_strategy: &dyn BlackjackStrategyTrait,
 ) -> f64 {
-    let mut boxed_deck: Box<dyn Deck>;
-    if play_config.play_normal {
-        boxed_deck = Box::new(EightDecks::new());
-    } else {
-        boxed_deck = Box::new(CountedDeck::new(0));
-    }
+    let mut boxed_deck: Box<dyn Deck> = match play_config.play_normal {
+        true => Box::new(EightDecks::new()),
+        false => Box::new(CountedDeck::new(0)),
+    };
     let mut rng = RandomNumberGenerator::new();
     let mut result = 0.0;
     for _ in 0..play_config.nb_hands {
@@ -34,7 +32,7 @@ pub fn play_blackjack(
             1.0,
             player_hand,
             dealer_hand,
-            &mut boxed_deck,
+            &mut *boxed_deck,
             blackjack_strategy,
             &mut rng,
             PlayMode::All,
