@@ -5,6 +5,7 @@ use crate::blackjack::rng::RandomNumberGenerator;
 
 use rand::seq::SliceRandom;
 use rand::thread_rng;
+use std::cmp::Ordering;
 
 pub trait Deck {
     fn deal_card(&mut self, rng: &mut RandomNumberGenerator) -> Card;
@@ -24,33 +25,36 @@ impl CountedDeck {
         for i in 0..52 {
             deck.push(Card::new_with_int(i));
         }
-        if count > 0 {
-            let mut cnt = count;
-            deck.retain(|card| {
-                if cnt > 0
-                    && (BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ten)
-                        || BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ace))
-                {
-                    cnt -= 1;
-                    return false;
-                }
-                true
-            });
-        } else if count < 0 {
-            let mut cnt = -count;
-            deck.retain(|card| {
-                let blackjack_rank = BlackjackRank::new(card.rank());
-                if cnt > 0
-                    && blackjack_rank >= BlackjackRank::new(Rank::Deuce)
-                    && blackjack_rank <= BlackjackRank::new(Rank::Six)
-                {
-                    cnt -= 1;
-                    return false;
-                }
-                true
-            });
+        match count.cmp(&0) {
+            Ordering::Greater => {
+                let mut cnt = count;
+                deck.retain(|card| {
+                    if cnt > 0
+                        && (BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ten)
+                            || BlackjackRank::new(card.rank()) == BlackjackRank::new(Rank::Ace))
+                    {
+                        cnt -= 1;
+                        return false;
+                    }
+                    true
+                });
+            }
+            Ordering::Less => {
+                let mut cnt = -count;
+                deck.retain(|card| {
+                    let blackjack_rank = BlackjackRank::new(card.rank());
+                    if cnt > 0
+                        && blackjack_rank >= BlackjackRank::new(Rank::Deuce)
+                        && blackjack_rank <= BlackjackRank::new(Rank::Six)
+                    {
+                        cnt -= 1;
+                        return false;
+                    }
+                    true
+                });
+            }
+            Ordering::Equal => (),
         }
-
         CountedDeck { deck, count }
     }
 }
