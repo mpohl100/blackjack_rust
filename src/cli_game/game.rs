@@ -85,6 +85,12 @@ pub struct CliGame {
     game_state: GameState,
 }
 
+impl Default for CliGame {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CliGame {
     pub fn new() -> CliGame {
         CliGame {
