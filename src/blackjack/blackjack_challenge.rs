@@ -55,7 +55,7 @@ impl BlackjackChallenge<'_> {
                 1.0,
                 self.player_hand.clone(),
                 dealer_hand,
-                &mut self.deck,
+                &mut *self.deck,
                 self.strat,
                 &mut rng,
                 play_mode,

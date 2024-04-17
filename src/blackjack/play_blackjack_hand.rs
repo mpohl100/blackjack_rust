@@ -44,7 +44,7 @@ pub fn play_blackjack_hand(
     mut player_bet: f64,
     mut player_hand: PlayerHand,
     mut dealer_hand: DealerHand,
-    deck: &mut Box<dyn Deck>,
+    deck: &mut dyn Deck,
     player_strategy: &dyn BlackjackStrategyTrait,
     rng: &mut RandomNumberGenerator,
     play_mode: PlayMode,

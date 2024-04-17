@@ -30,7 +30,7 @@ impl CountedBlackjackStrategy {
     }
 }
 
-fn get_clamped_count(deck: &Box<dyn Deck>, min_count: i32, max_count: i32) -> i32 {
+fn get_clamped_count(deck: &dyn Deck, min_count: i32, max_count: i32) -> i32 {
     let nb_cards = deck.get_nb_cards();
     let count = deck.get_count();
     let ratio = (count as f64) / (nb_cards as f64);
@@ -45,7 +45,7 @@ fn get_clamped_count(deck: &Box<dyn Deck>, min_count: i32, max_count: i32) -> i3
 }
 
 impl BlackjackStrategyTrait for CountedBlackjackStrategy {
-    fn get_draw(&self, situation: HandSituation, deck: &Box<dyn Deck>) -> bool {
+    fn get_draw(&self, situation: HandSituation, deck: &dyn Deck) -> bool {
         match self
             .counted_strategies
             .get(&get_clamped_count(deck, self.min_count, self.max_count))
@@ -55,7 +55,7 @@ impl BlackjackStrategyTrait for CountedBlackjackStrategy {
         }
     }
 
-    fn get_double_down(&self, situation: HandSituation, deck: &Box<dyn Deck>) -> bool {
+    fn get_double_down(&self, situation: HandSituation, deck: &dyn Deck) -> bool {
         match self
             .counted_strategies
             .get(&get_clamped_count(deck, self.min_count, self.max_count))
@@ -64,7 +64,7 @@ impl BlackjackStrategyTrait for CountedBlackjackStrategy {
             _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
         }
     }
-    fn get_split(&self, situation: SplitSituation, deck: &Box<dyn Deck>) -> bool {
+    fn get_split(&self, situation: SplitSituation, deck: &dyn Deck) -> bool {
         match self
             .counted_strategies
             .get(&get_clamped_count(deck, self.min_count, self.max_count))

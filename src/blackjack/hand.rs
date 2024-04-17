@@ -74,7 +74,7 @@ impl DealerHand {
         self.blackjack_hand.cards.clone()
     }
 
-    pub fn play(&mut self, deck: &mut Box<dyn Deck>, rng: &mut RandomNumberGenerator) -> i32 {
+    pub fn play(&mut self, deck: &mut dyn Deck, rng: &mut RandomNumberGenerator) -> i32 {
         let draw_until = 17;
         let result;
         loop {

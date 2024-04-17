@@ -63,7 +63,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
         }
     }
 
-    fn get_draw(&self, situation: HandSituation, _deck: &Box<dyn Deck>) -> bool {
+    fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         if !self.reversed {
             let mut iter = self.data.iter();
             let res = iter.find(|x| x.0 == GameSituation::Draw(situation));
@@ -81,7 +81,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
         }
     }
 
-    fn get_double_down(&self, situation: HandSituation, _deck: &Box<dyn Deck>) -> bool {
+    fn get_double_down(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         if !self.reversed {
             let mut iter = self.data.iter();
             let res = iter.find(|x| x.0 == GameSituation::DoubleDown(situation));
@@ -99,7 +99,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
         }
     }
 
-    fn get_split(&self, situation: SplitSituation, _deck: &Box<dyn Deck>) -> bool {
+    fn get_split(&self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
         if !self.reversed {
             let mut iter = self.data.iter();
             let res = iter.find(|x| x.0 == GameSituation::Split(situation));
