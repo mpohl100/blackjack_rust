@@ -86,6 +86,12 @@ pub struct EightDecks {
     count: i32,
 }
 
+impl Default for EightDecks {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl EightDecks {
     pub fn new() -> EightDecks {
         let mut deck = EightDecks {
