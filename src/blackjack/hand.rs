@@ -270,7 +270,7 @@ mod dealer_hand_tests {
         let mut rng = RandomNumberGenerator::new();
         let mut dealer_hand = DealerHand::new(&vec![]);
 
-        let result = dealer_hand.play(&mut deck, &mut rng);
+        let result = dealer_hand.play(&mut *deck, &mut rng);
 
         assert_eq!(result, -1); // Dealer busts
 
@@ -282,7 +282,7 @@ mod dealer_hand_tests {
         let mut rng = RandomNumberGenerator::new();
         let mut dealer_hand = DealerHand::new(&vec![]);
 
-        let result = dealer_hand.play(&mut deck, &mut rng);
+        let result = dealer_hand.play(&mut *deck, &mut rng);
 
         assert_eq!(result, 17); // Dealer stands at 17
 
@@ -294,7 +294,7 @@ mod dealer_hand_tests {
         let mut rng = RandomNumberGenerator::new();
         let mut dealer_hand = DealerHand::new(&vec![]);
 
-        let result = dealer_hand.play(&mut deck, &mut rng);
+        let result = dealer_hand.play(&mut *deck, &mut rng);
 
         assert_eq!(result, 17); // Dealer stands at 17
     }
