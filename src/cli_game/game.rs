@@ -10,9 +10,9 @@ use crate::blackjack::play_blackjack_hand::PlayMode;
 use crate::blackjack::rng::RandomNumberGenerator;
 use crate::blackjack::strategy::blackjack_strategy_combined_ordered_hash_map::BlackjackStrategyCombinedOrderedHashMap;
 
+use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
 use crate::blackjack::traits::BlackjackStrategyTrait;
-use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
 
 use std::cmp::Ordering;
 use threadpool::ThreadPool;
@@ -172,8 +172,7 @@ impl BlackjackStrategyTrait for GameStrategy<'_> {
         let result = input.trim() == "y";
         if result == self.optimal_strategy.get_draw(situation, _deck) {
             println!("Right decision");
-        }
-        else {
+        } else {
             println!("Wrong decision");
         }
         result
@@ -203,8 +202,7 @@ impl BlackjackStrategyTrait for GameStrategy<'_> {
         let result = input.trim() == "y";
         if result == self.optimal_strategy.get_double_down(situation, _deck) {
             println!("Right decision");
-        }
-        else {
+        } else {
             println!("Wrong decision");
         }
         result
@@ -233,8 +231,7 @@ impl BlackjackStrategyTrait for GameStrategy<'_> {
         let result = input.trim() == "y";
         if result == self.optimal_strategy.get_split(situation, _deck) {
             println!("Right decision");
-        }
-        else {
+        } else {
             println!("Wrong decision");
         }
         result
