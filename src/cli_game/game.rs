@@ -8,10 +8,14 @@ use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::play_blackjack_hand::play_blackjack_hand;
 use crate::blackjack::play_blackjack_hand::PlayMode;
 use crate::blackjack::rng::RandomNumberGenerator;
+use crate::blackjack::strategy::blackjack_strategy_combined_ordered_hash_map::BlackjackStrategyCombinedOrderedHashMap;
+use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
 use crate::blackjack::traits::BlackjackStrategyTrait;
+use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
 
 use std::cmp::Ordering;
+use threadpool::ThreadPool;
 
 struct GameState {
     rng: RandomNumberGenerator,
@@ -22,10 +26,11 @@ struct GameState {
     previous_balance: f64,
     nb_hands_played: i32,
     player_bet: f64,
+    optimal_strategy: Box<dyn BlackjackStrategyTrait>,
 }
 
 impl GameState {
-    pub fn new() -> GameState {
+    pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait>) -> GameState {
         GameState {
             rng: RandomNumberGenerator::new(),
             deck: EightDecks::new(),
@@ -35,6 +40,7 @@ impl GameState {
             previous_balance: 1000.0,
             nb_hands_played: 0,
             player_bet: 1.0,
+            optimal_strategy: optimal_strategy,
         }
     }
 
@@ -57,7 +63,7 @@ impl GameState {
 
     pub fn play(&mut self) {
         self.previous_balance = self.current_balance;
-        let game_strat = GameStrategy::new();
+        let game_strat = GameStrategy::new(&*self.optimal_strategy);
         self.current_balance += play_blackjack_hand(
             self.player_bet,
             self.player_hand.clone(),
@@ -93,8 +99,11 @@ impl Default for CliGame {
 
 impl CliGame {
     pub fn new() -> CliGame {
+        let game_strat = BlackjackStrategyCombinedOrderedHashMap::new();
+        let thread_pool = ThreadPool::new(4);
+        let optimal_strategy = optimize_blackjack(game_strat, &thread_pool, 0);
         CliGame {
-            game_state: GameState::new(),
+            game_state: GameState::new(Box::new(optimal_strategy)),
         }
     }
 
@@ -116,15 +125,17 @@ impl CliGame {
     }
 }
 
-struct GameStrategy {}
+struct GameStrategy<'_os> {
+    optimal_strategy: &'_os dyn BlackjackStrategyTrait,
+}
 
-impl GameStrategy {
-    pub fn new() -> GameStrategy {
-        GameStrategy {}
+impl GameStrategy<'_> {
+    pub fn new(optimal_strategy: &dyn BlackjackStrategyTrait) -> GameStrategy {
+        GameStrategy { optimal_strategy: optimal_strategy }
     }
 }
 
-impl BlackjackStrategyTrait for GameStrategy {
+impl BlackjackStrategyTrait for GameStrategy<'_> {
     fn add_draw(&mut self, _situation: HandSituation, _do_it: bool) {
         unimplemented!()
     }
@@ -158,7 +169,14 @@ impl BlackjackStrategyTrait for GameStrategy {
         std::io::stdin()
             .read_line(&mut input)
             .expect("Failed to read line");
-        input.trim() == "y"
+        let result = input.trim() == "y";
+        if result == self.optimal_strategy.get_draw(situation, _deck) {
+            println!("Right decision");
+        }
+        else {
+            println!("Wrong decision");
+        }
+        result
     }
 
     fn get_double_down(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
@@ -182,7 +200,14 @@ impl BlackjackStrategyTrait for GameStrategy {
         std::io::stdin()
             .read_line(&mut input)
             .expect("Failed to read line");
-        input.trim() == "y"
+        let result = input.trim() == "y";
+        if result == self.optimal_strategy.get_double_down(situation, _deck) {
+            println!("Right decision");
+        }
+        else {
+            println!("Wrong decision");
+        }
+        result
     }
 
     fn get_split(&self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
@@ -205,7 +230,14 @@ impl BlackjackStrategyTrait for GameStrategy {
         std::io::stdin()
             .read_line(&mut input)
             .expect("Failed to read line");
-        input.trim() == "y"
+        let result = input.trim() == "y";
+        if result == self.optimal_strategy.get_split(situation, _deck) {
+            println!("Right decision");
+        }
+        else {
+            println!("Wrong decision");
+        }
+        result
     }
 
     fn combine(&mut self, _blackjack_strategy: &BlackjackStrategyData) {
