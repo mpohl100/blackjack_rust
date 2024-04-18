@@ -9,7 +9,7 @@ use crate::blackjack::play_blackjack_hand::play_blackjack_hand;
 use crate::blackjack::play_blackjack_hand::PlayMode;
 use crate::blackjack::rng::RandomNumberGenerator;
 use crate::blackjack::strategy::blackjack_strategy_combined_ordered_hash_map::BlackjackStrategyCombinedOrderedHashMap;
-use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
+
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
@@ -40,7 +40,7 @@ impl GameState {
             previous_balance: 1000.0,
             nb_hands_played: 0,
             player_bet: 1.0,
-            optimal_strategy: optimal_strategy,
+            optimal_strategy,
         }
     }
 
@@ -131,7 +131,7 @@ struct GameStrategy<'_os> {
 
 impl GameStrategy<'_> {
     pub fn new(optimal_strategy: &dyn BlackjackStrategyTrait) -> GameStrategy {
-        GameStrategy { optimal_strategy: optimal_strategy }
+        GameStrategy { optimal_strategy }
     }
 }
 
