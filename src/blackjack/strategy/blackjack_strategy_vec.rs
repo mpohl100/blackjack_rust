@@ -151,15 +151,15 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec {
     }
 
     fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData) {
-        for (sit, do_it) in blackjack_strategy.drawing_percentages.iter() {
+        for (sit, do_it) in blackjack_strategy.drawing_decisions.iter() {
             self.add_draw(*sit, *do_it);
         }
 
-        for (sit, do_it) in blackjack_strategy.double_down_percentages.iter() {
+        for (sit, do_it) in blackjack_strategy.double_down_decisions.iter() {
             self.add_double_down(*sit, *do_it);
         }
 
-        for (sit, do_it) in blackjack_strategy.split_percentages.iter() {
+        for (sit, do_it) in blackjack_strategy.split_decisions.iter() {
             self.add_split(*sit, *do_it);
         }
     }
@@ -169,19 +169,19 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec {
 
         for hand_situation in &self.data.drawing_percentages {
             result
-                .drawing_percentages
+                .drawing_decisions
                 .insert(hand_situation.situation, hand_situation.do_it);
         }
 
         for hand_situation in &self.data.double_down_percentages {
             result
-                .double_down_percentages
+                .double_down_decisions
                 .insert(hand_situation.situation, hand_situation.do_it);
         }
 
         for split_situation in &self.data.split_percentages {
             result
-                .split_percentages
+                .split_decisions
                 .insert(split_situation.situation, split_situation.do_it);
         }
         result
