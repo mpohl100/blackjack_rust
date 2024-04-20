@@ -11,16 +11,16 @@ use std::collections::HashMap;
 
 #[derive(Default, Clone)]
 pub struct BlackjackStrategyData {
-    pub drawing_percentages: BTreeMap<HandSituation, bool>,
-    pub double_down_percentages: BTreeMap<HandSituation, bool>,
-    pub split_percentages: BTreeMap<SplitSituation, bool>,
+    pub drawing_decisions: BTreeMap<HandSituation, bool>,
+    pub double_down_decisions: BTreeMap<HandSituation, bool>,
+    pub split_decisions: BTreeMap<SplitSituation, bool>,
 }
 
 #[derive(Default, Clone)]
 struct BlackjackStrategyDataHash {
-    pub drawing_percentages: HashMap<HandSituation, bool>,
-    pub double_down_percentages: HashMap<HandSituation, bool>,
-    pub split_percentages: HashMap<SplitSituation, bool>,
+    pub drawing_decisions: HashMap<HandSituation, bool>,
+    pub double_down_decisions: HashMap<HandSituation, bool>,
+    pub split_decisions: HashMap<SplitSituation, bool>,
 }
 
 #[derive(Default, Clone)]
@@ -45,19 +45,19 @@ impl BlackjackStrategyTrait for BlackjackStrategy {
         let mut hard_strat: BTreeMap<HandSituation, String> = BTreeMap::new();
         let mut soft_strat: BTreeMap<HandSituation, String> = BTreeMap::new();
 
-        for (situation, do_it) in self.data.double_down_percentages.iter() {
+        for (situation, do_it) in self.data.double_down_decisions.iter() {
             let points = situation.situation();
             if points.upper() == points.lower() {
                 if *do_it {
                     hard_strat.insert(*situation, "D".to_string());
-                } else if *self.data.drawing_percentages.get(situation).unwrap() {
+                } else if *self.data.drawing_decisions.get(situation).unwrap() {
                     hard_strat.insert(*situation, "H".to_string());
                 } else {
                     hard_strat.insert(*situation, "S".to_string());
                 }
             } else if *do_it {
                 soft_strat.insert(*situation, "D".to_string());
-            } else if *self.data.drawing_percentages.get(situation).unwrap() {
+            } else if *self.data.drawing_decisions.get(situation).unwrap() {
                 soft_strat.insert(*situation, "H".to_string());
             } else {
                 soft_strat.insert(*situation, "S".to_string());
@@ -102,7 +102,7 @@ impl BlackjackStrategyTrait for BlackjackStrategy {
         for rank in BlackjackRank::create_all() {
             ret.push_str(&(rank.to_string_internal() + ";"));
         }
-        for (situation, do_it) in self.data.split_percentages.iter() {
+        for (situation, do_it) in self.data.split_decisions.iter() {
             let hand_rank = situation.situation();
             if hand_rank != first_rank {
                 ret.push('\n');
@@ -121,9 +121,9 @@ impl BlackjackStrategyTrait for BlackjackStrategy {
 
     fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         let it = if !self.use_hash {
-            self.data.drawing_percentages.get(&situation)
+            self.data.drawing_decisions.get(&situation)
         } else {
-            self.data_hash.drawing_percentages.get(&situation)
+            self.data_hash.drawing_decisions.get(&situation)
         };
         if it.is_none() {
             panic!(
@@ -138,9 +138,9 @@ impl BlackjackStrategyTrait for BlackjackStrategy {
 
     fn get_double_down(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         let it = if !self.use_hash {
-            self.data.double_down_percentages.get(&situation)
+            self.data.double_down_decisions.get(&situation)
         } else {
-            self.data_hash.double_down_percentages.get(&situation)
+            self.data_hash.double_down_decisions.get(&situation)
         };
         if it.is_none() {
             panic!(
@@ -155,9 +155,9 @@ impl BlackjackStrategyTrait for BlackjackStrategy {
 
     fn get_split(&self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
         let it = if !self.use_hash {
-            self.data.split_percentages.get(&situation)
+            self.data.split_decisions.get(&situation)
         } else {
-            self.data_hash.split_percentages.get(&situation)
+            self.data_hash.split_decisions.get(&situation)
         };
         if it.is_none() {
             panic!(
@@ -171,32 +171,32 @@ impl BlackjackStrategyTrait for BlackjackStrategy {
     }
 
     fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
-        self.data.drawing_percentages.insert(situation, do_it);
-        self.data_hash.drawing_percentages.insert(situation, do_it);
+        self.data.drawing_decisions.insert(situation, do_it);
+        self.data_hash.drawing_decisions.insert(situation, do_it);
     }
 
     fn add_double_down(&mut self, situation: HandSituation, do_it: bool) {
-        self.data.double_down_percentages.insert(situation, do_it);
+        self.data.double_down_decisions.insert(situation, do_it);
         self.data_hash
-            .double_down_percentages
+            .double_down_decisions
             .insert(situation, do_it);
     }
 
     fn add_split(&mut self, situation: SplitSituation, do_it: bool) {
-        self.data.split_percentages.insert(situation, do_it);
-        self.data_hash.split_percentages.insert(situation, do_it);
+        self.data.split_decisions.insert(situation, do_it);
+        self.data_hash.split_decisions.insert(situation, do_it);
     }
 
     fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData) {
-        for (sit, do_it) in blackjack_strategy.drawing_percentages.iter() {
+        for (sit, do_it) in blackjack_strategy.drawing_decisions.iter() {
             self.add_draw(*sit, *do_it);
         }
 
-        for (sit, do_it) in blackjack_strategy.double_down_percentages.iter() {
+        for (sit, do_it) in blackjack_strategy.double_down_decisions.iter() {
             self.add_double_down(*sit, *do_it);
         }
 
-        for (sit, do_it) in blackjack_strategy.split_percentages.iter() {
+        for (sit, do_it) in blackjack_strategy.split_decisions.iter() {
             self.add_split(*sit, *do_it);
         }
     }

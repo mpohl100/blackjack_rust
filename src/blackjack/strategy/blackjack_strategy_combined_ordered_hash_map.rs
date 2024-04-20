@@ -74,15 +74,15 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedOrderedHashMap {
     }
 
     fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData) {
-        for (sit, do_it) in blackjack_strategy.drawing_percentages.iter() {
+        for (sit, do_it) in blackjack_strategy.drawing_decisions.iter() {
             self.add_draw(*sit, *do_it);
         }
 
-        for (sit, do_it) in blackjack_strategy.double_down_percentages.iter() {
+        for (sit, do_it) in blackjack_strategy.double_down_decisions.iter() {
             self.add_double_down(*sit, *do_it);
         }
 
-        for (sit, do_it) in blackjack_strategy.split_percentages.iter() {
+        for (sit, do_it) in blackjack_strategy.split_decisions.iter() {
             self.add_split(*sit, *do_it);
         }
     }
@@ -93,15 +93,15 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedOrderedHashMap {
         for (situation, do_it) in &self.data {
             match situation {
                 GameSituation::Draw(hand_situation) => {
-                    result.drawing_percentages.insert(*hand_situation, *do_it);
+                    result.drawing_decisions.insert(*hand_situation, *do_it);
                 }
                 GameSituation::DoubleDown(hand_situation) => {
                     result
-                        .double_down_percentages
+                        .double_down_decisions
                         .insert(*hand_situation, *do_it);
                 }
                 GameSituation::Split(split_situation) => {
-                    result.split_percentages.insert(*split_situation, *do_it);
+                    result.split_decisions.insert(*split_situation, *do_it);
                 }
             }
         }
