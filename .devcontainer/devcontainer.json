@@ -9,7 +9,8 @@
             "extensions": [
                 "ms-vscode.git",  // Include Git extension
                 "rust-lang.rust-analyzer",
-                "GitHub.copilot"
+                "GitHub.copilot",
+                "arjun.swagger-viewer"
               ],
               "settings": {
                 "terminal.integrated.shell.linux": "/bin/bash",
