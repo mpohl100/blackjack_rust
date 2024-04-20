@@ -1,0 +1,71 @@
+openapi: 3.0.0
+info:
+  title: Blackjack REST API
+  version: 1.0.0
+paths:
+  /blackjack:
+    post:
+      summary: Create a new game
+      description: Create a new game of blackjack
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameResponse'
+        '400':
+          description: Bad request
+  /blackjack/{game_id}:
+    delete:
+      summary: Delete a blackjack game
+      description: Delete a blackjack game
+      parameters:
+        - in: path
+          name: game_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The ID of the blackjack game to delete
+      responses:
+        '204':
+          description: The blackjack game was successfully deleted
+        '403':
+          description: The access token did not enable you to delete this blackjack game
+        '404':
+          description: The blackjack game ID was not found
+      security:
+        - bearerAuth: []
+      
+
+components:
+  schemas:
+    GameRequest:
+      type: object
+      properties:
+        access_token:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+    GameResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        access_token:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
