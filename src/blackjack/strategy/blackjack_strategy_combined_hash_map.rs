@@ -96,9 +96,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedHashMap {
                     result.drawing_decisions.insert(*hand_situation, *do_it);
                 }
                 GameSituation::DoubleDown(hand_situation) => {
-                    result
-                        .double_down_decisions
-                        .insert(*hand_situation, *do_it);
+                    result.double_down_decisions.insert(*hand_situation, *do_it);
                 }
                 GameSituation::Split(split_situation) => {
                     result.split_decisions.insert(*split_situation, *do_it);
