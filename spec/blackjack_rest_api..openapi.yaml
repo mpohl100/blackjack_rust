@@ -7,12 +7,6 @@ paths:
     post:
       summary: Create a new game
       description: Create a new game of blackjack
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GameRequest'
       responses:
         '201':
           description: Created
@@ -47,13 +41,6 @@ paths:
 
 components:
   schemas:
-    GameRequest:
-      type: object
-      properties:
-        access_token:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
     GameResponse:
       type: object
       properties:
