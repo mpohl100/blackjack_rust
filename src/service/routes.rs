@@ -83,7 +83,7 @@ async fn play_game(
 
 #[derive(Debug, Deserialize)]
 struct Action {
-    action: String,
+    _action: String,
 }
 
 #[actix_web::main]
