@@ -93,22 +93,15 @@ components:
     GameState:
       type: object
       properties:
-        player_hand:
+        player_hands:
           type: array
           items:
             $ref:
-             '#/components/schemas/Card'
+             '#/components/schemas/Hand'
         dealer_hand:
-          type: array
-          items:
-            $ref:
-             '#/components/schemas/Card'
-        player_score:
-          type: integer
-          example: 21
-        dealer_score:
-          type: integer
-          example: 17
+          type: object
+          $ref:
+            '#/components/schemas/Hand'
         player_options:
           type: array
           items:
@@ -119,6 +112,9 @@ components:
               - double
               - split
           example: hit
+        active_hand:
+          type: integer
+          example: 0
         winner:
           type: string
           enum:
@@ -126,6 +122,17 @@ components:
             - dealer
             - tie
           example: player
+    Hand:
+      type: object
+      properties:
+        cards:
+          type: array
+          items:
+            $ref:
+             '#/components/schemas/Card'
+        score:
+          type: integer
+          example: 21
     Card:
       type: object
       properties:
