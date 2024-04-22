@@ -1,6 +1,5 @@
-use actix_web::{web, HttpResponse, Responder, HttpServer, App, HttpRequest};
+use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
-
 
 #[derive(Debug, Serialize, Deserialize)]
 struct GameResponse {
@@ -52,7 +51,11 @@ async fn delete_game(req: HttpRequest, info: web::Path<(String,)>) -> impl Respo
     HttpResponse::Unauthorized()
 }
 
-async fn play_game(req: HttpRequest, info: web::Path<(String,)>, query: web::Query<Action>) -> impl Responder {
+async fn play_game(
+    req: HttpRequest,
+    info: web::Path<(String,)>,
+    query: web::Query<Action>,
+) -> impl Responder {
     // Your implementation to play the game with the specified ID and action
     if let Some(auth_header) = req.headers().get("Authorization") {
         if let Ok(auth_str) = auth_header.to_str() {
