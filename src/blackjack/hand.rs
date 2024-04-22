@@ -268,7 +268,7 @@ mod dealer_hand_tests {
             Card::new(Rank::Six, Suit::Spades),
         ]));
         let mut rng = RandomNumberGenerator::new();
-        let mut dealer_hand = DealerHand::new(&vec![]);
+        let mut dealer_hand = DealerHand::new(&[]);
 
         let result = dealer_hand.play(&mut *deck, &mut rng);
 
@@ -280,7 +280,7 @@ mod dealer_hand_tests {
             Card::new(Rank::Ace, Suit::Diamonds),
         ]));
         let mut rng = RandomNumberGenerator::new();
-        let mut dealer_hand = DealerHand::new(&vec![]);
+        let mut dealer_hand = DealerHand::new(&[]);
 
         let result = dealer_hand.play(&mut *deck, &mut rng);
 
@@ -292,7 +292,7 @@ mod dealer_hand_tests {
             Card::new(Rank::Jack, Suit::Diamonds),
         ]));
         let mut rng = RandomNumberGenerator::new();
-        let mut dealer_hand = DealerHand::new(&vec![]);
+        let mut dealer_hand = DealerHand::new(&[]);
 
         let result = dealer_hand.play(&mut *deck, &mut rng);
 
