@@ -36,12 +36,12 @@ async fn create_game() -> impl Responder {
     })
 }
 
-async fn delete_game(req: HttpRequest, info: web::Path<(String,)>) -> impl Responder {
+async fn delete_game(req: HttpRequest, _info: web::Path<(String,)>) -> impl Responder {
     // Your implementation to delete the game with the specified ID
     if let Some(auth_header) = req.headers().get("Authorization") {
         if let Ok(auth_str) = auth_header.to_str() {
             if let Some(stripped) = auth_str.strip_prefix("Bearer ") {
-                let token = stripped;
+                let _token = stripped;
                 // Check token validity and permission
                 // Implement your token validation logic here
                 return HttpResponse::NoContent();
@@ -60,11 +60,11 @@ async fn play_game(
     if let Some(auth_header) = req.headers().get("Authorization") {
         if let Ok(auth_str) = auth_header.to_str() {
             if let Some(stripped) = auth_str.strip_prefix("Bearer ") {
-                let token = stripped;
+                let _token = stripped;
                 // Check token validity and permission
                 // Implement your token validation logic here
-                let game_id = info.into_inner().0;
-                let action = query.into_inner();
+                let _game_id = info.into_inner().0;
+                let _action = query.into_inner();
                 return HttpResponse::Ok().json(GameState {
                     player_hands: Vec::new(),
                     dealer_hand: Hand {
