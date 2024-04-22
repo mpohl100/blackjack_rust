@@ -40,8 +40,8 @@ async fn delete_game(req: HttpRequest, info: web::Path<(String,)>) -> impl Respo
     // Your implementation to delete the game with the specified ID
     if let Some(auth_header) = req.headers().get("Authorization") {
         if let Ok(auth_str) = auth_header.to_str() {
-            if auth_str.starts_with("Bearer ") {
-                let token = &auth_str[7..];
+            if let Some(stripped) = auth_str.strip_prefix("Bearer ") {
+                let token = stripped;
                 // Check token validity and permission
                 // Implement your token validation logic here
                 return HttpResponse::NoContent();
@@ -59,8 +59,8 @@ async fn play_game(
     // Your implementation to play the game with the specified ID and action
     if let Some(auth_header) = req.headers().get("Authorization") {
         if let Ok(auth_str) = auth_header.to_str() {
-            if auth_str.starts_with("Bearer ") {
-                let token = &auth_str[7..];
+            if let Some(stripped) = auth_str.strip_prefix("Bearer ") {
+                let token = stripped;
                 // Check token validity and permission
                 // Implement your token validation logic here
                 let game_id = info.into_inner().0;
