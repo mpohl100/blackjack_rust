@@ -4,8 +4,8 @@ use crate::blackjack::blackjack_situation::SplitSituation;
 use crate::blackjack::deck::Deck;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
-use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::traits::BlackjackGame;
+use crate::blackjack::traits::BlackjackStrategyTrait;
 use std::collections::BTreeMap;
 
 #[derive(Default, Clone)]
