@@ -76,7 +76,7 @@ impl GameState {
 
     pub fn play(&mut self) {
         self.previous_balance = self.current_balance;
-        let game = GameStrategy::new(&self.game_data);
+        let game = GameStrategy::new(&mut self.game_data);
         self.current_balance += play_blackjack_hand(
             self.player_bet.clone(),
             self.player_hand.clone(),
@@ -139,11 +139,11 @@ impl CliGame {
 }
 
 struct GameStrategy<'_gs> {
-    game_data: &'_gs GameData,
+    game_data: &'_gs mut GameData,
 }
 
 impl GameStrategy<'_> {
-    pub fn new(game_data: &GameData) -> GameStrategy {
+    pub fn new(game_data: &mut GameData) -> GameStrategy {
         GameStrategy { game_data }
     }
 }
