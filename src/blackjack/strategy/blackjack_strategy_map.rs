@@ -4,8 +4,8 @@ use crate::blackjack::blackjack_situation::SplitSituation;
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::deck::Deck;
 use crate::blackjack::traits::Allable;
-use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::traits::BlackjackGame;
+use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::traits::Stringable;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
@@ -41,7 +41,7 @@ impl BlackjackStrategy {
     }
 }
 
-impl BlackjackGame for BlackjackStrategy{
+impl BlackjackGame for BlackjackStrategy {
     fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         let it = if !self.use_hash {
             self.data.drawing_decisions.get(&situation)

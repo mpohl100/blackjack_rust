@@ -4,8 +4,8 @@ use crate::blackjack::blackjack_situation::SplitSituation;
 use crate::blackjack::deck::Deck;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
-pub use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::traits::BlackjackGame;
+pub use crate::blackjack::traits::BlackjackStrategyTrait;
 use core::panic;
 
 #[derive(Default, Clone)]
@@ -23,7 +23,7 @@ impl BlackjackStrategyCombinedVec {
     }
 }
 
-impl BlackjackGame for BlackjackStrategyCombinedVec{
+impl BlackjackGame for BlackjackStrategyCombinedVec {
     fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         if !self.reversed {
             let mut iter = self.data.iter();
