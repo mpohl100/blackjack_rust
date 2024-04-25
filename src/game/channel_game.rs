@@ -25,7 +25,11 @@ struct GameData {
 
 impl GameData {
     pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait>) -> GameData {
-        GameData { optimal_strategy, nb_hands_played: 0, nb_right_decisions: 0}
+        GameData {
+            optimal_strategy,
+            nb_hands_played: 0,
+            nb_right_decisions: 0,
+        }
     }
 }
 

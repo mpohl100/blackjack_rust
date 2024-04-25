@@ -63,7 +63,7 @@ impl GameState {
 
     pub fn play(&mut self) {
         self.previous_balance = self.current_balance;
-        let mut game_strat = GameStrategy::new(&mut*self.optimal_strategy);
+        let mut game_strat = GameStrategy::new(&mut *self.optimal_strategy);
         self.current_balance += play_blackjack_hand(
             self.player_bet,
             self.player_hand.clone(),

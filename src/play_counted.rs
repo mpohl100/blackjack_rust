@@ -13,7 +13,8 @@ fn main() {
     let app = get_commandline_params("play_normal".to_string(), description);
     let strat_config = get_strat_config(app.clone());
     let thread_pool = ThreadPool::new(strat_config.nb_threads.try_into().unwrap());
-    let mut counted_strat = optimize_counted(BlackjackStrategy::new(true), strat_config, &thread_pool);
+    let mut counted_strat =
+        optimize_counted(BlackjackStrategy::new(true), strat_config, &thread_pool);
     println!("{}", counted_strat.to_string_mat2());
     let mut play_config = get_play_config(app);
     play_config.play_normal = true;
