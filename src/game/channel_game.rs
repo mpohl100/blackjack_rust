@@ -97,22 +97,22 @@ impl GameState {
     }
 }
 
-pub struct CliGame {
+pub struct ChannelGame {
     game_state: GameState,
 }
 
-impl Default for CliGame {
+impl Default for ChannelGame {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl CliGame {
-    pub fn new() -> CliGame {
+impl ChannelGame {
+    pub fn new() -> ChannelGame {
         let game_strat = BlackjackStrategyCombinedOrderedHashMap::new();
         let thread_pool = ThreadPool::new(4);
         let optimal_strategy = optimize_blackjack(game_strat, &thread_pool, 0);
-        CliGame {
+        ChannelGame {
             game_state: GameState::new(Box::new(optimal_strategy)),
         }
     }
