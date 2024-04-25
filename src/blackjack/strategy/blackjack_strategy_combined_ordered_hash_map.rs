@@ -22,21 +22,21 @@ impl BlackjackStrategyCombinedOrderedHashMap {
 }
 
 impl BlackjackGame for BlackjackStrategyCombinedOrderedHashMap {
-    fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         match self.data.get(&GameSituation::Draw(situation)) {
             Some(value) => *value,
             _ => panic!("Couldn't find draw hand situation in drawing percentages"),
         }
     }
 
-    fn get_double_down(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         match self.data.get(&GameSituation::DoubleDown(situation)) {
             Some(value) => *value,
             _ => panic!("Couldn't find double down situation in double down percentages"),
         }
     }
 
-    fn get_split(&self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
+    fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
         match self.data.get(&GameSituation::Split(situation)) {
             Some(value) => *value,
             _ => panic!("Couldn't find split situation in split percentages"),
@@ -45,7 +45,7 @@ impl BlackjackGame for BlackjackStrategyCombinedOrderedHashMap {
 }
 
 impl BlackjackStrategyTrait for BlackjackStrategyCombinedOrderedHashMap {
-    fn upcast(&self) -> &dyn BlackjackGame {
+    fn upcast_mut(&mut self) -> &mut dyn BlackjackGame {
         self
     }
 

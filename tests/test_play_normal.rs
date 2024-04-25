@@ -21,10 +21,10 @@ where
     BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static,
 {
     let strat_start = Instant::now();
-    let strat = optimize_blackjack(blackjack_strategy, thread_pool, 0);
+    let mut strat = optimize_blackjack(blackjack_strategy, thread_pool, 0);
     let strat_duration = strat_start.elapsed();
     let start = Instant::now();
-    let result = play_blackjack(play_config.clone(), &strat);
+    let result = play_blackjack(play_config.clone(), &mut strat);
     let duration = start.elapsed();
     // Print the elapsed time
     println!(

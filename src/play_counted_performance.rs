@@ -24,10 +24,10 @@ fn play<BlackjackStrategyType>(
     BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static,
 {
     let strat_start = Instant::now();
-    let strat = optimize_counted(blackjack_strategy, strat_config.clone(), thread_pool);
+    let mut strat = optimize_counted(blackjack_strategy, strat_config.clone(), thread_pool);
     let strat_duration = strat_start.elapsed();
     let start = Instant::now();
-    let result = play_blackjack(play_config.clone(), &strat);
+    let result = play_blackjack(play_config.clone(), &mut strat);
     let duration = start.elapsed();
     // Print the elapsed time
     println!(

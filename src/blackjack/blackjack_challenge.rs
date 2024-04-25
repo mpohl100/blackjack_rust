@@ -46,13 +46,13 @@ impl BlackjackChallenge<'_> {
         }
         let mut rng = RandomNumberGenerator::new();
         let mut result = 0.0;
-        let blackjack_game = self.strat.upcast();
+        let play_mode = self.get_play_mode();
+        let blackjack_game = self.strat.upcast_mut();
         for _ in 0..2000 {
             let dealer_hand = DealerHand::new(&[
                 self.dealer_rank.get_representative_card(),
                 self.deck.deal_card(&mut rng),
             ]);
-            let play_mode = self.get_play_mode();
             result += play_blackjack_hand(
                 1.0,
                 self.player_hand.clone(),

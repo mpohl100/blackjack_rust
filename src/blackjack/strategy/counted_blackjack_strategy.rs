@@ -46,29 +46,29 @@ fn get_clamped_count(deck: &dyn Deck, min_count: i32, max_count: i32) -> i32 {
 }
 
 impl BlackjackGame for CountedBlackjackStrategy {
-    fn get_draw(&self, situation: HandSituation, deck: &dyn Deck) -> bool {
+    fn get_draw(&mut self, situation: HandSituation, deck: &dyn Deck) -> bool {
         match self
             .counted_strategies
-            .get(&get_clamped_count(deck, self.min_count, self.max_count))
+            .get_mut(&get_clamped_count(deck, self.min_count, self.max_count))
         {
             Some(strat) => strat.get_draw(situation, deck),
             _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
         }
     }
 
-    fn get_double_down(&self, situation: HandSituation, deck: &dyn Deck) -> bool {
+    fn get_double_down(&mut self, situation: HandSituation, deck: &dyn Deck) -> bool {
         match self
             .counted_strategies
-            .get(&get_clamped_count(deck, self.min_count, self.max_count))
+            .get_mut(&get_clamped_count(deck, self.min_count, self.max_count))
         {
             Some(strat) => strat.get_double_down(situation, deck),
             _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
         }
     }
-    fn get_split(&self, situation: SplitSituation, deck: &dyn Deck) -> bool {
+    fn get_split(&mut self, situation: SplitSituation, deck: &dyn Deck) -> bool {
         match self
             .counted_strategies
-            .get(&get_clamped_count(deck, self.min_count, self.max_count))
+            .get_mut(&get_clamped_count(deck, self.min_count, self.max_count))
         {
             Some(strat) => strat.get_split(situation, deck),
             _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
@@ -77,7 +77,7 @@ impl BlackjackGame for CountedBlackjackStrategy {
 }
 
 impl BlackjackStrategyTrait for CountedBlackjackStrategy {
-    fn upcast(&self) -> &dyn BlackjackGame {
+    fn upcast_mut(&mut self) -> &mut dyn BlackjackGame {
         self
     }
 

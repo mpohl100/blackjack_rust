@@ -42,7 +42,7 @@ impl BlackjackStrategy {
 }
 
 impl BlackjackGame for BlackjackStrategy {
-    fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         let it = if !self.use_hash {
             self.data.drawing_decisions.get(&situation)
         } else {
@@ -59,7 +59,7 @@ impl BlackjackGame for BlackjackStrategy {
         *it.unwrap()
     }
 
-    fn get_double_down(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         let it = if !self.use_hash {
             self.data.double_down_decisions.get(&situation)
         } else {
@@ -76,7 +76,7 @@ impl BlackjackGame for BlackjackStrategy {
         *it.unwrap()
     }
 
-    fn get_split(&self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
+    fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
         let it = if !self.use_hash {
             self.data.split_decisions.get(&situation)
         } else {
@@ -95,7 +95,7 @@ impl BlackjackGame for BlackjackStrategy {
 }
 
 impl BlackjackStrategyTrait for BlackjackStrategy {
-    fn upcast(&self) -> &dyn BlackjackGame {
+    fn upcast_mut(&mut self) -> &mut dyn BlackjackGame {
         self
     }
 

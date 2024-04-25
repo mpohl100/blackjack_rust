@@ -11,7 +11,7 @@ use crate::blackjack::traits::BlackjackStrategyTrait;
 
 pub fn play_blackjack(
     play_config: PlayConfiguration,
-    blackjack_strategy: &dyn BlackjackStrategyTrait,
+    blackjack_strategy: &mut dyn BlackjackStrategyTrait,
 ) -> f64 {
     let mut boxed_deck: Box<dyn Deck> = match play_config.play_normal {
         true => Box::new(EightDecks::new()),
@@ -19,7 +19,7 @@ pub fn play_blackjack(
     };
     let mut rng = RandomNumberGenerator::new();
     let mut result = 0.0;
-    let blackjack_game = blackjack_strategy.upcast();
+    let blackjack_game = blackjack_strategy.upcast_mut();
     for _ in 0..play_config.nb_hands {
         let player_hand = PlayerHand::new(&[
             boxed_deck.deal_card(&mut rng),

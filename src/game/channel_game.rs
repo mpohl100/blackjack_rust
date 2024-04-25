@@ -19,11 +19,13 @@ use threadpool::ThreadPool;
 
 struct GameData {
     optimal_strategy: Box<dyn BlackjackStrategyTrait>,
+    nb_hands_played: i32,
+    nb_right_decisions: i32,
 }
 
 impl GameData {
     pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait>) -> GameData {
-        GameData { optimal_strategy }
+        GameData { optimal_strategy, nb_hands_played: 0, nb_right_decisions: 0}
     }
 }
 
@@ -73,13 +75,13 @@ impl GameState {
 
     pub fn play(&mut self) {
         self.previous_balance = self.current_balance;
-        let game = GameStrategy::new(&mut self.game_data);
+        let mut game = GameStrategy::new(&mut self.game_data);
         self.current_balance += play_blackjack_hand(
             self.player_bet,
             self.player_hand.clone(),
             self.dealer_hand.clone(),
             &mut self.deck,
-            &game,
+            &mut game,
             &mut self.rng,
             PlayMode::All,
         );
@@ -146,7 +148,7 @@ impl GameStrategy<'_> {
 }
 
 impl BlackjackGame for GameStrategy<'_> {
-    fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
@@ -170,13 +172,15 @@ impl BlackjackGame for GameStrategy<'_> {
         let result = input.trim() == "y";
         if result == self.game_data.optimal_strategy.get_draw(situation, _deck) {
             println!("Right decision");
+            self.game_data.nb_right_decisions += 1;
         } else {
             println!("Wrong decision");
         }
+        self.game_data.nb_hands_played += 1;
         result
     }
 
-    fn get_double_down(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
@@ -205,13 +209,15 @@ impl BlackjackGame for GameStrategy<'_> {
                 .get_double_down(situation, _deck)
         {
             println!("Right decision");
+            self.game_data.nb_right_decisions += 1;
         } else {
             println!("Wrong decision");
         }
+        self.game_data.nb_hands_played += 1;
         result
     }
 
-    fn get_split(&self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
+    fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
@@ -234,9 +240,11 @@ impl BlackjackGame for GameStrategy<'_> {
         let result = input.trim() == "y";
         if result == self.game_data.optimal_strategy.get_split(situation, _deck) {
             println!("Right decision");
+            self.game_data.nb_right_decisions += 1;
         } else {
             println!("Wrong decision");
         }
+        self.game_data.nb_hands_played += 1;
         result
     }
 }

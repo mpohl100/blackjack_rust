@@ -13,13 +13,13 @@ pub trait Stringable {
 }
 
 pub trait BlackjackGame {
-    fn get_draw(&self, situation: HandSituation, deck: &dyn Deck) -> bool;
-    fn get_double_down(&self, situation: HandSituation, deck: &dyn Deck) -> bool;
-    fn get_split(&self, situation: SplitSituation, deck: &dyn Deck) -> bool;
+    fn get_draw(&mut self, situation: HandSituation, deck: &dyn Deck) -> bool;
+    fn get_double_down(&mut self, situation: HandSituation, deck: &dyn Deck) -> bool;
+    fn get_split(&mut self, situation: SplitSituation, deck: &dyn Deck) -> bool;
 }
 
 pub trait BlackjackStrategyTrait: BlackjackGame {
-    fn upcast(&self) -> &dyn BlackjackGame;
+    fn upcast_mut(&mut self) -> &mut dyn BlackjackGame;
     fn add_draw(&mut self, situation: HandSituation, do_it: bool);
     fn add_double_down(&mut self, situation: HandSituation, do_it: bool);
     fn add_split(&mut self, situation: SplitSituation, do_it: bool);

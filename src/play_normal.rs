@@ -13,11 +13,11 @@ fn main() {
     let app = get_commandline_params("play_normal".to_string(), description);
     let strat_config = get_strat_config(app.clone());
     let thread_pool = ThreadPool::new(strat_config.nb_threads.try_into().unwrap());
-    let strat = optimize_blackjack(BlackjackStrategy::new(true), &thread_pool, 0);
+    let mut strat = optimize_blackjack(BlackjackStrategy::new(true), &thread_pool, 0);
     println!("Card count {}", 0);
     println!("{}\n", strat.to_string_mat2());
     let mut play_config = get_play_config(app);
     play_config.play_normal = false;
-    let result = play_blackjack(play_config.clone(), &strat);
+    let result = play_blackjack(play_config.clone(), &mut strat);
     println!("result: {} after {} hands", result, play_config.nb_hands);
 }

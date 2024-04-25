@@ -63,13 +63,13 @@ impl GameState {
 
     pub fn play(&mut self) {
         self.previous_balance = self.current_balance;
-        let game_strat = GameStrategy::new(&*self.optimal_strategy);
+        let mut game_strat = GameStrategy::new(&mut*self.optimal_strategy);
         self.current_balance += play_blackjack_hand(
             self.player_bet,
             self.player_hand.clone(),
             self.dealer_hand.clone(),
             &mut self.deck,
-            &game_strat,
+            &mut game_strat,
             &mut self.rng,
             PlayMode::All,
         );
@@ -126,17 +126,17 @@ impl CliGame {
 }
 
 struct GameStrategy<'_os> {
-    optimal_strategy: &'_os dyn BlackjackStrategyTrait,
+    optimal_strategy: &'_os mut dyn BlackjackStrategyTrait,
 }
 
 impl GameStrategy<'_> {
-    pub fn new(optimal_strategy: &dyn BlackjackStrategyTrait) -> GameStrategy {
+    pub fn new(optimal_strategy: &mut dyn BlackjackStrategyTrait) -> GameStrategy {
         GameStrategy { optimal_strategy }
     }
 }
 
 impl BlackjackGame for GameStrategy<'_> {
-    fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
@@ -166,7 +166,7 @@ impl BlackjackGame for GameStrategy<'_> {
         result
     }
 
-    fn get_double_down(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
@@ -196,7 +196,7 @@ impl BlackjackGame for GameStrategy<'_> {
         result
     }
 
-    fn get_split(&self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
+    fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
