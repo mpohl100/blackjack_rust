@@ -17,7 +17,7 @@ use crate::blackjack::traits::BlackjackStrategyTrait;
 use std::cmp::Ordering;
 use threadpool::ThreadPool;
 
-struct GameState<'a> {
+struct GameState {
     rng: RandomNumberGenerator,
     deck: EightDecks,
     dealer_hand: DealerHand,
@@ -27,12 +27,11 @@ struct GameState<'a> {
     nb_hands_played: i32,
     player_bet: f64,
     optimal_strategy: Box<dyn BlackjackStrategyTrait>,
-    game: GameStrategy<'a>,
 }
 
-impl<'a> GameState<'a> {
-    pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait>) -> GameState<'a> {
-        GameState {
+impl GameState {
+    pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait>) -> GameState {
+        let game_state = GameState {
             rng: RandomNumberGenerator::new(),
             deck: EightDecks::new(),
             dealer_hand: DealerHand::new(&[Card::new_with_int(0), Card::new_with_int(1)]),
@@ -42,8 +41,8 @@ impl<'a> GameState<'a> {
             nb_hands_played: 0,
             player_bet: 1.0,
             optimal_strategy: optimal_strategy,
-            game: GameStrategy::<'a>::new(&*optimal_strategy),
-        }
+        };
+        game_state
     }
 
     pub fn deal(&mut self) {
@@ -65,12 +64,13 @@ impl<'a> GameState<'a> {
 
     pub fn play(&mut self) {
         self.previous_balance = self.current_balance;
+        let game = GameStrategy::new(&*self);
         self.current_balance += play_blackjack_hand(
             self.player_bet,
             self.player_hand.clone(),
             self.dealer_hand.clone(),
             &mut self.deck,
-            &self.game,
+            &game,
             &mut self.rng,
             PlayMode::All,
         );
@@ -88,18 +88,18 @@ impl<'a> GameState<'a> {
     }
 }
 
-pub struct CliGame<'a> {
-    game_state: GameState<'a>,
+pub struct CliGame {
+    game_state: GameState,
 }
 
-impl Default for CliGame<'_> {
+impl Default for CliGame {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<'a> CliGame <'_>{
-    pub fn new() -> CliGame<'a> {
+impl CliGame {
+    pub fn new() -> CliGame {
         let game_strat = BlackjackStrategyCombinedOrderedHashMap::new();
         let thread_pool = ThreadPool::new(4);
         let optimal_strategy = optimize_blackjack(game_strat, &thread_pool, 0);
@@ -126,13 +126,13 @@ impl<'a> CliGame <'_>{
     }
 }
 
-struct GameStrategy<'_os> {
-    optimal_strategy: &'_os dyn BlackjackStrategyTrait,
+struct GameStrategy<'_gs> {
+    game_state: &'_gs GameState,
 }
 
 impl GameStrategy<'_> {
-    pub fn new(optimal_strategy: &dyn BlackjackStrategyTrait) -> GameStrategy {
-        GameStrategy { optimal_strategy }
+    pub fn new(game_state: &GameState) -> GameStrategy {
+        GameStrategy { game_state }
     }
 }
 
@@ -159,7 +159,7 @@ impl BlackjackGame for GameStrategy<'_> {
             .read_line(&mut input)
             .expect("Failed to read line");
         let result = input.trim() == "y";
-        if result == self.optimal_strategy.get_draw(situation, _deck) {
+        if result == self.game_state.optimal_strategy.get_draw(situation, _deck) {
             println!("Right decision");
         } else {
             println!("Wrong decision");
@@ -189,7 +189,7 @@ impl BlackjackGame for GameStrategy<'_> {
             .read_line(&mut input)
             .expect("Failed to read line");
         let result = input.trim() == "y";
-        if result == self.optimal_strategy.get_double_down(situation, _deck) {
+        if result == self.game_state.optimal_strategy.get_double_down(situation, _deck) {
             println!("Right decision");
         } else {
             println!("Wrong decision");
@@ -218,7 +218,7 @@ impl BlackjackGame for GameStrategy<'_> {
             .read_line(&mut input)
             .expect("Failed to read line");
         let result = input.trim() == "y";
-        if result == self.optimal_strategy.get_split(situation, _deck) {
+        if result == self.game_state.optimal_strategy.get_split(situation, _deck) {
             println!("Right decision");
         } else {
             println!("Wrong decision");
