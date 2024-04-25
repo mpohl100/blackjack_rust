@@ -17,15 +17,13 @@ use crate::blackjack::traits::BlackjackStrategyTrait;
 use std::cmp::Ordering;
 use threadpool::ThreadPool;
 
-struct GameData{
+struct GameData {
     optimal_strategy: Box<dyn BlackjackStrategyTrait>,
 }
 
 impl GameData {
     pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait>) -> GameData {
-        GameData {
-            optimal_strategy
-        }
+        GameData { optimal_strategy }
     }
 }
 
@@ -43,7 +41,7 @@ struct GameState {
 
 impl GameState {
     pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait>) -> GameState {
-        let game_state = GameState {
+        GameState {
             rng: RandomNumberGenerator::new(),
             deck: EightDecks::new(),
             dealer_hand: DealerHand::new(&[Card::new_with_int(0), Card::new_with_int(1)]),
@@ -53,8 +51,7 @@ impl GameState {
             nb_hands_played: 0,
             player_bet: 1.0,
             game_data: GameData::new(optimal_strategy),
-        };
-        game_state
+        }
     }
 
     pub fn deal(&mut self) {
@@ -78,7 +75,7 @@ impl GameState {
         self.previous_balance = self.current_balance;
         let game = GameStrategy::new(&mut self.game_data);
         self.current_balance += play_blackjack_hand(
-            self.player_bet.clone(),
+            self.player_bet,
             self.player_hand.clone(),
             self.dealer_hand.clone(),
             &mut self.deck,
@@ -201,7 +198,12 @@ impl BlackjackGame for GameStrategy<'_> {
             .read_line(&mut input)
             .expect("Failed to read line");
         let result = input.trim() == "y";
-        if result == self.game_data.optimal_strategy.get_double_down(situation, _deck) {
+        if result
+            == self
+                .game_data
+                .optimal_strategy
+                .get_double_down(situation, _deck)
+        {
             println!("Right decision");
         } else {
             println!("Wrong decision");
