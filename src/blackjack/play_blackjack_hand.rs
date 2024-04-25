@@ -4,7 +4,7 @@ use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 use crate::blackjack::hand::DealerHand;
 use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::rng::RandomNumberGenerator;
-use crate::blackjack::traits::BlackjackStrategyTrait;
+use crate::blackjack::traits::BlackjackGame;
 
 use super::analysis::blackjack_analysis::HandSituation;
 use super::analysis::blackjack_analysis::SplitSituation;
@@ -45,7 +45,7 @@ pub fn play_blackjack_hand(
     mut player_hand: PlayerHand,
     mut dealer_hand: DealerHand,
     deck: &mut dyn Deck,
-    player_strategy: &dyn BlackjackStrategyTrait,
+    player_strategy: &dyn BlackjackGame,
     rng: &mut RandomNumberGenerator,
     play_mode: PlayMode,
 ) -> f64 {

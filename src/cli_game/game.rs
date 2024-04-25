@@ -11,7 +11,7 @@ use crate::blackjack::rng::RandomNumberGenerator;
 use crate::blackjack::strategy::blackjack_strategy_combined_ordered_hash_map::BlackjackStrategyCombinedOrderedHashMap;
 
 use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
-use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
+use crate::blackjack::traits::BlackjackGame;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 
 use std::cmp::Ordering;
@@ -135,19 +135,7 @@ impl GameStrategy<'_> {
     }
 }
 
-impl BlackjackStrategyTrait for GameStrategy<'_> {
-    fn add_draw(&mut self, _situation: HandSituation, _do_it: bool) {
-        unimplemented!()
-    }
-
-    fn add_double_down(&mut self, _situation: HandSituation, _do_it: bool) {
-        unimplemented!()
-    }
-
-    fn add_split(&mut self, _situation: SplitSituation, _do_it: bool) {
-        unimplemented!()
-    }
-
+impl BlackjackGame for GameStrategy<'_> {
     fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         println!(
             "The dealer is showing: {}",
@@ -235,17 +223,5 @@ impl BlackjackStrategyTrait for GameStrategy<'_> {
             println!("Wrong decision");
         }
         result
-    }
-
-    fn combine(&mut self, _blackjack_strategy: &BlackjackStrategyData) {
-        unimplemented!()
-    }
-
-    fn dump(&self) -> BlackjackStrategyData {
-        unimplemented!()
-    }
-
-    fn to_string_mat2(&self) -> String {
-        unimplemented!()
     }
 }

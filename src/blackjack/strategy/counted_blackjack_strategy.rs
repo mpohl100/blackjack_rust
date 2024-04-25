@@ -3,6 +3,7 @@ use crate::blackjack::blackjack_situation::SplitSituation;
 use crate::blackjack::deck::Deck;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
 use crate::blackjack::traits::BlackjackStrategyTrait;
+use crate::blackjack::traits::BlackjackGame;
 use std::collections::BTreeMap;
 
 pub struct CountedBlackjackStrategy {
@@ -44,7 +45,7 @@ fn get_clamped_count(deck: &dyn Deck, min_count: i32, max_count: i32) -> i32 {
     }
 }
 
-impl BlackjackStrategyTrait for CountedBlackjackStrategy {
+impl BlackjackGame for CountedBlackjackStrategy{
     fn get_draw(&self, situation: HandSituation, deck: &dyn Deck) -> bool {
         match self
             .counted_strategies
@@ -73,7 +74,9 @@ impl BlackjackStrategyTrait for CountedBlackjackStrategy {
             _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
         }
     }
+}
 
+impl BlackjackStrategyTrait for CountedBlackjackStrategy {
     fn add_draw(&mut self, _situation: HandSituation, _do_it: bool) {
         unimplemented!()
     }

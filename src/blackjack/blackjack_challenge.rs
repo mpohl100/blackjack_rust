@@ -1,4 +1,5 @@
 use super::rng::RandomNumberGenerator;
+use super::traits::BlackjackGame;
 use crate::blackjack::blackjack_situation::GameSituation;
 use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::deck::Deck;

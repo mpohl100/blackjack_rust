@@ -5,6 +5,7 @@ use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::deck::Deck;
 use crate::blackjack::traits::Allable;
 use crate::blackjack::traits::BlackjackStrategyTrait;
+use crate::blackjack::traits::BlackjackGame;
 use crate::blackjack::traits::Stringable;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
@@ -37,6 +38,59 @@ impl BlackjackStrategy {
             data_hash: BlackjackStrategyDataHash::default(),
             use_hash,
         }
+    }
+}
+
+impl BlackjackGame for BlackjackStrategy{
+    fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+        let it = if !self.use_hash {
+            self.data.drawing_decisions.get(&situation)
+        } else {
+            self.data_hash.drawing_decisions.get(&situation)
+        };
+        if it.is_none() {
+            panic!(
+                "Drawing strategy not found {} ; {}",
+                situation.situation().to_string_internal(),
+                situation.dealer_card().to_string_internal()
+            );
+        }
+
+        *it.unwrap()
+    }
+
+    fn get_double_down(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+        let it = if !self.use_hash {
+            self.data.double_down_decisions.get(&situation)
+        } else {
+            self.data_hash.double_down_decisions.get(&situation)
+        };
+        if it.is_none() {
+            panic!(
+                "Double down strategy not found {} ; {}",
+                situation.situation().to_string_internal(),
+                situation.dealer_card().to_string_internal()
+            );
+        }
+
+        *it.unwrap()
+    }
+
+    fn get_split(&self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
+        let it = if !self.use_hash {
+            self.data.split_decisions.get(&situation)
+        } else {
+            self.data_hash.split_decisions.get(&situation)
+        };
+        if it.is_none() {
+            panic!(
+                "Split strategy not found for rank {} ; {}",
+                situation.situation().to_string_internal(),
+                situation.dealer_card().to_string_internal()
+            )
+        }
+
+        *it.unwrap()
     }
 }
 
@@ -117,57 +171,6 @@ impl BlackjackStrategyTrait for BlackjackStrategy {
         }
 
         ret
-    }
-
-    fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
-        let it = if !self.use_hash {
-            self.data.drawing_decisions.get(&situation)
-        } else {
-            self.data_hash.drawing_decisions.get(&situation)
-        };
-        if it.is_none() {
-            panic!(
-                "Drawing strategy not found {} ; {}",
-                situation.situation().to_string_internal(),
-                situation.dealer_card().to_string_internal()
-            );
-        }
-
-        *it.unwrap()
-    }
-
-    fn get_double_down(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
-        let it = if !self.use_hash {
-            self.data.double_down_decisions.get(&situation)
-        } else {
-            self.data_hash.double_down_decisions.get(&situation)
-        };
-        if it.is_none() {
-            panic!(
-                "Double down strategy not found {} ; {}",
-                situation.situation().to_string_internal(),
-                situation.dealer_card().to_string_internal()
-            );
-        }
-
-        *it.unwrap()
-    }
-
-    fn get_split(&self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
-        let it = if !self.use_hash {
-            self.data.split_decisions.get(&situation)
-        } else {
-            self.data_hash.split_decisions.get(&situation)
-        };
-        if it.is_none() {
-            panic!(
-                "Split strategy not found for rank {} ; {}",
-                situation.situation().to_string_internal(),
-                situation.dealer_card().to_string_internal()
-            )
-        }
-
-        *it.unwrap()
     }
 
     fn add_draw(&mut self, situation: HandSituation, do_it: bool) {

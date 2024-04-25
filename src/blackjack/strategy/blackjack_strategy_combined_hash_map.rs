@@ -5,6 +5,7 @@ use crate::blackjack::deck::Deck;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
 use crate::blackjack::traits::BlackjackStrategyTrait;
+use crate::blackjack::traits::BlackjackGame;
 use std::collections::HashMap;
 
 #[derive(Default, Clone)]
@@ -20,20 +21,7 @@ impl BlackjackStrategyCombinedHashMap {
     }
 }
 
-impl BlackjackStrategyTrait for BlackjackStrategyCombinedHashMap {
-    fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
-        self.data.insert(GameSituation::Draw(situation), do_it);
-    }
-
-    fn add_double_down(&mut self, situation: HandSituation, do_it: bool) {
-        self.data
-            .insert(GameSituation::DoubleDown(situation), do_it);
-    }
-
-    fn add_split(&mut self, situation: SplitSituation, do_it: bool) {
-        self.data.insert(GameSituation::Split(situation), do_it);
-    }
-
+impl BlackjackGame for BlackjackStrategyCombinedHashMap {
     fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         match self.data.get(&GameSituation::Draw(situation)) {
             Some(value) => *value,
@@ -53,6 +41,21 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedHashMap {
             Some(value) => *value,
             _ => panic!("Couldn't find split situation in split percentages"),
         }
+    }
+}
+
+impl BlackjackStrategyTrait for BlackjackStrategyCombinedHashMap {
+    fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
+        self.data.insert(GameSituation::Draw(situation), do_it);
+    }
+
+    fn add_double_down(&mut self, situation: HandSituation, do_it: bool) {
+        self.data
+            .insert(GameSituation::DoubleDown(situation), do_it);
+    }
+
+    fn add_split(&mut self, situation: SplitSituation, do_it: bool) {
+        self.data.insert(GameSituation::Split(situation), do_it);
     }
 
     fn to_string_mat2(&self) -> String {
