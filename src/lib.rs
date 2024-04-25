@@ -1,3 +1,3 @@
 pub mod blackjack;
-pub mod cli_game;
+pub mod game;
 pub mod commandline_params;

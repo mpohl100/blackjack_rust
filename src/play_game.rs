@@ -1,4 +1,4 @@
-use blackjack_rust::cli_game::game::CliGame;
+use blackjack_rust::game::cli_game::CliGame;
 
 fn main() {
     let mut game = CliGame::new();
