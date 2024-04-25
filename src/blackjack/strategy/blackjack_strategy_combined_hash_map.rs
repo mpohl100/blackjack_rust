@@ -45,6 +45,10 @@ impl BlackjackGame for BlackjackStrategyCombinedHashMap {
 }
 
 impl BlackjackStrategyTrait for BlackjackStrategyCombinedHashMap {
+    fn upcast(&self) -> &dyn BlackjackGame {
+        self
+    }
+
     fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
         self.data.insert(GameSituation::Draw(situation), do_it);
     }

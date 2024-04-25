@@ -77,6 +77,10 @@ impl BlackjackGame for CountedBlackjackStrategy{
 }
 
 impl BlackjackStrategyTrait for CountedBlackjackStrategy {
+    fn upcast(&self) -> &dyn BlackjackGame {
+        self
+    }
+
     fn add_draw(&mut self, _situation: HandSituation, _do_it: bool) {
         unimplemented!()
     }

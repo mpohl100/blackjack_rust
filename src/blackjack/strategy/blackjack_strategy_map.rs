@@ -95,6 +95,10 @@ impl BlackjackGame for BlackjackStrategy{
 }
 
 impl BlackjackStrategyTrait for BlackjackStrategy {
+    fn upcast(&self) -> &dyn BlackjackGame {
+        self
+    }
+
     fn to_string_mat2(&self) -> String {
         let mut hard_strat: BTreeMap<HandSituation, String> = BTreeMap::new();
         let mut soft_strat: BTreeMap<HandSituation, String> = BTreeMap::new();

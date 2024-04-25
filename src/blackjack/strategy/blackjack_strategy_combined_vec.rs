@@ -80,6 +80,10 @@ impl BlackjackGame for BlackjackStrategyCombinedVec{
 }
 
 impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
+    fn upcast(&self) -> &dyn BlackjackGame {
+        self
+    }
+
     fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
         let mut iter = self.data.iter_mut();
         let res = iter.find(|x| x.0 == GameSituation::Draw(situation));
