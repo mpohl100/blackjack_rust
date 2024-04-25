@@ -17,6 +17,18 @@ use crate::blackjack::traits::BlackjackStrategyTrait;
 use std::cmp::Ordering;
 use threadpool::ThreadPool;
 
+struct GameData{
+    optimal_strategy: Box<dyn BlackjackStrategyTrait>,
+}
+
+impl GameData {
+    pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait>) -> GameData {
+        GameData {
+            optimal_strategy
+        }
+    }
+}
+
 struct GameState {
     rng: RandomNumberGenerator,
     deck: EightDecks,
@@ -26,7 +38,7 @@ struct GameState {
     previous_balance: f64,
     nb_hands_played: i32,
     player_bet: f64,
-    optimal_strategy: Box<dyn BlackjackStrategyTrait>,
+    game_data: GameData,
 }
 
 impl GameState {
@@ -40,7 +52,7 @@ impl GameState {
             previous_balance: 1000.0,
             nb_hands_played: 0,
             player_bet: 1.0,
-            optimal_strategy: optimal_strategy,
+            game_data: GameData::new(optimal_strategy),
         };
         game_state
     }
@@ -64,9 +76,9 @@ impl GameState {
 
     pub fn play(&mut self) {
         self.previous_balance = self.current_balance;
-        let game = GameStrategy::new(&*self);
+        let game = GameStrategy::new(&self.game_data);
         self.current_balance += play_blackjack_hand(
-            self.player_bet,
+            self.player_bet.clone(),
             self.player_hand.clone(),
             self.dealer_hand.clone(),
             &mut self.deck,
@@ -127,12 +139,12 @@ impl CliGame {
 }
 
 struct GameStrategy<'_gs> {
-    game_state: &'_gs GameState,
+    game_data: &'_gs GameData,
 }
 
 impl GameStrategy<'_> {
-    pub fn new(game_state: &GameState) -> GameStrategy {
-        GameStrategy { game_state }
+    pub fn new(game_data: &GameData) -> GameStrategy {
+        GameStrategy { game_data }
     }
 }
 
@@ -159,7 +171,7 @@ impl BlackjackGame for GameStrategy<'_> {
             .read_line(&mut input)
             .expect("Failed to read line");
         let result = input.trim() == "y";
-        if result == self.game_state.optimal_strategy.get_draw(situation, _deck) {
+        if result == self.game_data.optimal_strategy.get_draw(situation, _deck) {
             println!("Right decision");
         } else {
             println!("Wrong decision");
@@ -189,7 +201,7 @@ impl BlackjackGame for GameStrategy<'_> {
             .read_line(&mut input)
             .expect("Failed to read line");
         let result = input.trim() == "y";
-        if result == self.game_state.optimal_strategy.get_double_down(situation, _deck) {
+        if result == self.game_data.optimal_strategy.get_double_down(situation, _deck) {
             println!("Right decision");
         } else {
             println!("Wrong decision");
@@ -218,7 +230,7 @@ impl BlackjackGame for GameStrategy<'_> {
             .read_line(&mut input)
             .expect("Failed to read line");
         let result = input.trim() == "y";
-        if result == self.game_state.optimal_strategy.get_split(situation, _deck) {
+        if result == self.game_data.optimal_strategy.get_split(situation, _deck) {
             println!("Right decision");
         } else {
             println!("Wrong decision");
