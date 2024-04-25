@@ -4,6 +4,7 @@ use crate::blackjack::deck::Deck;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
 use crate::blackjack::traits::BlackjackStrategyTrait;
+use crate::blackjack::traits::BlackjackGame;
 
 #[derive(Default, Clone, Copy)]
 struct SituationStrategy<T> {
@@ -36,7 +37,7 @@ impl BlackjackStrategyVec {
     }
 }
 
-impl BlackjackStrategyTrait for BlackjackStrategyVec {
+impl BlackjackGame for BlackjackStrategyVec{
     fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         if !self.reversed {
             let mut iter = self.data.drawing_percentages.iter();
@@ -90,7 +91,9 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec {
             }
         }
     }
+}
 
+impl BlackjackStrategyTrait for BlackjackStrategyVec {
     fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
         let mut iter = self.data.drawing_percentages.iter_mut();
         let res = iter.find(|x| x.situation == situation);

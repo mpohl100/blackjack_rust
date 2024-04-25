@@ -5,6 +5,7 @@ use crate::blackjack::deck::Deck;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
 pub use crate::blackjack::traits::BlackjackStrategyTrait;
+use crate::blackjack::traits::BlackjackGame;
 use core::panic;
 
 #[derive(Default, Clone)]
@@ -22,47 +23,7 @@ impl BlackjackStrategyCombinedVec {
     }
 }
 
-impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
-    fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
-        let mut iter = self.data.iter_mut();
-        let res = iter.find(|x| x.0 == GameSituation::Draw(situation));
-        match res {
-            Some(value) => {
-                value.1 = do_it;
-            }
-            _ => {
-                self.data.push((GameSituation::Draw(situation), do_it));
-            }
-        }
-    }
-
-    fn add_double_down(&mut self, situation: HandSituation, do_it: bool) {
-        let mut iter = self.data.iter_mut();
-        let res = iter.find(|x| x.0 == GameSituation::DoubleDown(situation));
-        match res {
-            Some(value) => {
-                value.1 = do_it;
-            }
-            _ => {
-                self.data
-                    .push((GameSituation::DoubleDown(situation), do_it));
-            }
-        }
-    }
-
-    fn add_split(&mut self, situation: SplitSituation, do_it: bool) {
-        let mut iter = self.data.iter_mut();
-        let res = iter.find(|x| x.0 == GameSituation::Split(situation));
-        match res {
-            Some(value) => {
-                value.1 = do_it;
-            }
-            _ => {
-                self.data.push((GameSituation::Split(situation), do_it));
-            }
-        }
-    }
-
+impl BlackjackGame for BlackjackStrategyCombinedVec{
     fn get_draw(&self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         if !self.reversed {
             let mut iter = self.data.iter();
@@ -113,6 +74,48 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
             match res {
                 Some(value) => value.1,
                 _ => panic!("Couldn't find split situation in split percentages"),
+            }
+        }
+    }
+}
+
+impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
+    fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
+        let mut iter = self.data.iter_mut();
+        let res = iter.find(|x| x.0 == GameSituation::Draw(situation));
+        match res {
+            Some(value) => {
+                value.1 = do_it;
+            }
+            _ => {
+                self.data.push((GameSituation::Draw(situation), do_it));
+            }
+        }
+    }
+
+    fn add_double_down(&mut self, situation: HandSituation, do_it: bool) {
+        let mut iter = self.data.iter_mut();
+        let res = iter.find(|x| x.0 == GameSituation::DoubleDown(situation));
+        match res {
+            Some(value) => {
+                value.1 = do_it;
+            }
+            _ => {
+                self.data
+                    .push((GameSituation::DoubleDown(situation), do_it));
+            }
+        }
+    }
+
+    fn add_split(&mut self, situation: SplitSituation, do_it: bool) {
+        let mut iter = self.data.iter_mut();
+        let res = iter.find(|x| x.0 == GameSituation::Split(situation));
+        match res {
+            Some(value) => {
+                value.1 = do_it;
+            }
+            _ => {
+                self.data.push((GameSituation::Split(situation), do_it));
             }
         }
     }
