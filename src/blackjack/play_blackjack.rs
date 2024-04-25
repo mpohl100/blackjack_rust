@@ -19,6 +19,7 @@ pub fn play_blackjack(
     };
     let mut rng = RandomNumberGenerator::new();
     let mut result = 0.0;
+    let blackjack_game = blackjack_strategy.upcast();
     for _ in 0..play_config.nb_hands {
         let player_hand = PlayerHand::new(&[
             boxed_deck.deal_card(&mut rng),
@@ -33,7 +34,7 @@ pub fn play_blackjack(
             player_hand,
             dealer_hand,
             &mut *boxed_deck,
-            blackjack_strategy,
+            blackjack_game,
             &mut rng,
             PlayMode::All,
         );

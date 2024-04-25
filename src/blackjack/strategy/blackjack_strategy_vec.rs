@@ -94,6 +94,10 @@ impl BlackjackGame for BlackjackStrategyVec{
 }
 
 impl BlackjackStrategyTrait for BlackjackStrategyVec {
+    fn upcast(&self) -> &dyn BlackjackGame {
+        self
+    }
+
     fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
         let mut iter = self.data.drawing_percentages.iter_mut();
         let res = iter.find(|x| x.situation == situation);

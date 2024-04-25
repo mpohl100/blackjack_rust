@@ -46,6 +46,7 @@ impl BlackjackChallenge<'_> {
         }
         let mut rng = RandomNumberGenerator::new();
         let mut result = 0.0;
+        let blackjack_game = self.strat.upcast();
         for _ in 0..2000 {
             let dealer_hand = DealerHand::new(&[
                 self.dealer_rank.get_representative_card(),
@@ -57,7 +58,7 @@ impl BlackjackChallenge<'_> {
                 self.player_hand.clone(),
                 dealer_hand,
                 &mut *self.deck,
-                self.strat,
+                blackjack_game,
                 &mut rng,
                 play_mode,
             );

@@ -19,7 +19,7 @@ pub trait BlackjackGame{
 }
 
 pub trait BlackjackStrategyTrait: BlackjackGame {
-    
+    fn upcast(&self) -> &dyn BlackjackGame;    
     fn add_draw(&mut self, situation: HandSituation, do_it: bool);
     fn add_double_down(&mut self, situation: HandSituation, do_it: bool);
     fn add_split(&mut self, situation: SplitSituation, do_it: bool);
