@@ -17,18 +17,34 @@ use crate::blackjack::traits::BlackjackStrategyTrait;
 use std::cmp::Ordering;
 use threadpool::ThreadPool;
 
+use tokio::sync::mpsc;
+
+#[derive(Clone, Copy)]
+pub enum GameAction{
+    Stop,
+    Continue,
+    Split,
+    DoubleDown,
+    Hit,
+    Stand,
+}
+
 struct GameData {
     optimal_strategy: Box<dyn BlackjackStrategyTrait + Send>,
     nb_hands_played: i32,
     nb_right_decisions: i32,
+    action_receiver: mpsc::Receiver<GameAction>,
+    option_sender: mpsc::Sender<Vec<GameAction>>,
 }
 
 impl GameData {
-    pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait + Send>) -> GameData {
+    pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait + Send>, action_receiver: mpsc::Receiver<GameAction>, option_sender: mpsc::Sender<Vec<GameAction>>) -> GameData {
         GameData {
             optimal_strategy,
             nb_hands_played: 0,
             nb_right_decisions: 0,
+            action_receiver: action_receiver,
+            option_sender: option_sender,
         }
     }
 }
@@ -46,7 +62,7 @@ struct GameState {
 }
 
 impl GameState {
-    pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait + Send>) -> GameState {
+    pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait + Send>, action_receiver: mpsc::Receiver<GameAction>, option_sender: mpsc::Sender<Vec<GameAction>>) -> GameState {
         GameState {
             rng: RandomNumberGenerator::new(),
             deck: EightDecks::new(),
@@ -56,7 +72,7 @@ impl GameState {
             previous_balance: 1000.0,
             nb_hands_played: 0,
             player_bet: 1.0,
-            game_data: GameData::new(optimal_strategy),
+            game_data: GameData::new(optimal_strategy, action_receiver, option_sender),
         }
     }
 
@@ -107,19 +123,13 @@ pub struct ChannelGame {
     game_state: GameState,
 }
 
-impl Default for ChannelGame {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl ChannelGame {
-    pub fn new() -> ChannelGame {
+    pub fn new(action_receiver: mpsc::Receiver<GameAction>, option_sender: mpsc::Sender<Vec<GameAction>>) -> ChannelGame {
         let game_strat = BlackjackStrategyCombinedOrderedHashMap::new();
         let thread_pool = ThreadPool::new(4);
         let optimal_strategy = optimize_blackjack(game_strat, &thread_pool, 0);
         ChannelGame {
-            game_state: GameState::new(Box::new(optimal_strategy)),
+            game_state: GameState::new(Box::new(optimal_strategy), action_receiver, option_sender),
         }
     }
 
