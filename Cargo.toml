@@ -30,8 +30,8 @@ name = "play_counted_performance"
 path = "src/play_counted_performance.rs"
 
 [[bin]]
-name = "play_game"
-path = "src/play_game.rs"
+name = "play_cli_game"
+path = "src/play_cli_game.rs"
 
 [[bin]]
 name = "server"
