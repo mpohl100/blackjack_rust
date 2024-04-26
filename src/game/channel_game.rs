@@ -18,13 +18,13 @@ use std::cmp::Ordering;
 use threadpool::ThreadPool;
 
 struct GameData {
-    optimal_strategy: Box<dyn BlackjackStrategyTrait>,
+    optimal_strategy: Box<dyn BlackjackStrategyTrait + Send>,
     nb_hands_played: i32,
     nb_right_decisions: i32,
 }
 
 impl GameData {
-    pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait>) -> GameData {
+    pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait + Send>) -> GameData {
         GameData {
             optimal_strategy,
             nb_hands_played: 0,
@@ -46,7 +46,7 @@ struct GameState {
 }
 
 impl GameState {
-    pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait>) -> GameState {
+    pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait + Send>) -> GameState {
         GameState {
             rng: RandomNumberGenerator::new(),
             deck: EightDecks::new(),
