@@ -9,11 +9,11 @@ use crate::blackjack::play_blackjack_hand::PlayMode;
 use crate::blackjack::rng::RandomNumberGenerator;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 
-pub fn play_blackjack(
+pub async fn play_blackjack(
     play_config: PlayConfiguration,
     blackjack_strategy: &mut dyn BlackjackStrategyTrait,
 ) -> f64 {
-    let mut boxed_deck: Box<dyn Deck> = match play_config.play_normal {
+    let mut boxed_deck: Box<dyn Deck + Send> = match play_config.play_normal {
         true => Box::new(EightDecks::new()),
         false => Box::new(CountedDeck::new(0)),
     };
@@ -33,11 +33,11 @@ pub fn play_blackjack(
             1.0,
             player_hand,
             dealer_hand,
-            &mut *boxed_deck,
+            &mut boxed_deck,
             blackjack_game,
             &mut rng,
             PlayMode::All,
-        );
+        ).await;
     }
     result
 }

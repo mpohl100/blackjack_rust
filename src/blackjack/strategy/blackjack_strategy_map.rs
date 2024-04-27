@@ -44,7 +44,7 @@ impl BlackjackStrategy {
 
 #[async_trait]
 impl BlackjackGame for BlackjackStrategy {
-    async fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_draw(&mut self, situation: HandSituation, _deck: &Box<dyn Deck + Send>) -> bool {
         let it = if !self.use_hash {
             self.data.drawing_decisions.get(&situation)
         } else {
@@ -61,7 +61,7 @@ impl BlackjackGame for BlackjackStrategy {
         *it.unwrap()
     }
 
-    async fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_double_down(&mut self, situation: HandSituation, _deck: &Box<dyn Deck + Send>) -> bool {
         let it = if !self.use_hash {
             self.data.double_down_decisions.get(&situation)
         } else {
@@ -78,7 +78,7 @@ impl BlackjackGame for BlackjackStrategy {
         *it.unwrap()
     }
 
-    async fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
+    async fn get_split(&mut self, situation: SplitSituation, _deck: &Box<dyn Deck + Send>) -> bool {
         let it = if !self.use_hash {
             self.data.split_decisions.get(&situation)
         } else {

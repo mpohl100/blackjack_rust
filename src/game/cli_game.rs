@@ -138,7 +138,7 @@ impl GameStrategy<'_> {
 
 #[async_trait]
 impl BlackjackGame for GameStrategy<'_> {
-    async fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_draw(&mut self, situation: HandSituation, _deck: &Box<dyn Deck + Send>) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
@@ -168,7 +168,7 @@ impl BlackjackGame for GameStrategy<'_> {
         result
     }
 
-    async fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_double_down(&mut self, situation: HandSituation, _deck: &Box<dyn Deck + Send>) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
@@ -198,7 +198,7 @@ impl BlackjackGame for GameStrategy<'_> {
         result
     }
 
-    async fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
+    async fn get_split(&mut self, situation: SplitSituation, _deck: &Box<dyn Deck + Send>) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
