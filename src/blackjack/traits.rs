@@ -17,9 +17,9 @@ pub trait Stringable {
 
 #[async_trait]
 pub trait BlackjackGame {
-    async fn get_draw(&mut self, situation: HandSituation, deck: WrappedDeck) -> bool;
-    async fn get_double_down(&mut self, situation: HandSituation, deck: WrappedDeck) -> bool;
-    async fn get_split(&mut self, situation: SplitSituation, deck: WrappedDeck) -> bool;
+    async fn get_draw(&mut self, situation: HandSituation, deck: &mut WrappedDeck) -> bool;
+    async fn get_double_down(&mut self, situation: HandSituation, deck: &mut WrappedDeck) -> bool;
+    async fn get_split(&mut self, situation: SplitSituation, deck: &mut WrappedDeck) -> bool;
 }
 
 pub trait BlackjackStrategyTrait: BlackjackGame {

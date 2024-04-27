@@ -44,7 +44,7 @@ pub async fn play_blackjack_hand(
     mut player_bet: f64,
     mut player_hand: PlayerHand,
     mut dealer_hand: DealerHand,
-    deck: WrappedDeck,
+    deck: &mut WrappedDeck,
     player_strategy: &mut dyn BlackjackGame,
     rng: &mut RandomNumberGenerator,
     play_mode: PlayMode,
@@ -57,7 +57,7 @@ pub async fn play_blackjack_hand(
         // splitting hands is allowed
         let rank = BlackjackRank::new(player_hand.get_cards()[0].rank());
         let do_split =
-            player_strategy.get_split(SplitSituation::new(rank, dealer_hand.open_card()), deck);
+            player_strategy.get_split(SplitSituation::new(rank, dealer_hand.open_card()), &mut deck);
         if do_split.await {
             let first = PlayerHand::new(&[player_hand.get_cards()[0], deck.get().deal_card(rng)]);
             let second = PlayerHand::new(&[player_hand.get_cards()[1], deck.get().deal_card(rng)]);
@@ -90,7 +90,7 @@ pub async fn play_blackjack_hand(
         player_points = evaluate_blackjack_hand(&player_hand.get_blackjack_hand());
         only_draw_once = player_strategy.get_double_down(
             HandSituation::new(player_points, dealer_hand.open_card()),
-            deck,
+            &mut deck,
         ).await;
         if only_draw_once {
             player_bet *= 2.0;
@@ -108,7 +108,7 @@ pub async fn play_blackjack_hand(
             }
             let draw = player_strategy.get_draw(
                 HandSituation::new(player_points, dealer_hand.open_card()),
-                deck,
+                &mut deck,
             ).await;
             if !draw {
                 break;

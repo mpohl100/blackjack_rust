@@ -47,7 +47,7 @@ fn get_clamped_count(deck: &mut WrappedDeck, min_count: i32, max_count: i32) -> 
 
 #[async_trait]
 impl BlackjackGame for CountedBlackjackStrategy {
-    async fn get_draw(&mut self, situation: HandSituation, deck: WrappedDeck) -> bool {
+    async fn get_draw(&mut self, situation: HandSituation, deck: &mut WrappedDeck) -> bool {
         match self.counted_strategies.get_mut(&get_clamped_count(
             &mut deck,
             self.min_count,
@@ -58,17 +58,17 @@ impl BlackjackGame for CountedBlackjackStrategy {
         }
     }
 
-    async fn get_double_down(&mut self, situation: HandSituation, deck: WrappedDeck) -> bool {
+    async fn get_double_down(&mut self, situation: HandSituation, deck: &mut WrappedDeck) -> bool {
         match self.counted_strategies.get_mut(&get_clamped_count(
             &mut deck,
             self.min_count,
             self.max_count,
         )) {
             Some(strat) => strat.get_double_down(situation, deck).await,
-            _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
+            _ => panic!("Count {} not found in counted_strategies", deck.get().get_count()),
         }
     }
-    async fn get_split(&mut self, situation: SplitSituation, deck: WrappedDeck) -> bool {
+    async fn get_split(&mut self, situation: SplitSituation, deck: &mut WrappedDeck) -> bool {
         match self.counted_strategies.get_mut(&get_clamped_count(
             &mut deck,
             self.min_count,
