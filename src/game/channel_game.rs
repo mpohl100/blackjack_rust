@@ -250,7 +250,7 @@ impl BlackjackGame for GameStrategy<'_> {
                 .to_blackjack_score()
         );
         println!("Your options are split (s), double down (d), hit (h), stand (t)");
-        self.game_data.option_sender.send(vec![GameAction::Split, GameAction::DoubleDown, GameAction::Hit, GameAction::Stand]).unwrap();
+        self.game_data.option_sender.send(vec![GameAction::Split, GameAction::DoubleDown, GameAction::Hit, GameAction::Stand]);
         let choice = self.game_data.action_receiver.recv().await.unwrap();
         let mut input = String::new();
         println!("Do you want to split? (y/n)");
