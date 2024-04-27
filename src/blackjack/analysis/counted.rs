@@ -1,33 +1,30 @@
 use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
-use crate::blackjack::blackjack_configuration::StrategyConfiguration;
 use crate::blackjack::strategy::counted_blackjack_strategy::CountedBlackjackStrategy;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 use std::collections::BTreeMap;
-use std::sync::mpsc::channel;
-use threadpool::ThreadPool;
+use tokio::sync::mpsc::channel;
 
-pub fn optimize_counted<BlackjackStrategyType>(
+pub async fn optimize_counted<BlackjackStrategyType>(
     blackjack_strategy: BlackjackStrategyType,
-    strat_config: StrategyConfiguration,
-    thread_pool: &ThreadPool,
-) -> impl BlackjackStrategyTrait
+) -> CountedBlackjackStrategy
 where
     BlackjackStrategyType: BlackjackStrategyTrait + Clone + 'static + Send,
 {
-    let mut data = BTreeMap::<i32, Box<dyn BlackjackStrategyTrait>>::new();
-    let (transaction, receiver) = channel();
+    let mut data = BTreeMap::<i32, Box<dyn BlackjackStrategyTrait + Send>>::new();
+    let (transaction, mut receiver) = channel(32);
     for i in -10..11 {
         let tr = transaction.clone();
-        let strat_config_clone = strat_config.clone();
         let blackjack_strategy_clone = blackjack_strategy.clone();
-        thread_pool.execute(move || {
-            let pool = ThreadPool::new(strat_config_clone.nb_threads.try_into().unwrap());
-            let strat = optimize_blackjack(blackjack_strategy_clone, &pool, i);
-            tr.send((i, strat)).expect("Could not send strategy");
+        tokio::spawn(async move {
+            let strat = optimize_blackjack(blackjack_strategy_clone, i).await;
+            tr.send((i, strat));
         });
     }
     for _ in -10..11 {
-        let (i, strat) = receiver.recv().expect("Could not receive strategy");
+        let (i, strat) = match receiver.recv().await {
+            Some(result) => result,
+            None => panic!("Did not receive blackjack"),
+        };
         data.insert(i, Box::new(strat));
     }
     CountedBlackjackStrategy::new(data)

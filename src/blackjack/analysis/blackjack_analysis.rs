@@ -13,8 +13,8 @@ use crate::blackjack::deck::WrappedDeck;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 use crate::blackjack::hand::PlayerHand;
 pub use crate::blackjack::traits::BlackjackStrategyTrait;
-use std::sync::mpsc::channel;
-use threadpool::ThreadPool;
+
+use tokio::sync::mpsc::channel;
 
 struct BlackjackGameSituation<'a> {
     pub game_situation: GameSituation,
@@ -118,7 +118,6 @@ where
 
 async fn optimize_draw<BlackjackStrategyType>(
     blackjack_strategy: BlackjackStrategyType,
-    thread_pool: &ThreadPool,
     card_count: i32,
 ) -> BlackjackStrategyType
 where
@@ -139,30 +138,31 @@ where
         }
     }
     // schedule work
-    let (transaction, receiver) = channel();
+    let (transaction, receiver) = channel(32);
     for (_, bucket) in buckets.iter() {
         let tr_clone = transaction.clone();
         let bucket_clone = bucket.clone();
         let deck_clone = deck.clone();
         let result_clone = result.clone();
-        thread_pool.execute(move ||{
+        tokio::spawn(async move {
             let bucket_result = calculate_draw(bucket_clone, deck_clone, result_clone);
-            tr_clone.send(bucket_result).expect("Could not send bucket");
+            tr_clone.send(bucket_result);
         });
     }
     // receive results
     for (_, _) in buckets.iter() {
         let bucket_result = receiver
-            .recv()
-            .expect("Did not receive blackjack strategy bucket calculation");
-        result.combine(&bucket_result.await.dump());
+            .recv().await;
+        match bucket_result {
+            Some(bucket_result) => result.combine(&bucket_result.await.dump()),
+            None => panic!("Error receiving draw result"),
+        }
     }
     result
 }
 
-fn optimize_double_down<BlackjackStrategyType>(
+async fn optimize_double_down<BlackjackStrategyType>(
     blackjack_strategy: BlackjackStrategyType,
-    thread_pool: &ThreadPool,
     card_count: i32,
 ) -> BlackjackStrategyType
 where
@@ -170,35 +170,36 @@ where
 {
     let mut result = blackjack_strategy.clone();
     let deck = CountedDeck::new(card_count);
-    let (transaction, receiver) = channel();
+    let (transaction, mut receiver) = channel(32);
     for hand_situation in HandSituation::create_all() {
         let tr_clone = transaction.clone();
         let deck_clone = deck.clone();
         let result_clone = result.clone();
         let hand_situation_clone = hand_situation;
-        thread_pool.execute(move || {
+        tokio::spawn(async move {
             let mut situation = BlackjackGameSituation {
                 game_situation: GameSituation::DoubleDown(hand_situation_clone),
                 strat: &mut result_clone.clone(),
             };
-            let do_it = optimize_situation(&mut situation, &deck_clone);
+            let do_it = optimize_situation(&mut situation, &deck_clone).await;
             tr_clone
                 .send((hand_situation_clone, do_it))
-                .expect("Could not send double down result")
         });
     }
     for _ in HandSituation::create_all() {
-        let (hand_situation, do_it) = receiver
-            .recv()
-            .expect("Did not receive blackjack strategy double down calculation");
+        let (hand_situation, do_it) = match receiver
+            .recv().await
+            {
+                Some(result) => result,
+                None => panic!("Did not receive blackjack strategy double down calculation"),
+            };
         result.add_double_down(hand_situation, do_it);
     }
     result
 }
 
-fn optimize_split<BlackjackStrategyType>(
+async fn optimize_split<BlackjackStrategyType>(
     blackjack_strategy: BlackjackStrategyType,
-    thread_pool: &ThreadPool,
     card_count: i32,
 ) -> BlackjackStrategyType
 where
@@ -206,46 +207,46 @@ where
 {
     let mut result = blackjack_strategy.clone();
     let deck = CountedDeck::new(card_count);
-    let (transaction, receiver) = channel();
+    let (transaction, mut receiver) = channel(32);
     for split_situation in SplitSituation::create_all() {
         let tr_clone = transaction.clone();
         let deck_clone = deck.clone();
         let result_clone = result.clone();
         let split_situation_clone = split_situation;
-        thread_pool.execute(move || {
+        tokio::spawn(async move {
             let mut situation = BlackjackGameSituation {
                 game_situation: GameSituation::Split(split_situation_clone),
                 strat: &mut result_clone.clone(),
             };
-            let do_it = optimize_situation(&mut situation, &deck_clone);
+            let do_it = optimize_situation(&mut situation, &deck_clone).await;
             tr_clone
-                .send((split_situation_clone, do_it))
-                .expect("Could not send split result")
+                .send((split_situation_clone, do_it)).await
         });
     }
     for _ in SplitSituation::create_all() {
-        let (split_situation, do_it) = receiver
-            .recv()
-            .expect("Did not receive blackjack strategy split calculation");
+        let (split_situation, do_it) = match receiver
+            .recv().await{
+                Some(result) => result,
+                None => panic!("Did not receive blackjack strategy split calculation"),
+            };
         result.add_split(split_situation, do_it);
     }
     result
 }
 
-pub fn optimize_blackjack<BlackjackStrategyType>(
+pub async fn optimize_blackjack<BlackjackStrategyType>(
     blackjack_strategy: BlackjackStrategyType,
-    thread_pool: &ThreadPool,
     card_count: i32,
-) -> impl BlackjackStrategyTrait
+) -> BlackjackStrategyType
 where
     BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static,
 {
-    let mut result = optimize_draw(blackjack_strategy, thread_pool, card_count).clone();
+    let mut result = optimize_draw(blackjack_strategy, card_count).await.clone();
     let _deck = CountedDeck::new(card_count);
 
     // then optimize double down
-    result = optimize_double_down(result.clone(), thread_pool, card_count);
+    result = optimize_double_down(result.clone(), card_count).await;
 
     // then optimize split
-    optimize_split(result.clone(), thread_pool, card_count)
+    optimize_split(result.clone(), card_count).await
 }
