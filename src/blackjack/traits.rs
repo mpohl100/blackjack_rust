@@ -2,6 +2,9 @@ use crate::blackjack::blackjack_situation::HandSituation;
 use crate::blackjack::blackjack_situation::SplitSituation;
 use crate::blackjack::deck::Deck;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
+
+use async_trait::async_trait;
+
 pub trait Allable {
     fn create_all() -> Vec<Self>
     where
@@ -12,10 +15,11 @@ pub trait Stringable {
     fn to_string_internal(&self) -> String;
 }
 
+#[async_trait]
 pub trait BlackjackGame {
-    fn get_draw(&mut self, situation: HandSituation, deck: &dyn Deck) -> bool;
-    fn get_double_down(&mut self, situation: HandSituation, deck: &dyn Deck) -> bool;
-    fn get_split(&mut self, situation: SplitSituation, deck: &dyn Deck) -> bool;
+    async fn get_draw(&mut self, situation: HandSituation, deck: &dyn Deck) -> bool;
+    async fn get_double_down(&mut self, situation: HandSituation, deck: &dyn Deck) -> bool;
+    async fn get_split(&mut self, situation: SplitSituation, deck: &dyn Deck) -> bool;
 }
 
 pub trait BlackjackStrategyTrait: BlackjackGame {

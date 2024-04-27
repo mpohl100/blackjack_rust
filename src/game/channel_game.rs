@@ -17,6 +17,8 @@ use crate::blackjack::traits::BlackjackStrategyTrait;
 use std::cmp::Ordering;
 use threadpool::ThreadPool;
 
+use async_trait::async_trait;
+
 use tokio::sync::mpsc;
 
 #[derive(Clone, Copy)]
@@ -161,8 +163,9 @@ impl GameStrategy<'_> {
     }
 }
 
+#[async_trait]
 impl BlackjackGame for GameStrategy<'_> {
-    fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
@@ -194,7 +197,7 @@ impl BlackjackGame for GameStrategy<'_> {
         result
     }
 
-    fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
@@ -231,7 +234,7 @@ impl BlackjackGame for GameStrategy<'_> {
         result
     }
 
-    fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
+    async fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
         println!(
             "The dealer is showing: {}",
             situation

@@ -5,7 +5,7 @@ use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
 use crate::blackjack::traits::BlackjackGame;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 use std::collections::BTreeMap;
-
+use async_trait::async_trait;
 pub struct CountedBlackjackStrategy {
     counted_strategies: BTreeMap<i32, Box<dyn BlackjackStrategyTrait>>,
     max_count: i32,
@@ -45,8 +45,9 @@ fn get_clamped_count(deck: &dyn Deck, min_count: i32, max_count: i32) -> i32 {
     }
 }
 
+#[async_trait]
 impl BlackjackGame for CountedBlackjackStrategy {
-    fn get_draw(&mut self, situation: HandSituation, deck: &dyn Deck) -> bool {
+    async fn get_draw(&mut self, situation: HandSituation, deck: &dyn Deck) -> bool {
         match self.counted_strategies.get_mut(&get_clamped_count(
             deck,
             self.min_count,
@@ -57,7 +58,7 @@ impl BlackjackGame for CountedBlackjackStrategy {
         }
     }
 
-    fn get_double_down(&mut self, situation: HandSituation, deck: &dyn Deck) -> bool {
+    async fn get_double_down(&mut self, situation: HandSituation, deck: &dyn Deck) -> bool {
         match self.counted_strategies.get_mut(&get_clamped_count(
             deck,
             self.min_count,
@@ -67,7 +68,7 @@ impl BlackjackGame for CountedBlackjackStrategy {
             _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
         }
     }
-    fn get_split(&mut self, situation: SplitSituation, deck: &dyn Deck) -> bool {
+    async fn get_split(&mut self, situation: SplitSituation, deck: &dyn Deck) -> bool {
         match self.counted_strategies.get_mut(&get_clamped_count(
             deck,
             self.min_count,

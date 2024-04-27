@@ -6,6 +6,8 @@ use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
 use crate::blackjack::traits::BlackjackGame;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 
+use async_trait::async_trait;
+
 #[derive(Default, Clone, Copy)]
 struct SituationStrategy<T> {
     pub situation: T,
@@ -37,8 +39,9 @@ impl BlackjackStrategyVec {
     }
 }
 
+#[async_trait]
 impl BlackjackGame for BlackjackStrategyVec {
-    fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         if !self.reversed {
             let mut iter = self.data.drawing_percentages.iter();
             let res = iter.find(|x| x.situation == situation);
@@ -56,7 +59,7 @@ impl BlackjackGame for BlackjackStrategyVec {
         }
     }
 
-    fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         if !self.reversed {
             let mut iter = self.data.double_down_percentages.iter();
             let res = iter.find(|x| x.situation == situation);
@@ -74,7 +77,7 @@ impl BlackjackGame for BlackjackStrategyVec {
         }
     }
 
-    fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
+    async fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
         if !self.reversed {
             let mut iter = self.data.split_percentages.iter();
             let res = iter.find(|x| x.situation == situation);

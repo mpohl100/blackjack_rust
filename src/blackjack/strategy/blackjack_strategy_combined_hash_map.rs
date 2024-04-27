@@ -8,6 +8,8 @@ use crate::blackjack::traits::BlackjackGame;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 use std::collections::HashMap;
 
+use async_trait::async_trait;
+
 #[derive(Default, Clone)]
 pub struct BlackjackStrategyCombinedHashMap {
     data: HashMap<GameSituation, bool>,
@@ -21,22 +23,23 @@ impl BlackjackStrategyCombinedHashMap {
     }
 }
 
+#[async_trait]
 impl BlackjackGame for BlackjackStrategyCombinedHashMap {
-    fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         match self.data.get(&GameSituation::Draw(situation)) {
             Some(value) => *value,
             _ => panic!("Couldn't find draw hand situation in drawing percentages"),
         }
     }
 
-    fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         match self.data.get(&GameSituation::DoubleDown(situation)) {
             Some(value) => *value,
             _ => panic!("Couldn't find double down situation in double down percentages"),
         }
     }
 
-    fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
+    async fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
         match self.data.get(&GameSituation::Split(situation)) {
             Some(value) => *value,
             _ => panic!("Couldn't find split situation in split percentages"),

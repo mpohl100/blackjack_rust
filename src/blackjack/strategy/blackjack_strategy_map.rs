@@ -9,6 +9,7 @@ use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::traits::Stringable;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
+use async_trait::async_trait;
 
 #[derive(Default, Clone)]
 pub struct BlackjackStrategyData {
@@ -41,8 +42,9 @@ impl BlackjackStrategy {
     }
 }
 
+#[async_trait]
 impl BlackjackGame for BlackjackStrategy {
-    fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         let it = if !self.use_hash {
             self.data.drawing_decisions.get(&situation)
         } else {
@@ -59,7 +61,7 @@ impl BlackjackGame for BlackjackStrategy {
         *it.unwrap()
     }
 
-    fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         let it = if !self.use_hash {
             self.data.double_down_decisions.get(&situation)
         } else {
@@ -76,7 +78,7 @@ impl BlackjackGame for BlackjackStrategy {
         *it.unwrap()
     }
 
-    fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
+    async fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
         let it = if !self.use_hash {
             self.data.split_decisions.get(&situation)
         } else {
