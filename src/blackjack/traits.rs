@@ -34,12 +34,12 @@ pub trait BlackjackStrategyTrait: BlackjackGame {
     fn dump(&self) -> BlackjackStrategyData;
 }
 
-pub struct WrappedStrategy{
-    strat: Arc<Mutex<Box<dyn BlackjackStrategyTrait + Send>>>,
+pub struct WrappedStrategy<BlackjackStrategyType> where BlackjackStrategyType: BlackjackStrategyTrait + Send{
+    strat: Arc<Mutex<BlackjackStrategyType>>,
 }
 
-impl WrappedStrategy {
-    pub fn new(strat: Box<dyn BlackjackStrategyTrait + Send>) -> WrappedStrategy {
+impl<BlackjackStrategyType> WrappedStrategy<BlackjackStrategyType> where BlackjackStrategyType: BlackjackStrategyTrait + Send{
+    pub fn new(strat: BlackjackStrategyType) -> WrappedStrategy<BlackjackStrategyType> {
         WrappedStrategy {
             strat: Arc::new(Mutex::new(strat)),
         }
