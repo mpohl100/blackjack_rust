@@ -15,7 +15,6 @@ use crate::blackjack::traits::BlackjackGame;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 
 use std::cmp::Ordering;
-use threadpool::ThreadPool;
 
 use async_trait::async_trait;
 
@@ -126,10 +125,9 @@ pub struct ChannelGame {
 }
 
 impl ChannelGame {
-    pub fn new(action_receiver: mpsc::Receiver<GameAction>, option_sender: mpsc::Sender<Vec<GameAction>>) -> ChannelGame {
+    pub async fn new(action_receiver: mpsc::Receiver<GameAction>, option_sender: mpsc::Sender<Vec<GameAction>>) -> ChannelGame {
         let game_strat = BlackjackStrategyCombinedOrderedHashMap::new();
-        let thread_pool = ThreadPool::new(4);
-        let optimal_strategy = optimize_blackjack(game_strat, &thread_pool, 0);
+        let optimal_strategy = optimize_blackjack(game_strat, 0).await;
         ChannelGame {
             game_state: GameState::new(Box::new(optimal_strategy), action_receiver, option_sender),
         }
