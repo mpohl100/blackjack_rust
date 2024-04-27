@@ -407,6 +407,7 @@ name = "blackjack_rust"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "async-trait",
  "clap",
  "rand 0.9.0",
  "serde",

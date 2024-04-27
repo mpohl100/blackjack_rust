@@ -8,6 +8,8 @@ use crate::blackjack::traits::BlackjackGame;
 pub use crate::blackjack::traits::BlackjackStrategyTrait;
 use core::panic;
 
+use async_trait::async_trait;
+
 #[derive(Default, Clone)]
 pub struct BlackjackStrategyCombinedVec {
     data: Vec<(GameSituation, bool)>,
@@ -23,8 +25,9 @@ impl BlackjackStrategyCombinedVec {
     }
 }
 
+#[async_trait]
 impl BlackjackGame for BlackjackStrategyCombinedVec {
-    fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         if !self.reversed {
             let mut iter = self.data.iter();
             let res = iter.find(|x| x.0 == GameSituation::Draw(situation));
@@ -42,7 +45,7 @@ impl BlackjackGame for BlackjackStrategyCombinedVec {
         }
     }
 
-    fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
         if !self.reversed {
             let mut iter = self.data.iter();
             let res = iter.find(|x| x.0 == GameSituation::DoubleDown(situation));
@@ -60,7 +63,7 @@ impl BlackjackGame for BlackjackStrategyCombinedVec {
         }
     }
 
-    fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
+    async fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
         if !self.reversed {
             let mut iter = self.data.iter();
             let res = iter.find(|x| x.0 == GameSituation::Split(situation));
