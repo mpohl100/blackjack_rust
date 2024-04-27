@@ -15,7 +15,7 @@ pub struct BlackjackChallenge<'a> {
     dealer_rank: BlackjackRank,
     player_hand: PlayerHand,
     strat: &'a mut dyn BlackjackStrategyTrait,
-    deck: Box<dyn Deck>,
+    deck: Box<dyn Deck + Send>,
 }
 
 impl BlackjackChallenge<'_> {
@@ -24,7 +24,7 @@ impl BlackjackChallenge<'_> {
         dealer_card: BlackjackRank,
         player_hand: PlayerHand,
         strat: &mut dyn BlackjackStrategyTrait,
-        deck: Box<dyn Deck>,
+        deck: Box<dyn Deck + Send>,
     ) -> BlackjackChallenge {
         BlackjackChallenge {
             game_situation_: game_situation,
@@ -35,7 +35,7 @@ impl BlackjackChallenge<'_> {
         }
     }
 
-    pub fn score(&mut self, do_it: bool) -> f64 {
+    pub async fn score(&mut self, do_it: bool) -> f64 {
         let _points = evaluate_blackjack_hand(&self.player_hand.get_blackjack_hand());
         match self.game_situation_ {
             GameSituation::Draw(hand_situation) => self.strat.add_draw(hand_situation, do_it),
@@ -57,11 +57,11 @@ impl BlackjackChallenge<'_> {
                 1.0,
                 self.player_hand.clone(),
                 dealer_hand,
-                &mut *self.deck,
+                &mut self.deck,
                 blackjack_game,
                 &mut rng,
                 play_mode,
-            );
+            ).await;
         }
         result
     }

@@ -74,7 +74,7 @@ impl DealerHand {
         self.blackjack_hand.cards.clone()
     }
 
-    pub fn play(&mut self, deck: &mut dyn Deck, rng: &mut RandomNumberGenerator) -> i32 {
+    pub fn play(&mut self, deck: &mut Box<dyn Deck + Send>, rng: &mut RandomNumberGenerator) -> i32 {
         let draw_until = 17;
         let result;
         loop {
@@ -262,7 +262,7 @@ mod dealer_hand_tests {
     #[test]
     fn test_play() {
         // Test case: Hand with cards that add up to 16
-        let mut deck: Box<dyn Deck> = Box::new(DeterministicDeck::new(vec![
+        let mut deck: Box<dyn Deck + Send> = Box::new(DeterministicDeck::new(vec![
             Card::new(Rank::King, Suit::Hearts),
             Card::new(Rank::Six, Suit::Diamonds),
             Card::new(Rank::Six, Suit::Spades),
@@ -270,31 +270,31 @@ mod dealer_hand_tests {
         let mut rng = RandomNumberGenerator::new();
         let mut dealer_hand = DealerHand::new(&[]);
 
-        let result = dealer_hand.play(&mut *deck, &mut rng);
+        let result = dealer_hand.play(&mut deck, &mut rng);
 
         assert_eq!(result, -1); // Dealer busts
 
         // Test case: Hand with cards that add up to soft 17
-        let mut deck: Box<dyn Deck> = Box::new(DeterministicDeck::new(vec![
+        let mut deck: Box<dyn Deck + Send> = Box::new(DeterministicDeck::new(vec![
             Card::new(Rank::Six, Suit::Hearts),
             Card::new(Rank::Ace, Suit::Diamonds),
         ]));
         let mut rng = RandomNumberGenerator::new();
         let mut dealer_hand = DealerHand::new(&[]);
 
-        let result = dealer_hand.play(&mut *deck, &mut rng);
+        let result = dealer_hand.play(&mut deck, &mut rng);
 
         assert_eq!(result, 17); // Dealer stands at 17
 
         // Test case: Hand with cards that add up to hard 17
-        let mut deck: Box<dyn Deck> = Box::new(DeterministicDeck::new(vec![
+        let mut deck: Box<dyn Deck + Send> = Box::new(DeterministicDeck::new(vec![
             Card::new(Rank::Seven, Suit::Hearts),
             Card::new(Rank::Jack, Suit::Diamonds),
         ]));
         let mut rng = RandomNumberGenerator::new();
         let mut dealer_hand = DealerHand::new(&[]);
 
-        let result = dealer_hand.play(&mut *deck, &mut rng);
+        let result = dealer_hand.play(&mut deck, &mut rng);
 
         assert_eq!(result, 17); // Dealer stands at 17
     }

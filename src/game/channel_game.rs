@@ -53,7 +53,7 @@ impl GameData {
 
 struct GameState {
     rng: RandomNumberGenerator,
-    deck: EightDecks,
+    deck: Box<dyn Deck + Send>,
     dealer_hand: DealerHand,
     player_hand: PlayerHand,
     current_balance: f64,
@@ -67,7 +67,7 @@ impl GameState {
     pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait + Send>, action_receiver: mpsc::Receiver<GameAction>, option_sender: mpsc::Sender<Vec<GameAction>>) -> GameState {
         GameState {
             rng: RandomNumberGenerator::new(),
-            deck: EightDecks::new(),
+            deck: Box::new(EightDecks::new()),
             dealer_hand: DealerHand::new(&[Card::new_with_int(0), Card::new_with_int(1)]),
             player_hand: PlayerHand::new(&[Card::new_with_int(2), Card::new_with_int(3)]),
             current_balance: 1000.0,
@@ -95,7 +95,7 @@ impl GameState {
         println!("Your hand: {:?}", self.player_hand.get_cards());
     }
 
-    pub fn play(&mut self) {
+    pub async fn play(&mut self) {
         self.previous_balance = self.current_balance;
         let mut game = GameStrategy::new(&mut self.game_data);
         self.current_balance += play_blackjack_hand(
@@ -106,7 +106,7 @@ impl GameState {
             &mut game,
             &mut self.rng,
             PlayMode::All,
-        );
+        ).await;
     }
 
     pub fn print_after_hand(&self) {
@@ -165,7 +165,7 @@ impl GameStrategy<'_> {
 
 #[async_trait]
 impl BlackjackGame for GameStrategy<'_> {
-    async fn get_draw(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_draw(&mut self, situation: HandSituation, _deck: &Box<dyn Deck + Send>) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
@@ -187,7 +187,7 @@ impl BlackjackGame for GameStrategy<'_> {
             .read_line(&mut input)
             .expect("Failed to read line");
         let result = input.trim() == "y";
-        if result == self.game_data.optimal_strategy.get_draw(situation, _deck) {
+        if result == self.game_data.optimal_strategy.get_draw(situation, _deck).await {
             println!("Right decision");
             self.game_data.nb_right_decisions += 1;
         } else {
@@ -197,7 +197,7 @@ impl BlackjackGame for GameStrategy<'_> {
         result
     }
 
-    async fn get_double_down(&mut self, situation: HandSituation, _deck: &dyn Deck) -> bool {
+    async fn get_double_down(&mut self, situation: HandSituation, _deck: &Box<dyn Deck + Send>) -> bool {
         println!(
             "The dealer is showing: {}",
             situation
@@ -234,7 +234,7 @@ impl BlackjackGame for GameStrategy<'_> {
         result
     }
 
-    async fn get_split(&mut self, situation: SplitSituation, _deck: &dyn Deck) -> bool {
+    async fn get_split(&mut self, situation: SplitSituation, _deck: &Box<dyn Deck + Send>) -> bool {
         println!(
             "The dealer is showing: {}",
             situation

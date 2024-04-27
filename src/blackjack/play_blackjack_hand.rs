@@ -40,11 +40,11 @@ fn get_play_result(
     -player_bet
 }
 
-pub fn play_blackjack_hand(
+pub async fn play_blackjack_hand(
     mut player_bet: f64,
     mut player_hand: PlayerHand,
     mut dealer_hand: DealerHand,
-    deck: &mut dyn Deck,
+    deck: &mut Box<dyn Deck + Send>,
     player_strategy: &mut dyn BlackjackGame,
     rng: &mut RandomNumberGenerator,
     play_mode: PlayMode,
@@ -58,7 +58,7 @@ pub fn play_blackjack_hand(
         let rank = BlackjackRank::new(player_hand.get_cards()[0].rank());
         let do_split =
             player_strategy.get_split(SplitSituation::new(rank, dealer_hand.open_card()), deck);
-        if do_split {
+        if do_split.await {
             let first = PlayerHand::new(&[player_hand.get_cards()[0], deck.deal_card(rng)]);
             let second = PlayerHand::new(&[player_hand.get_cards()[1], deck.deal_card(rng)]);
             let mut overall_result = 0.0;
@@ -70,7 +70,7 @@ pub fn play_blackjack_hand(
                 player_strategy,
                 rng,
                 play_mode,
-            );
+            ).await;
             overall_result += play_blackjack_hand(
                 player_bet,
                 second,
@@ -79,7 +79,7 @@ pub fn play_blackjack_hand(
                 player_strategy,
                 rng,
                 play_mode,
-            );
+            ).await;
             return overall_result;
         }
     }
@@ -91,7 +91,7 @@ pub fn play_blackjack_hand(
         only_draw_once = player_strategy.get_double_down(
             HandSituation::new(player_points, dealer_hand.open_card()),
             deck,
-        );
+        ).await;
         if only_draw_once {
             player_bet *= 2.0;
         }
@@ -109,7 +109,7 @@ pub fn play_blackjack_hand(
             let draw = player_strategy.get_draw(
                 HandSituation::new(player_points, dealer_hand.open_card()),
                 deck,
-            );
+            ).await;
             if !draw {
                 break;
             }
