@@ -52,7 +52,7 @@ impl BlackjackChallenge<'_> {
         for _ in 0..2000 {
             let dealer_hand = DealerHand::new(&[
                 self.dealer_rank.get_representative_card(),
-                self.deck.get().deal_card(&mut rng),
+                self.deck.deal_card(&mut rng),
             ]);
             result += play_blackjack_hand(
                 1.0,

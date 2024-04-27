@@ -88,7 +88,7 @@ impl DealerHand {
                 result = points.lower();
                 break;
             }
-            self.blackjack_hand.add_card(&deck.get().deal_card(rng));
+            self.blackjack_hand.add_card(&deck.deal_card(rng));
         }
         if result > 21 {
             return -1;

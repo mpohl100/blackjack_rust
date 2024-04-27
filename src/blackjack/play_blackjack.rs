@@ -1,6 +1,5 @@
 use crate::blackjack::blackjack_configuration::PlayConfiguration;
 use crate::blackjack::deck::CountedDeck;
-use crate::blackjack::deck::Deck;
 use crate::blackjack::deck::EightDecks;
 use crate::blackjack::hand::DealerHand;
 use crate::blackjack::hand::PlayerHand;
@@ -24,12 +23,12 @@ pub async fn play_blackjack(
     let blackjack_game = blackjack_strategy.upcast_mut();
     for _ in 0..play_config.nb_hands {
         let player_hand = PlayerHand::new(&[
-            boxed_deck.get().deal_card(&mut rng),
-            boxed_deck.get().deal_card(&mut rng),
+            boxed_deck.deal_card(&mut rng),
+            boxed_deck.deal_card(&mut rng),
         ]);
         let dealer_hand = DealerHand::new(&[
-            boxed_deck.get().deal_card(&mut rng),
-            boxed_deck.get().deal_card(&mut rng),
+            boxed_deck.deal_card(&mut rng),
+            boxed_deck.deal_card(&mut rng),
         ]);
         result += play_blackjack_hand(
             1.0,

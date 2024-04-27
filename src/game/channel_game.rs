@@ -79,12 +79,12 @@ impl GameState {
 
     pub fn deal(&mut self) {
         self.dealer_hand = DealerHand::new(&[
-            self.deck.get().deal_card(&mut self.rng),
-            self.deck.get().deal_card(&mut self.rng),
+            self.deck.deal_card(&mut self.rng),
+            self.deck.deal_card(&mut self.rng),
         ]);
         self.player_hand = PlayerHand::new(&[
-            self.deck.get().deal_card(&mut self.rng),
-            self.deck.get().deal_card(&mut self.rng),
+            self.deck.deal_card(&mut self.rng),
+            self.deck.deal_card(&mut self.rng),
         ]);
     }
 

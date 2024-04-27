@@ -32,8 +32,8 @@ impl CountedBlackjackStrategy {
 }
 
 fn get_clamped_count(deck: &mut WrappedDeck, min_count: i32, max_count: i32) -> i32 {
-    let nb_cards = deck.get().get_nb_cards();
-    let count = deck.get().get_count();
+    let nb_cards = deck.get_nb_cards();
+    let count = deck.get_count();
     let ratio = (count as f64) / (nb_cards as f64);
     let count = (ratio * 52.0) as i32;
     if count > max_count {
@@ -49,33 +49,33 @@ fn get_clamped_count(deck: &mut WrappedDeck, min_count: i32, max_count: i32) -> 
 impl BlackjackGame for CountedBlackjackStrategy {
     async fn get_draw(&mut self, situation: HandSituation, deck: &mut WrappedDeck) -> bool {
         match self.counted_strategies.get_mut(&get_clamped_count(
-            &mut deck,
+            deck,
             self.min_count,
             self.max_count,
         )) {
             Some(strat) => strat.get_draw(situation, deck).await,
-            _ => panic!("Count {} not found in counted_strategies", deck.get().get_count()),
+            _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
         }
     }
 
     async fn get_double_down(&mut self, situation: HandSituation, deck: &mut WrappedDeck) -> bool {
         match self.counted_strategies.get_mut(&get_clamped_count(
-            &mut deck,
+            deck,
             self.min_count,
             self.max_count,
         )) {
             Some(strat) => strat.get_double_down(situation, deck).await,
-            _ => panic!("Count {} not found in counted_strategies", deck.get().get_count()),
+            _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
         }
     }
     async fn get_split(&mut self, situation: SplitSituation, deck: &mut WrappedDeck) -> bool {
         match self.counted_strategies.get_mut(&get_clamped_count(
-            &mut deck,
+            deck,
             self.min_count,
             self.max_count,
         )) {
             Some(strat) => strat.get_split(situation, deck).await,
-            _ => panic!("Count {} not found in counted_strategies", deck.get().get_count()),
+            _ => panic!("Count {} not found in counted_strategies", deck.get_count()),
         }
     }
 }
