@@ -138,15 +138,15 @@ where
         }
     }
     // schedule work
-    let (transaction, receiver) = channel(32);
+    let (transaction, mut receiver) = channel(32);
     for (_, bucket) in buckets.iter() {
         let tr_clone = transaction.clone();
         let bucket_clone = bucket.clone();
         let deck_clone = deck.clone();
         let result_clone = result.clone();
         tokio::spawn(async move {
-            let bucket_result = calculate_draw(bucket_clone, deck_clone, result_clone);
-            tr_clone.send(bucket_result);
+            let bucket_result = calculate_draw(bucket_clone, deck_clone, result_clone).await;
+            tr_clone.send(bucket_result).await;
         });
     }
     // receive results
@@ -154,7 +154,7 @@ where
         let bucket_result = receiver
             .recv().await;
         match bucket_result {
-            Some(bucket_result) => result.combine(&bucket_result.await.dump()),
+            Some(bucket_result) => result.combine(&bucket_result.dump()),
             None => panic!("Error receiving draw result"),
         }
     }
@@ -183,7 +183,7 @@ where
             };
             let do_it = optimize_situation(&mut situation, &deck_clone).await;
             tr_clone
-                .send((hand_situation_clone, do_it))
+                .send((hand_situation_clone, do_it)).await;
         });
     }
     for _ in HandSituation::create_all() {
@@ -220,7 +220,7 @@ where
             };
             let do_it = optimize_situation(&mut situation, &deck_clone).await;
             tr_clone
-                .send((split_situation_clone, do_it)).await
+                .send((split_situation_clone, do_it)).await;
         });
     }
     for _ in SplitSituation::create_all() {

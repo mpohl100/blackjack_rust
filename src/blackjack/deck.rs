@@ -25,8 +25,19 @@ impl WrappedDeck {
         }
     }
 
-    pub fn get(&mut self) -> &mut (dyn Deck + Send) {
-        self.deck.lock().unwrap().as_mut()
+    pub fn get_nb_cards(&self) -> i32 {
+        let deck = self.deck.lock().unwrap();
+        deck.get_nb_cards()
+    }
+
+    pub fn get_count(&self) -> i32 {
+        let deck = self.deck.lock().unwrap();
+        deck.get_count()
+    }
+
+    pub fn deal_card(&self, rng: &mut RandomNumberGenerator) -> Card {
+        let mut deck = self.deck.lock().unwrap();
+        deck.deal_card(rng)
     }
 }
 

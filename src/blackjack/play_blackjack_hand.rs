@@ -59,8 +59,8 @@ pub async fn play_blackjack_hand(
         let do_split =
             player_strategy.get_split(SplitSituation::new(rank, dealer_hand.open_card()), deck);
         if do_split.await {
-            let first = PlayerHand::new(&[player_hand.get_cards()[0], deck.get().deal_card(rng)]);
-            let second = PlayerHand::new(&[player_hand.get_cards()[1], deck.get().deal_card(rng)]);
+            let first = PlayerHand::new(&[player_hand.get_cards()[0], deck.deal_card(rng)]);
+            let second = PlayerHand::new(&[player_hand.get_cards()[1], deck.deal_card(rng)]);
             let mut overall_result = 0.0;
             overall_result += Box::pin(play_blackjack_hand(
                 player_bet,
@@ -98,7 +98,7 @@ pub async fn play_blackjack_hand(
     }
 
     if only_draw_once {
-        player_hand.add_card(&deck.get().deal_card(rng));
+        player_hand.add_card(&deck.deal_card(rng));
         player_points = evaluate_blackjack_hand(&player_hand.get_blackjack_hand());
     } else {
         loop {
@@ -113,7 +113,7 @@ pub async fn play_blackjack_hand(
             if !draw {
                 break;
             }
-            player_hand.add_card(&deck.get().deal_card(rng));
+            player_hand.add_card(&deck.deal_card(rng));
         }
     }
     // deduce player result
