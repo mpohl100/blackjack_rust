@@ -4,6 +4,7 @@ use crate::blackjack::card::BlackjackRank;
 use crate::blackjack::deck::Deck;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 
+use super::deck::WrappedDeck;
 use super::rng::RandomNumberGenerator;
 
 #[derive(Default, Clone)]
@@ -74,7 +75,7 @@ impl DealerHand {
         self.blackjack_hand.cards.clone()
     }
 
-    pub fn play(&mut self, deck: &mut Box<dyn Deck + Send>, rng: &mut RandomNumberGenerator) -> i32 {
+    pub fn play(&mut self, deck: &mut WrappedDeck, rng: &mut RandomNumberGenerator) -> i32 {
         let draw_until = 17;
         let result;
         loop {
@@ -87,7 +88,7 @@ impl DealerHand {
                 result = points.lower();
                 break;
             }
-            self.blackjack_hand.add_card(&deck.deal_card(rng));
+            self.blackjack_hand.add_card(&deck.get().deal_card(rng));
         }
         if result > 21 {
             return -1;
@@ -262,11 +263,11 @@ mod dealer_hand_tests {
     #[test]
     fn test_play() {
         // Test case: Hand with cards that add up to 16
-        let mut deck: Box<dyn Deck + Send> = Box::new(DeterministicDeck::new(vec![
+        let mut deck = WrappedDeck::new(Box::new(DeterministicDeck::new(vec![
             Card::new(Rank::King, Suit::Hearts),
             Card::new(Rank::Six, Suit::Diamonds),
             Card::new(Rank::Six, Suit::Spades),
-        ]));
+        ])));
         let mut rng = RandomNumberGenerator::new();
         let mut dealer_hand = DealerHand::new(&[]);
 
@@ -275,10 +276,10 @@ mod dealer_hand_tests {
         assert_eq!(result, -1); // Dealer busts
 
         // Test case: Hand with cards that add up to soft 17
-        let mut deck: Box<dyn Deck + Send> = Box::new(DeterministicDeck::new(vec![
+        let mut deck = WrappedDeck::new(Box::new(DeterministicDeck::new(vec![
             Card::new(Rank::Six, Suit::Hearts),
             Card::new(Rank::Ace, Suit::Diamonds),
-        ]));
+        ])));
         let mut rng = RandomNumberGenerator::new();
         let mut dealer_hand = DealerHand::new(&[]);
 
@@ -287,10 +288,10 @@ mod dealer_hand_tests {
         assert_eq!(result, 17); // Dealer stands at 17
 
         // Test case: Hand with cards that add up to hard 17
-        let mut deck: Box<dyn Deck + Send> = Box::new(DeterministicDeck::new(vec![
+        let mut deck = WrappedDeck::new(Box::new(DeterministicDeck::new(vec![
             Card::new(Rank::Seven, Suit::Hearts),
             Card::new(Rank::Jack, Suit::Diamonds),
-        ]));
+        ])));
         let mut rng = RandomNumberGenerator::new();
         let mut dealer_hand = DealerHand::new(&[]);
 

@@ -1,7 +1,7 @@
 use crate::blackjack::blackjack_situation::GameSituation;
 use crate::blackjack::blackjack_situation::HandSituation;
 use crate::blackjack::blackjack_situation::SplitSituation;
-use crate::blackjack::deck::Deck;
+use crate::blackjack::deck::WrappedDeck;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
 use crate::blackjack::traits::BlackjackGame;
@@ -27,7 +27,7 @@ impl BlackjackStrategyCombinedVec {
 
 #[async_trait]
 impl BlackjackGame for BlackjackStrategyCombinedVec {
-    async fn get_draw(&mut self, situation: HandSituation, _deck: &Box<dyn Deck + Send>) -> bool {
+    async fn get_draw(&mut self, situation: HandSituation, _deck: WrappedDeck) -> bool {
         if !self.reversed {
             let mut iter = self.data.iter();
             let res = iter.find(|x| x.0 == GameSituation::Draw(situation));
@@ -45,7 +45,7 @@ impl BlackjackGame for BlackjackStrategyCombinedVec {
         }
     }
 
-    async fn get_double_down(&mut self, situation: HandSituation, _deck: &Box<dyn Deck + Send>) -> bool {
+    async fn get_double_down(&mut self, situation: HandSituation, _deck: WrappedDeck) -> bool {
         if !self.reversed {
             let mut iter = self.data.iter();
             let res = iter.find(|x| x.0 == GameSituation::DoubleDown(situation));
@@ -63,7 +63,7 @@ impl BlackjackGame for BlackjackStrategyCombinedVec {
         }
     }
 
-    async fn get_split(&mut self, situation: SplitSituation, _deck: &Box<dyn Deck + Send>) -> bool {
+    async fn get_split(&mut self, situation: SplitSituation, _deck: WrappedDeck) -> bool {
         if !self.reversed {
             let mut iter = self.data.iter();
             let res = iter.find(|x| x.0 == GameSituation::Split(situation));

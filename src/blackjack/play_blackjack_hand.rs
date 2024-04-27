@@ -1,5 +1,5 @@
 use crate::blackjack::card::BlackjackRank;
-use crate::blackjack::deck::Deck;
+use crate::blackjack::deck::WrappedDeck;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 use crate::blackjack::hand::DealerHand;
 use crate::blackjack::hand::PlayerHand;
@@ -44,13 +44,13 @@ pub async fn play_blackjack_hand(
     mut player_bet: f64,
     mut player_hand: PlayerHand,
     mut dealer_hand: DealerHand,
-    deck: &mut Box<dyn Deck + Send>,
+    deck: WrappedDeck,
     player_strategy: &mut dyn BlackjackGame,
     rng: &mut RandomNumberGenerator,
     play_mode: PlayMode,
 ) -> f64 {
     // play dealer hand at the beginning so that recursive versions for splitting use the same dealer outcome
-    let dealer_result = dealer_hand.play(deck, rng);
+    let dealer_result = dealer_hand.play(&mut deck, rng);
 
     // add code for splitting here
     if play_mode == PlayMode::All && player_hand.is_pair() {
@@ -59,8 +59,8 @@ pub async fn play_blackjack_hand(
         let do_split =
             player_strategy.get_split(SplitSituation::new(rank, dealer_hand.open_card()), deck);
         if do_split.await {
-            let first = PlayerHand::new(&[player_hand.get_cards()[0], deck.deal_card(rng)]);
-            let second = PlayerHand::new(&[player_hand.get_cards()[1], deck.deal_card(rng)]);
+            let first = PlayerHand::new(&[player_hand.get_cards()[0], deck.get().deal_card(rng)]);
+            let second = PlayerHand::new(&[player_hand.get_cards()[1], deck.get().deal_card(rng)]);
             let mut overall_result = 0.0;
             overall_result += play_blackjack_hand(
                 player_bet,
@@ -98,7 +98,7 @@ pub async fn play_blackjack_hand(
     }
 
     if only_draw_once {
-        player_hand.add_card(&deck.deal_card(rng));
+        player_hand.add_card(&deck.get().deal_card(rng));
         player_points = evaluate_blackjack_hand(&player_hand.get_blackjack_hand());
     } else {
         loop {
@@ -113,7 +113,7 @@ pub async fn play_blackjack_hand(
             if !draw {
                 break;
             }
-            player_hand.add_card(&deck.deal_card(rng));
+            player_hand.add_card(&deck.get().deal_card(rng));
         }
     }
     // deduce player result

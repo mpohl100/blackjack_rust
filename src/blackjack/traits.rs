@@ -1,6 +1,6 @@
 use crate::blackjack::blackjack_situation::HandSituation;
 use crate::blackjack::blackjack_situation::SplitSituation;
-use crate::blackjack::deck::Deck;
+use crate::blackjack::deck::WrappedDeck;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
 
 use async_trait::async_trait;
@@ -17,9 +17,9 @@ pub trait Stringable {
 
 #[async_trait]
 pub trait BlackjackGame {
-    async fn get_draw(&mut self, situation: HandSituation, deck: &Box<dyn Deck + Send>) -> bool;
-    async fn get_double_down(&mut self, situation: HandSituation, deck: &Box<dyn Deck + Send>) -> bool;
-    async fn get_split(&mut self, situation: SplitSituation, deck: &Box<dyn Deck + Send>) -> bool;
+    async fn get_draw(&mut self, situation: HandSituation, deck: WrappedDeck) -> bool;
+    async fn get_double_down(&mut self, situation: HandSituation, deck: WrappedDeck) -> bool;
+    async fn get_split(&mut self, situation: SplitSituation, deck: WrappedDeck) -> bool;
 }
 
 pub trait BlackjackStrategyTrait: BlackjackGame {
