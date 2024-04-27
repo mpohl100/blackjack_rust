@@ -9,6 +9,7 @@ use crate::blackjack::card::Card;
 use crate::blackjack::card::Rank;
 use crate::blackjack::card::Suit;
 use crate::blackjack::deck::CountedDeck;
+use crate::blackjack::deck::WrappedDeck;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 use crate::blackjack::hand::PlayerHand;
 pub use crate::blackjack::traits::BlackjackStrategyTrait;
@@ -75,8 +76,8 @@ fn get_player_hand(game_situation: GameSituation) -> PlayerHand {
     ret
 }
 
-fn optimize_situation(situation: &mut BlackjackGameSituation, deck: &CountedDeck) -> bool {
-    let boxed_deck = Box::new(deck.clone());
+async fn optimize_situation(situation: &mut BlackjackGameSituation<'_>, deck: &CountedDeck) -> bool {
+    let boxed_deck = WrappedDeck::new(Box::new(deck.clone()));
     let mut challenge = BlackjackChallenge::new(
         situation.game_situation,
         get_dealer_rank(situation.game_situation),
@@ -86,8 +87,8 @@ fn optimize_situation(situation: &mut BlackjackGameSituation, deck: &CountedDeck
     );
     let dont = false;
     let do_it = true;
-    let score_dont = challenge.score(dont);
-    let score_do_it = challenge.score(do_it);
+    let score_dont = challenge.score(dont).await;
+    let score_do_it = challenge.score(do_it).await;
 
     if score_do_it > score_dont {
         do_it
@@ -96,13 +97,13 @@ fn optimize_situation(situation: &mut BlackjackGameSituation, deck: &CountedDeck
     }
 }
 
-fn calculate_draw<BlackjackStrategyType>(
+async fn calculate_draw<BlackjackStrategyType>(
     hand_situations: Vec<HandSituation>,
     deck: CountedDeck,
     blackjack_strategy: BlackjackStrategyType,
 ) -> BlackjackStrategyType
 where
-    BlackjackStrategyType: BlackjackStrategyTrait + Clone,
+    BlackjackStrategyType: BlackjackStrategyTrait + Send + Clone,
 {
     let mut result = blackjack_strategy.clone();
     for hand_situation in hand_situations.iter().rev() {
@@ -110,12 +111,12 @@ where
             game_situation: GameSituation::Draw(*hand_situation),
             strat: &mut result.clone(),
         };
-        result.add_draw(*hand_situation, optimize_situation(&mut situation, &deck));
+        result.add_draw(*hand_situation, optimize_situation(&mut situation, &deck).await);
     }
     result
 }
 
-fn optimize_draw<BlackjackStrategyType>(
+async fn optimize_draw<BlackjackStrategyType>(
     blackjack_strategy: BlackjackStrategyType,
     thread_pool: &ThreadPool,
     card_count: i32,
@@ -144,7 +145,7 @@ where
         let bucket_clone = bucket.clone();
         let deck_clone = deck.clone();
         let result_clone = result.clone();
-        thread_pool.execute(move || {
+        thread_pool.execute(move ||{
             let bucket_result = calculate_draw(bucket_clone, deck_clone, result_clone);
             tr_clone.send(bucket_result).expect("Could not send bucket");
         });
@@ -154,7 +155,7 @@ where
         let bucket_result = receiver
             .recv()
             .expect("Did not receive blackjack strategy bucket calculation");
-        result.combine(&bucket_result.dump());
+        result.combine(&bucket_result.await.dump());
     }
     result
 }

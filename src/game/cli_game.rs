@@ -128,11 +128,11 @@ impl CliGame {
 }
 
 struct GameStrategy<'_os> {
-    optimal_strategy: &'_os mut dyn BlackjackStrategyTrait,
+    optimal_strategy: &'_os mut (dyn BlackjackStrategyTrait + Send),
 }
 
 impl GameStrategy<'_> {
-    pub fn new(optimal_strategy: &mut dyn BlackjackStrategyTrait) -> GameStrategy {
+    pub fn new(optimal_strategy: &mut (dyn BlackjackStrategyTrait + Send)) -> GameStrategy {
         GameStrategy { optimal_strategy }
     }
 }
