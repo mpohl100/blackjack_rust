@@ -1,3 +1,4 @@
+use super::deck::WrappedDeck;
 use super::rng::RandomNumberGenerator;
 
 use crate::blackjack::blackjack_situation::GameSituation;
@@ -15,7 +16,7 @@ pub struct BlackjackChallenge<'a> {
     dealer_rank: BlackjackRank,
     player_hand: PlayerHand,
     strat: &'a mut dyn BlackjackStrategyTrait,
-    deck: Box<dyn Deck + Send>,
+    deck: WrappedDeck,
 }
 
 impl BlackjackChallenge<'_> {
@@ -24,7 +25,7 @@ impl BlackjackChallenge<'_> {
         dealer_card: BlackjackRank,
         player_hand: PlayerHand,
         strat: &mut dyn BlackjackStrategyTrait,
-        deck: Box<dyn Deck + Send>,
+        deck: WrappedDeck,
     ) -> BlackjackChallenge {
         BlackjackChallenge {
             game_situation_: game_situation,
@@ -51,7 +52,7 @@ impl BlackjackChallenge<'_> {
         for _ in 0..2000 {
             let dealer_hand = DealerHand::new(&[
                 self.dealer_rank.get_representative_card(),
-                self.deck.deal_card(&mut rng),
+                self.deck.get().deal_card(&mut rng),
             ]);
             result += play_blackjack_hand(
                 1.0,

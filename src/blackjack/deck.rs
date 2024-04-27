@@ -6,11 +6,28 @@ use crate::blackjack::rng::RandomNumberGenerator;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::cmp::Ordering;
+use std::sync::{Arc, Mutex};
 
 pub trait Deck {
     fn deal_card(&mut self, rng: &mut RandomNumberGenerator) -> Card;
     fn get_count(&self) -> i32;
     fn get_nb_cards(&self) -> i32;
+}
+
+pub struct WrappedDeck{
+    deck: Arc<Mutex<Box<dyn Deck + Send>>>,
+}
+
+impl WrappedDeck {
+    pub fn new(deck: Box<dyn Deck + Send>) -> WrappedDeck {
+        WrappedDeck {
+            deck: Arc::new(Mutex::new(deck)),
+        }
+    }
+
+    pub fn get(&mut self) -> &mut (dyn Deck + Send) {
+        self.deck.lock().unwrap().as_mut()
+    }
 }
 
 #[derive(Default, Clone)]
