@@ -1,7 +1,6 @@
 use crate::blackjack::blackjack_situation::HandSituation;
 use crate::blackjack::blackjack_situation::SplitSituation;
 use crate::blackjack::deck::Card;
-use crate::blackjack::deck::Deck;
 use crate::blackjack::deck::EightDecks;
 use crate::blackjack::deck::WrappedDeck;
 use crate::blackjack::hand::DealerHand;
@@ -16,7 +15,6 @@ use crate::blackjack::traits::BlackjackGame;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 
 use std::cmp::Ordering;
-use threadpool::ThreadPool;
 
 use async_trait::async_trait;
 struct GameState {
@@ -93,17 +91,10 @@ pub struct CliGame {
     game_state: GameState,
 }
 
-impl Default for CliGame {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl CliGame {
-    pub fn new() -> CliGame {
+    pub async fn new() -> CliGame {
         let game_strat = BlackjackStrategyCombinedOrderedHashMap::new();
-        let thread_pool = ThreadPool::new(4);
-        let optimal_strategy = optimize_blackjack(game_strat, &thread_pool, 0);
+        let optimal_strategy = optimize_blackjack(game_strat, 0).await;
         CliGame {
             game_state: GameState::new(Box::new(optimal_strategy)),
         }

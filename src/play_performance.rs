@@ -12,23 +12,21 @@ use blackjack_rust::commandline_params::{
     get_commandline_params, get_play_config, get_strat_config,
 };
 use std::time::Instant;
-use threadpool::ThreadPool;
 
-pub fn play<BlackjackStrategyType>(
+pub async fn play<BlackjackStrategyType>(
     blackjack_strategy: BlackjackStrategyType,
     play_config: PlayConfiguration,
     strat_config: StrategyConfiguration,
-    thread_pool: &ThreadPool,
     description: String,
 ) -> f64
 where
     BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static,
 {
     let strat_start = Instant::now();
-    let mut strat = optimize_blackjack(blackjack_strategy, thread_pool, 0);
+    let mut strat = optimize_blackjack(blackjack_strategy, 0).await;
     let strat_duration = strat_start.elapsed();
     let start = Instant::now();
-    let result = play_blackjack(play_config.clone(), &mut strat);
+    let result = play_blackjack(play_config.clone(), &mut strat).await;
     let duration = start.elapsed();
     // Print the elapsed time
     println!(
@@ -40,68 +38,60 @@ where
     result
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let description = "Play as many hands as specified with the optimal blackjack strategy and compare the performance of the storage approaches of the blackjack strategy";
     let app = get_commandline_params("play_normal".to_string(), description);
     println!("Measure performance:");
     let mut play_config = get_play_config(app.clone());
     play_config.play_normal = false;
     let strat_config = get_strat_config(app);
-    let thread_pool = ThreadPool::new(strat_config.nb_threads.try_into().unwrap());
     play(
         BlackjackStrategy::new(true),
         play_config.clone(),
         strat_config.clone(),
-        &thread_pool,
         "HashMap".to_string(),
-    );
+    ).await;
     play(
         BlackjackStrategy::new(false),
         play_config.clone(),
         strat_config.clone(),
-        &thread_pool,
         "OrderedMap".to_string(),
-    );
+    ).await;
     play(
         BlackjackStrategyVec::new(false),
         play_config.clone(),
         strat_config.clone(),
-        &thread_pool,
         "ReversedVec".to_string(),
-    );
+    ).await;
     play(
         BlackjackStrategyVec::new(true),
         play_config.clone(),
         strat_config.clone(),
-        &thread_pool,
         "Vec".to_string(),
-    );
+    ).await;
     play(
         BlackjackStrategyCombinedHashMap::new(),
         play_config.clone(),
         strat_config.clone(),
-        &thread_pool,
         "CombinedHashMap".to_string(),
-    );
+    ).await;
     play(
         BlackjackStrategyCombinedOrderedHashMap::new(),
         play_config.clone(),
         strat_config.clone(),
-        &thread_pool,
         "CombinedOrderedHashMap".to_string(),
-    );
+    ).await;
     play(
         BlackjackStrategyCombinedVec::new(false),
         play_config.clone(),
         strat_config.clone(),
-        &thread_pool,
         "CombinedVec".to_string(),
-    );
+    ).await;
     play(
         BlackjackStrategyCombinedVec::new(true),
         play_config,
         strat_config,
-        &thread_pool,
         "CombinedReversedVec".to_string(),
-    );
+    ).await;
 }
