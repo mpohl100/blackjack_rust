@@ -12,7 +12,7 @@ use crate::blackjack::strategy::blackjack_strategy_combined_ordered_hash_map::Bl
 
 use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
 use crate::blackjack::traits::BlackjackGame;
-use crate::blackjack::traits::BlackjackStrategyTrait;
+use crate::blackjack::traits::WrappedStrategy;
 
 use std::cmp::Ordering;
 
@@ -26,11 +26,11 @@ struct GameState {
     previous_balance: f64,
     nb_hands_played: i32,
     player_bet: f64,
-    optimal_strategy: Box<dyn BlackjackStrategyTrait + Send>,
+    optimal_strategy: WrappedStrategy,
 }
 
 impl GameState {
-    pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait + Send>) -> GameState {
+    pub fn new(optimal_strategy: WrappedStrategy) -> GameState {
         GameState {
             rng: RandomNumberGenerator::new(),
             deck: WrappedDeck::new(Box::new(EightDecks::new())),
@@ -63,7 +63,7 @@ impl GameState {
 
     pub async fn play(&mut self) {
         self.previous_balance = self.current_balance;
-        let mut game_strat = GameStrategy::new(&mut *self.optimal_strategy);
+        let mut game_strat = GameStrategy::new(self.optimal_strategy.clone());
         self.current_balance += play_blackjack_hand(
             self.player_bet,
             self.player_hand.clone(),
@@ -93,10 +93,10 @@ pub struct CliGame {
 
 impl CliGame {
     pub async fn new() -> CliGame {
-        let game_strat = BlackjackStrategyCombinedOrderedHashMap::new();
+        let game_strat = WrappedStrategy::new(BlackjackStrategyCombinedOrderedHashMap::new());
         let optimal_strategy = optimize_blackjack(game_strat, 0).await;
         CliGame {
-            game_state: GameState::new(Box::new(optimal_strategy)),
+            game_state: GameState::new(optimal_strategy),
         }
     }
 
@@ -118,18 +118,18 @@ impl CliGame {
     }
 }
 
-struct GameStrategy<'_os> {
-    optimal_strategy: &'_os mut (dyn BlackjackStrategyTrait + Send),
+struct GameStrategy {
+    optimal_strategy: WrappedStrategy,
 }
 
-impl GameStrategy<'_> {
-    pub fn new(optimal_strategy: &mut (dyn BlackjackStrategyTrait + Send)) -> GameStrategy {
+impl GameStrategy {
+    pub fn new(optimal_strategy: WrappedStrategy) -> GameStrategy {
         GameStrategy { optimal_strategy }
     }
 }
 
 #[async_trait]
-impl BlackjackGame for GameStrategy<'_> {
+impl BlackjackGame for GameStrategy {
     async fn get_draw(&mut self, situation: HandSituation, _deck: &mut WrappedDeck) -> bool {
         println!(
             "The dealer is showing: {}",

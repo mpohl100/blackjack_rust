@@ -13,12 +13,13 @@ use crate::blackjack::deck::WrappedDeck;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 use crate::blackjack::hand::PlayerHand;
 pub use crate::blackjack::traits::BlackjackStrategyTrait;
+use crate::blackjack::traits::WrappedStrategy;
 
 use tokio::sync::mpsc::channel;
 
-struct BlackjackGameSituation<'a> {
+struct BlackjackGameSituation {
     pub game_situation: GameSituation,
-    pub strat: &'a mut dyn BlackjackStrategyTrait,
+    pub strat: WrappedStrategy,
 }
 
 fn get_dealer_rank(game_situation: GameSituation) -> BlackjackRank {
@@ -76,13 +77,13 @@ fn get_player_hand(game_situation: GameSituation) -> PlayerHand {
     ret
 }
 
-async fn optimize_situation(situation: &mut BlackjackGameSituation<'_>, deck: &CountedDeck) -> bool {
+async fn optimize_situation(situation: &mut BlackjackGameSituation, deck: &CountedDeck) -> bool {
     let boxed_deck = WrappedDeck::new(Box::new(deck.clone()));
     let mut challenge = BlackjackChallenge::new(
         situation.game_situation,
         get_dealer_rank(situation.game_situation),
         get_player_hand(situation.game_situation),
-        situation.strat,
+        situation.strat.clone(),
         boxed_deck,
     );
     let dont = false;
@@ -97,33 +98,29 @@ async fn optimize_situation(situation: &mut BlackjackGameSituation<'_>, deck: &C
     }
 }
 
-async fn calculate_draw<BlackjackStrategyType>(
+async fn calculate_draw(
     hand_situations: Vec<HandSituation>,
     deck: CountedDeck,
-    blackjack_strategy: BlackjackStrategyType,
-) -> BlackjackStrategyType
-where
-    BlackjackStrategyType: BlackjackStrategyTrait + Send + Clone,
+    blackjack_strategy: WrappedStrategy,
+) -> WrappedStrategy
 {
-    let mut result = blackjack_strategy.clone();
+    let mut result = blackjack_strategy;
     for hand_situation in hand_situations.iter().rev() {
         let mut situation = BlackjackGameSituation {
             game_situation: GameSituation::Draw(*hand_situation),
-            strat: &mut result.clone(),
+            strat: result.clone(),
         };
         result.add_draw(*hand_situation, optimize_situation(&mut situation, &deck).await);
     }
     result
 }
 
-async fn optimize_draw<BlackjackStrategyType>(
-    blackjack_strategy: BlackjackStrategyType,
+async fn optimize_draw(
+    blackjack_strategy: WrappedStrategy,
     card_count: i32,
-) -> BlackjackStrategyType
-where
-    BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static,
+) -> WrappedStrategy
 {
-    let mut result = blackjack_strategy.clone();
+    let mut result = blackjack_strategy;
     let deck = CountedDeck::new(card_count);
     // first optimize drawing
     let all_situations = HandSituation::create_all();
@@ -161,12 +158,10 @@ where
     result
 }
 
-async fn optimize_double_down<BlackjackStrategyType>(
-    blackjack_strategy: BlackjackStrategyType,
+async fn optimize_double_down(
+    blackjack_strategy: WrappedStrategy,
     card_count: i32,
-) -> BlackjackStrategyType
-where
-    BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static,
+) -> WrappedStrategy
 {
     let mut result = blackjack_strategy.clone();
     let deck = CountedDeck::new(card_count);
@@ -179,7 +174,7 @@ where
         tokio::spawn(async move {
             let mut situation = BlackjackGameSituation {
                 game_situation: GameSituation::DoubleDown(hand_situation_clone),
-                strat: &mut result_clone.clone(),
+                strat: result_clone.clone(),
             };
             let do_it = optimize_situation(&mut situation, &deck_clone).await;
             tr_clone
@@ -198,12 +193,10 @@ where
     result
 }
 
-async fn optimize_split<BlackjackStrategyType>(
-    blackjack_strategy: BlackjackStrategyType,
+async fn optimize_split(
+    blackjack_strategy: WrappedStrategy,
     card_count: i32,
-) -> BlackjackStrategyType
-where
-    BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static,
+) -> WrappedStrategy
 {
     let mut result = blackjack_strategy.clone();
     let deck = CountedDeck::new(card_count);
@@ -216,7 +209,7 @@ where
         tokio::spawn(async move {
             let mut situation = BlackjackGameSituation {
                 game_situation: GameSituation::Split(split_situation_clone),
-                strat: &mut result_clone.clone(),
+                strat: result_clone,
             };
             let do_it = optimize_situation(&mut situation, &deck_clone).await;
             tr_clone
@@ -234,14 +227,12 @@ where
     result
 }
 
-pub async fn optimize_blackjack<BlackjackStrategyType>(
-    blackjack_strategy: BlackjackStrategyType,
+pub async fn optimize_blackjack(
+    blackjack_strategy: WrappedStrategy,
     card_count: i32,
-) -> BlackjackStrategyType
-where
-    BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static,
+) -> WrappedStrategy
 {
-    let mut result = optimize_draw(blackjack_strategy, card_count).await.clone();
+    let mut result = optimize_draw(blackjack_strategy, card_count).await;
     let _deck = CountedDeck::new(card_count);
 
     // then optimize double down

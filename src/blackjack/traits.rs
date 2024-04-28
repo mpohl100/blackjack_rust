@@ -34,14 +34,15 @@ pub trait BlackjackStrategyTrait: BlackjackGame {
     fn dump(&self) -> BlackjackStrategyData;
 }
 
-pub struct WrappedStrategy<BlackjackStrategyType> where BlackjackStrategyType: BlackjackStrategyTrait + Send{
-    strat: Arc<Mutex<BlackjackStrategyType>>,
+#[derive(Clone)]
+pub struct WrappedStrategy{
+    strat: Arc<Mutex<Box<dyn BlackjackStrategyTrait + Send>>>,
 }
 
-impl<BlackjackStrategyType> WrappedStrategy<BlackjackStrategyType> where BlackjackStrategyType: BlackjackStrategyTrait + Send{
-    pub fn new(strat: BlackjackStrategyType) -> WrappedStrategy<BlackjackStrategyType> {
+impl WrappedStrategy {
+    pub fn new<BlackjackStrategyType>(strat: BlackjackStrategyType) -> WrappedStrategy where BlackjackStrategyType: BlackjackStrategyTrait + Send + 'static {
         WrappedStrategy {
-            strat: Arc::new(Mutex::new(strat)),
+            strat: Arc::new(Mutex::new(Box::new(strat))),
         }
     }
 
@@ -88,5 +89,10 @@ impl<BlackjackStrategyType> WrappedStrategy<BlackjackStrategyType> where Blackja
     pub fn dump(&self) -> BlackjackStrategyData {
         let strat = self.strat.lock().unwrap();
         strat.dump()
+    }
+
+    pub fn upcast_mut(&self) -> &mut dyn BlackjackGame {
+        let mut strat = self.strat.lock().unwrap();
+        strat.upcast_mut()
     }
 }
