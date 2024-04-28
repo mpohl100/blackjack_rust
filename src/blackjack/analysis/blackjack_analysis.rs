@@ -110,7 +110,7 @@ async fn calculate_draw(
             game_situation: GameSituation::Draw(*hand_situation),
             strat: result.clone(),
         };
-        result.add_draw(*hand_situation, optimize_situation(&mut situation, &deck).await);
+        result.add_draw(*hand_situation, optimize_situation(&mut situation, &deck).await).await;
     }
     result
 }
@@ -188,7 +188,7 @@ async fn optimize_double_down(
                 Some(result) => result,
                 None => panic!("Did not receive blackjack strategy double down calculation"),
             };
-        result.add_double_down(hand_situation, do_it);
+        result.add_double_down(hand_situation, do_it).await;
     }
     result
 }
@@ -222,7 +222,7 @@ async fn optimize_split(
                 Some(result) => result,
                 None => panic!("Did not receive blackjack strategy split calculation"),
             };
-        result.add_split(split_situation, do_it);
+        result.add_split(split_situation, do_it).await;
     }
     result
 }
