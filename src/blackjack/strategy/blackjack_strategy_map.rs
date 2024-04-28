@@ -96,6 +96,7 @@ impl BlackjackGame for BlackjackStrategy {
     }
 }
 
+#[async_trait]
 impl BlackjackStrategyTrait for BlackjackStrategy {
     fn as_any(&self) -> &dyn std::any::Any {
         self
@@ -105,7 +106,7 @@ impl BlackjackStrategyTrait for BlackjackStrategy {
         self
     }
 
-    fn to_string_mat2(&self) -> String {
+    async fn to_string_mat2(&self) -> String {
         let mut hard_strat: BTreeMap<HandSituation, String> = BTreeMap::new();
         let mut soft_strat: BTreeMap<HandSituation, String> = BTreeMap::new();
 
@@ -183,24 +184,24 @@ impl BlackjackStrategyTrait for BlackjackStrategy {
         ret
     }
 
-    fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
+    async fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
         self.data.drawing_decisions.insert(situation, do_it);
         self.data_hash.drawing_decisions.insert(situation, do_it);
     }
 
-    fn add_double_down(&mut self, situation: HandSituation, do_it: bool) {
+    async fn add_double_down(&mut self, situation: HandSituation, do_it: bool) {
         self.data.double_down_decisions.insert(situation, do_it);
         self.data_hash
             .double_down_decisions
             .insert(situation, do_it);
     }
 
-    fn add_split(&mut self, situation: SplitSituation, do_it: bool) {
+    async fn add_split(&mut self, situation: SplitSituation, do_it: bool) {
         self.data.split_decisions.insert(situation, do_it);
         self.data_hash.split_decisions.insert(situation, do_it);
     }
 
-    fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData) {
+    async fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData) {
         for (sit, do_it) in blackjack_strategy.drawing_decisions.iter() {
             self.add_draw(*sit, *do_it);
         }
@@ -214,7 +215,7 @@ impl BlackjackStrategyTrait for BlackjackStrategy {
         }
     }
 
-    fn dump(&self) -> BlackjackStrategyData {
+    async fn dump(&self) -> BlackjackStrategyData {
         self.data.clone()
     }
 }

@@ -30,17 +30,18 @@ pub trait BlackjackGame {
     async fn get_split(&mut self, situation: SplitSituation, deck: &mut WrappedDeck) -> bool;
 }
 
+#[async_trait]
 pub trait BlackjackStrategyTrait: BlackjackGame {
     fn as_any(&self) -> &dyn std::any::Any;
     fn upcast_mut(&mut self) -> &mut dyn BlackjackGame;
-    fn add_draw(&mut self, situation: HandSituation, do_it: bool);
-    fn add_double_down(&mut self, situation: HandSituation, do_it: bool);
-    fn add_split(&mut self, situation: SplitSituation, do_it: bool);
+    async fn add_draw(&mut self, situation: HandSituation, do_it: bool);
+    async fn add_double_down(&mut self, situation: HandSituation, do_it: bool);
+    async fn add_split(&mut self, situation: SplitSituation, do_it: bool);
 
-    fn to_string_mat2(&self) -> String;
+    async fn to_string_mat2(&self) -> String;
 
-    fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData);
-    fn dump(&self) -> BlackjackStrategyData;
+    async fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData);
+    async fn dump(&self) -> BlackjackStrategyData;
 }
 
 #[derive(Clone)]
@@ -88,7 +89,7 @@ impl WrappedStrategy {
 
     pub async fn to_string_mat2(&self) -> String {
         let strat = self.strat.lock().await;
-        strat.to_string_mat2()
+        strat.to_string_mat2().await
     }
 
     pub async fn combine(&self, blackjack_strategy: &BlackjackStrategyData) {
@@ -98,7 +99,7 @@ impl WrappedStrategy {
 
     pub async fn dump(&self) -> BlackjackStrategyData {
         let strat = self.strat.lock().await;
-        strat.dump()
+        strat.dump().await
     }
 
     pub fn get(&mut self) -> Arc<Mutex<Box<dyn BlackjackStrategyTrait + Send>>> {

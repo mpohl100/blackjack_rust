@@ -96,6 +96,7 @@ impl BlackjackGame for BlackjackStrategyVec {
     }
 }
 
+#[async_trait]
 impl BlackjackStrategyTrait for BlackjackStrategyVec {
     fn as_any(&self) -> &dyn std::any::Any {
         self
@@ -105,7 +106,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec {
         self
     }
 
-    fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
+    async fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
         let mut iter = self.data.drawing_percentages.iter_mut();
         let res = iter.find(|x| x.situation == situation);
         match res {
@@ -119,7 +120,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec {
         }
     }
 
-    fn add_double_down(&mut self, situation: HandSituation, do_it: bool) {
+    async fn add_double_down(&mut self, situation: HandSituation, do_it: bool) {
         let mut iter = self.data.double_down_percentages.iter_mut();
         let res = iter.find(|x| x.situation == situation);
         match res {
@@ -133,7 +134,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec {
         }
     }
 
-    fn add_split(&mut self, situation: SplitSituation, do_it: bool) {
+    async fn add_split(&mut self, situation: SplitSituation, do_it: bool) {
         let mut iter = self.data.split_percentages.iter_mut();
         let res = iter.find(|x| x.situation == situation);
         match res {
@@ -147,7 +148,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec {
         }
     }
 
-    fn to_string_mat2(&self) -> String {
+    async fn to_string_mat2(&self) -> String {
         let mut blackjack_strategy_sorted = BlackjackStrategy::new(false);
         for situation_strategy in &self.data.drawing_percentages {
             blackjack_strategy_sorted
@@ -161,10 +162,10 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec {
             blackjack_strategy_sorted
                 .add_split(situation_strategy.situation, situation_strategy.do_it);
         }
-        blackjack_strategy_sorted.to_string_mat2()
+        blackjack_strategy_sorted.to_string_mat2().await
     }
 
-    fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData) {
+    async fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData) {
         for (sit, do_it) in blackjack_strategy.drawing_decisions.iter() {
             self.add_draw(*sit, *do_it);
         }
@@ -178,7 +179,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec {
         }
     }
 
-    fn dump(&self) -> BlackjackStrategyData {
+    async fn dump(&self) -> BlackjackStrategyData {
         let mut result = BlackjackStrategyData::default();
 
         for hand_situation in &self.data.drawing_percentages {
