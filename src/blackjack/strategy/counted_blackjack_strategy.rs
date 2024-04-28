@@ -82,6 +82,10 @@ impl BlackjackGame for CountedBlackjackStrategy {
 }
 
 impl BlackjackStrategyTrait for CountedBlackjackStrategy {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
     fn upcast_mut(&mut self) -> &mut dyn BlackjackGame {
         self
     }

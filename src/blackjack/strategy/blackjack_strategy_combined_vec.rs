@@ -83,6 +83,10 @@ impl BlackjackGame for BlackjackStrategyCombinedVec {
 }
 
 impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
     fn upcast_mut(&mut self) -> &mut dyn BlackjackGame {
         self
     }
