@@ -6,6 +6,7 @@ use blackjack_rust::blackjack::strategy::blackjack_strategy_combined_vec::Blackj
 use blackjack_rust::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
 use blackjack_rust::blackjack::strategy::blackjack_strategy_vec::BlackjackStrategyVec;
 use blackjack_rust::blackjack::traits::BlackjackStrategyTrait;
+use blackjack_rust::blackjack::traits::WrappedStrategy;
 use blackjack_rust::commandline_params::get_commandline_params;
 use blackjack_rust::commandline_params::get_play_config;
 use blackjack_rust::commandline_params::get_strat_config;
@@ -25,7 +26,8 @@ async fn play<BlackjackStrategyType>(
     let mut strat = optimize_counted(blackjack_strategy).await;
     let strat_duration = strat_start.elapsed();
     let start = Instant::now();
-    let result = play_blackjack(play_config.clone(), &mut strat).await;
+    let mut wrapped_strat = WrappedStrategy::new(strat.clone());
+    let result = play_blackjack(play_config.clone(), &mut wrapped_strat).await;
     let duration = start.elapsed();
     // Print the elapsed time
     println!(
