@@ -1,5 +1,4 @@
 use std::time::Instant;
-use threadpool::ThreadPool;
 
 use blackjack_rust::{
     blackjack::analysis::blackjack_analysis::optimize_blackjack,
@@ -8,23 +7,23 @@ use blackjack_rust::{
     blackjack::play_blackjack::play_blackjack,
     blackjack::strategy::blackjack_strategy_map::BlackjackStrategy,
     blackjack::traits::BlackjackStrategyTrait,
+    blackjack::traits::WrappedStrategy,
 };
 
-pub fn play<BlackjackStrategyType>(
+pub async fn play<BlackjackStrategyType>(
     blackjack_strategy: BlackjackStrategyType,
     play_config: PlayConfiguration,
     strat_config: StrategyConfiguration,
-    thread_pool: &ThreadPool,
     description: String,
 ) -> f64
 where
     BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static,
 {
     let strat_start = Instant::now();
-    let mut strat = optimize_blackjack(blackjack_strategy, thread_pool, 0);
+    let mut strat = optimize_blackjack(WrappedStrategy::new(blackjack_strategy), 0).await;
     let strat_duration = strat_start.elapsed();
     let start = Instant::now();
-    let result = play_blackjack(play_config.clone(), &mut strat);
+    let result = play_blackjack(play_config.clone(), &mut strat).await;
     let duration = start.elapsed();
     // Print the elapsed time
     println!(
@@ -36,21 +35,19 @@ where
     result
 }
 
-#[test]
-fn play_blackjack_normal() {
+#[tokio::test]
+async fn play_blackjack_normal() {
     let play_configuration = PlayConfiguration {
         nb_hands: 100000,
         play_normal: true,
     };
     let strategy_configuration = StrategyConfiguration { nb_threads: 4 };
-    let thread_pool = ThreadPool::new(strategy_configuration.nb_threads.try_into().unwrap());
     let result_hash_map = play(
         BlackjackStrategy::new(true),
         play_configuration.clone(),
         strategy_configuration.clone(),
-        &thread_pool,
         "HashMap".to_string(),
-    );
+    ).await;
     //let result_ordinary_map = play(BlackjackStrategy::new(false), play_configuration.clone(), strategy_configuration.clone(), &thread_pool,"OrderedMap".to_string());
     //let result_vec = play(BlackjackStrategyVec::new(false), play_configuration.clone(), strategy_configuration.clone(), &thread_pool,"ReversedVec".to_string());
     //let result_vec_reversed = play(BlackjackStrategyVec::new(true), play_configuration, strategy_configuration.clone(), &thread_pool,"Vec".to_string());
