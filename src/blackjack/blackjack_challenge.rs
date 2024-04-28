@@ -9,7 +9,7 @@ use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::play_blackjack_hand::play_blackjack_hand;
 use crate::blackjack::play_blackjack_hand::PlayMode;
 use crate::blackjack::traits::BlackjackStrategyTrait;
-use crate::blackjack::traits::Stringable;
+
 use crate::blackjack::traits::WrappedStrategy;
 use crate::blackjack::traits::WrappedGame;
 

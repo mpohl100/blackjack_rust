@@ -23,7 +23,7 @@ async fn play<BlackjackStrategyType>(
     BlackjackStrategyType: BlackjackStrategyTrait + Clone + Send + 'static,
 {
     let strat_start = Instant::now();
-    let mut strat = optimize_counted(blackjack_strategy).await;
+    let strat = optimize_counted(blackjack_strategy).await;
     let strat_duration = strat_start.elapsed();
     let start = Instant::now();
     let mut wrapped_strat = WrappedStrategy::new(strat.clone());
