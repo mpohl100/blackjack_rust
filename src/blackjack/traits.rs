@@ -74,17 +74,17 @@ impl WrappedStrategy {
 
     pub async fn add_draw(&self, situation: HandSituation, do_it: bool) {
         let mut strat = self.strat.lock().await;
-        strat.add_draw(situation, do_it);
+        strat.add_draw(situation, do_it).await;
     }
 
     pub async fn add_double_down(&self, situation: HandSituation, do_it: bool) {
         let mut strat = self.strat.lock().await;
-        strat.add_double_down(situation, do_it);
+        strat.add_double_down(situation, do_it).await;
     }
 
     pub async fn add_split(&self, situation: SplitSituation, do_it: bool) {
         let mut strat = self.strat.lock().await;
-        strat.add_split(situation, do_it);
+        strat.add_split(situation, do_it).await;
     }
 
     pub async fn to_string_mat2(&self) -> String {
@@ -94,7 +94,7 @@ impl WrappedStrategy {
 
     pub async fn combine(&self, blackjack_strategy: &BlackjackStrategyData) {
         let mut strat = self.strat.lock().await;
-        strat.combine(blackjack_strategy);
+        strat.combine(blackjack_strategy).await;
     }
 
     pub async fn dump(&self) -> BlackjackStrategyData {
