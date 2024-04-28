@@ -4,7 +4,7 @@ use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 use crate::blackjack::hand::DealerHand;
 use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::rng::RandomNumberGenerator;
-use crate::blackjack::traits::BlackjackGame;
+use crate::blackjack::traits::WrappedGame;
 
 use super::analysis::blackjack_analysis::HandSituation;
 use super::analysis::blackjack_analysis::SplitSituation;
@@ -45,7 +45,7 @@ pub async fn play_blackjack_hand(
     mut player_hand: PlayerHand,
     mut dealer_hand: DealerHand,
     deck: &mut WrappedDeck,
-    player_strategy: &mut dyn BlackjackGame,
+    player_strategy: WrappedGame,
     rng: &mut RandomNumberGenerator,
     play_mode: PlayMode,
 ) -> f64 {
@@ -67,7 +67,7 @@ pub async fn play_blackjack_hand(
                 first,
                 dealer_hand.clone(),
                 deck,
-                player_strategy,
+                player_strategy.clone(),
                 rng,
                 play_mode,
             )).await;

@@ -10,6 +10,7 @@ use crate::blackjack::play_blackjack_hand::play_blackjack_hand;
 use crate::blackjack::play_blackjack_hand::PlayMode;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::traits::WrappedStrategy;
+use crate::blackjack::traits::WrappedGame;
 
 pub struct BlackjackChallenge {
     game_situation_: GameSituation,
@@ -48,9 +49,7 @@ impl BlackjackChallenge {
         let mut rng = RandomNumberGenerator::new();
         let mut result = 0.0;
         let play_mode = self.get_play_mode();
-        let arc_strat = self.strat.get();
-        let mut strat = arc_strat.lock().unwrap();
-        let blackjack_game = strat.upcast_mut();
+        let blackjack_game = WrappedGame::new_from_strat(&mut self.strat);
         for _ in 0..2000 {
             let dealer_hand = DealerHand::new(&[
                 self.dealer_rank.get_representative_card(),
@@ -61,7 +60,7 @@ impl BlackjackChallenge {
                 self.player_hand.clone(),
                 dealer_hand,
                 &mut self.deck,
-                blackjack_game,
+                blackjack_game.clone(),
                 &mut rng,
                 play_mode,
             ).await;
