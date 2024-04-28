@@ -2,8 +2,16 @@ use crate::blackjack::blackjack_situation::HandSituation;
 use crate::blackjack::blackjack_situation::SplitSituation;
 use crate::blackjack::deck::WrappedDeck;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
+use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategy;
+use crate::blackjack::strategy::blackjack_strategy_vec::BlackjackStrategyVec;
+use crate::blackjack::strategy::blackjack_strategy_combined_hash_map::BlackjackStrategyCombinedHashMap;
+use crate::blackjack::strategy::blackjack_strategy_combined_ordered_hash_map::BlackjackStrategyCombinedOrderedHashMap;
+use crate::blackjack::strategy::blackjack_strategy_combined_vec::BlackjackStrategyCombinedVec;
+use crate::blackjack::strategy::counted_blackjack_strategy::CountedBlackjackStrategy;
+
 
 use async_trait::async_trait;
+use std::any::TypeId;
 use std::sync::{Arc, Mutex};
 pub trait Allable {
     fn create_all() -> Vec<Self>
@@ -23,6 +31,7 @@ pub trait BlackjackGame {
 }
 
 pub trait BlackjackStrategyTrait: BlackjackGame {
+    fn as_any(&self) -> &dyn std::any::Any;
     fn upcast_mut(&mut self) -> &mut dyn BlackjackGame;
     fn add_draw(&mut self, situation: HandSituation, do_it: bool);
     fn add_double_down(&mut self, situation: HandSituation, do_it: bool);
@@ -104,6 +113,74 @@ impl WrappedGame{
     pub fn new<BlackjackGameType>(game: BlackjackGameType) -> WrappedGame where BlackjackGameType: BlackjackGame + Send + 'static {
         WrappedGame {
             game: Arc::new(Mutex::new(Box::new(game))),
+        }
+    }
+
+    pub fn new_from_strat(strat: Box<dyn BlackjackStrategyTrait + Send>) -> WrappedGame {
+        let game_map = match strat.as_any().downcast_ref::<BlackjackStrategy>(){
+            Some(strategy) => {
+                Some(strategy)
+            },
+            None => None,
+        };
+        let game_vec = match strat.as_any().downcast_ref::<BlackjackStrategyVec>(){
+            Some(strategy) => {
+                Some(strategy)
+            },
+            None => None,
+        };
+        let game_combined_hash_map = match strat.as_any().downcast_ref::<BlackjackStrategyCombinedHashMap>(){
+            Some(strategy) => {
+                Some(strategy)
+            },
+            None => None,
+        };
+        let game_combined_ordered_hash_map = match strat.as_any().downcast_ref::<BlackjackStrategyCombinedOrderedHashMap>(){
+            Some(strategy) => {
+                Some(strategy)
+            },
+            None => None,
+        };
+        let game_combined_vec = match strat.as_any().downcast_ref::<BlackjackStrategyCombinedVec>(){
+            Some(strategy) => {
+                Some(strategy)
+            },
+            None => None,
+        };
+        let game_counted = match strat.as_any().downcast_ref::<CountedBlackjackStrategy>(){
+            Some(strategy) => {
+                Some(strategy)
+            },
+            None => None,
+        };
+        match game_map{
+            Some(game_map_inner) => WrappedGame::new(game_map_inner.clone()),
+            None => {
+                match game_vec{
+                    Some(game_vec_inner) => WrappedGame::new(game_vec_inner.clone()),
+                    None => {
+                        match game_combined_hash_map{
+                            Some(game_combined_hash_map_inner) => WrappedGame::new(game_combined_hash_map_inner.clone()),
+                            None => {
+                                match game_combined_ordered_hash_map{
+                                    Some(game_combined_ordered_hash_map_inner) => WrappedGame::new(game_combined_ordered_hash_map_inner.clone()),
+                                    None => {
+                                        match game_combined_vec{
+                                            Some(game_combined_vec_inner) => WrappedGame::new(game_combined_vec_inner.clone()),
+                                            None => {
+                                                match game_counted {
+                                                    Some(game_counted_inner) => WrappedGame::new(game_counted_inner.clone()),
+                                                    None => panic!("Unknown strategy type"),
+                                                }
+                                            }
+                                        }
+                                    },
+                                }
+                            },
+                        }
+                    },
+                }
+            },
         }
     }
 

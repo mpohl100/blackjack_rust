@@ -48,6 +48,10 @@ impl BlackjackGame for BlackjackStrategyCombinedHashMap {
 }
 
 impl BlackjackStrategyTrait for BlackjackStrategyCombinedHashMap {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+    
     fn upcast_mut(&mut self) -> &mut dyn BlackjackGame {
         self
     }
