@@ -101,11 +101,11 @@ impl CliGame {
         }
     }
 
-    pub fn play(&mut self) {
+    pub async fn play(&mut self) {
         self.game_state.nb_hands_played += 1;
         self.game_state.deal();
         self.game_state.print_before_hand();
-        self.game_state.play();
+        self.game_state.play().await;
         self.game_state.print_after_hand();
     }
 

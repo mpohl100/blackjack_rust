@@ -20,7 +20,8 @@ use std::cmp::Ordering;
 use async_trait::async_trait;
 
 use tokio::sync::mpsc;
-use std::sync::{Arc, Mutex};
+use tokio::sync::Mutex;
+use std::sync::Arc;
 
 #[derive(Clone, Copy)]
 pub enum GameAction{
@@ -136,11 +137,11 @@ impl ChannelGame {
         }
     }
 
-    pub fn play(&mut self) {
+    pub async fn play(&mut self) {
         self.game_state.nb_hands_played += 1;
         self.game_state.deal();
         self.game_state.print_before_hand();
-        self.game_state.play();
+        self.game_state.play().await;
         self.game_state.print_after_hand();
     }
 
@@ -188,13 +189,13 @@ impl BlackjackGame for GameStrategy {
             .read_line(&mut input)
             .expect("Failed to read line");
         let result = input.trim() == "y";
-        if result == self.game_data.lock().unwrap().optimal_strategy.get_draw(situation, _deck).await {
+        if result == self.game_data.lock().await.optimal_strategy.get_draw(situation, _deck).await {
             println!("Right decision");
-            self.game_data.lock().unwrap().nb_right_decisions += 1;
+            self.game_data.lock().await.nb_right_decisions += 1;
         } else {
             println!("Wrong decision");
         }
-        self.game_data.lock().unwrap().nb_hands_played += 1;
+        self.game_data.lock().await.nb_hands_played += 1;
         result
     }
 
@@ -222,16 +223,16 @@ impl BlackjackGame for GameStrategy {
         let result = input.trim() == "y";
         if result
             == self
-                .game_data.lock().unwrap()
+                .game_data.lock().await
                 .optimal_strategy
                 .get_double_down(situation, _deck).await
         {
             println!("Right decision");
-            self.game_data.lock().unwrap().nb_right_decisions += 1;
+            self.game_data.lock().await.nb_right_decisions += 1;
         } else {
             println!("Wrong decision");
         }
-        self.game_data.lock().unwrap().nb_hands_played += 1;
+        self.game_data.lock().await.nb_hands_played += 1;
         result
     }
 
@@ -251,21 +252,21 @@ impl BlackjackGame for GameStrategy {
                 .to_blackjack_score()
         );
         println!("Your options are split (s), double down (d), hit (h), stand (t)");
-        self.game_data.lock().unwrap().option_sender.send(vec![GameAction::Split, GameAction::DoubleDown, GameAction::Hit, GameAction::Stand]);
-        let choice = self.game_data.lock().unwrap().action_receiver.recv().await.unwrap();
+        self.game_data.lock().await.option_sender.send(vec![GameAction::Split, GameAction::DoubleDown, GameAction::Hit, GameAction::Stand]);
+        let choice = self.game_data.lock().await.action_receiver.recv().await.unwrap();
         let mut input = String::new();
         println!("Do you want to split? (y/n)");
         std::io::stdin()
             .read_line(&mut input)
             .expect("Failed to read line");
         let result = input.trim() == "y";
-        if result == self.game_data.lock().unwrap().optimal_strategy.get_split(situation, _deck).await {
+        if result == self.game_data.lock().await.optimal_strategy.get_split(situation, _deck).await {
             println!("Right decision");
-            self.game_data.lock().unwrap().nb_right_decisions += 1;
+            self.game_data.lock().await.nb_right_decisions += 1;
         } else {
             println!("Wrong decision");
         }
-        self.game_data.lock().unwrap().nb_hands_played += 1;
+        self.game_data.lock().await.nb_hands_played += 1;
         result
     }
 }
