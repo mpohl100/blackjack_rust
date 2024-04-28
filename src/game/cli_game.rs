@@ -13,6 +13,7 @@ use crate::blackjack::strategy::blackjack_strategy_combined_ordered_hash_map::Bl
 use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
 use crate::blackjack::traits::BlackjackGame;
 use crate::blackjack::traits::WrappedStrategy;
+use crate::blackjack::traits::WrappedGame;
 
 use std::cmp::Ordering;
 
@@ -63,13 +64,13 @@ impl GameState {
 
     pub async fn play(&mut self) {
         self.previous_balance = self.current_balance;
-        let mut game_strat = GameStrategy::new(self.optimal_strategy.clone());
+        let mut game_strat = WrappedGame::new(GameStrategy::new(self.optimal_strategy.clone()));
         self.current_balance += play_blackjack_hand(
             self.player_bet,
             self.player_hand.clone(),
             self.dealer_hand.clone(),
             &mut self.deck,
-            &mut game_strat,
+            game_strat,
             &mut self.rng,
             PlayMode::All,
         ).await;
