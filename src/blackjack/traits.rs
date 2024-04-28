@@ -50,8 +50,9 @@ pub struct WrappedStrategy{
 
 impl WrappedStrategy {
     pub fn new<BlackjackStrategyType>(strat: BlackjackStrategyType) -> WrappedStrategy where BlackjackStrategyType: BlackjackStrategyTrait + Send + 'static {
+        let b = Box::new(strat) as Box<dyn BlackjackStrategyTrait + Send>;
         WrappedStrategy {
-            strat: Arc::new(Mutex::new(Box::new(strat))),
+            strat: Arc::new(Mutex::new(b)),
         }
     }
 
@@ -112,8 +113,9 @@ pub struct WrappedGame{
 
 impl WrappedGame{
     pub fn new<BlackjackGameType>(game: BlackjackGameType) -> WrappedGame where BlackjackGameType: BlackjackGame + Send + 'static {
+        let b = Box::new(game) as Box<dyn BlackjackGame + Send>;
         WrappedGame {
-            game: Arc::new(Mutex::new(Box::new(game))),
+            game: Arc::new(Mutex::new(b)),
         }
     }
 
