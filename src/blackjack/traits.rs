@@ -95,3 +95,30 @@ impl WrappedStrategy {
         self.strat.clone()
     }
 }
+
+struct WrappedGame{
+    game: Arc<Mutex<Box<dyn BlackjackGame + Send>>>,
+}
+
+impl WrappedGame{
+    pub fn new<BlackjackGameType>(game: BlackjackGameType) -> WrappedGame where BlackjackGameType: BlackjackGame + Send + 'static {
+        WrappedGame {
+            game: Arc::new(Mutex::new(Box::new(game))),
+        }
+    }
+
+    pub async fn get_draw(&self, situation: HandSituation, deck: &mut WrappedDeck) -> bool {
+        let mut game = self.game.lock().unwrap();
+        game.get_draw(situation, deck).await
+    }
+
+    pub async fn get_double_down(&self, situation: HandSituation, deck: &mut WrappedDeck) -> bool {
+        let mut game = self.game.lock().unwrap();
+        game.get_double_down(situation, deck).await
+    }
+
+    pub async fn get_split(&self, situation: SplitSituation, deck: &mut WrappedDeck) -> bool {
+        let mut game = self.game.lock().unwrap();
+        game.get_split(situation, deck).await
+    }
+}
