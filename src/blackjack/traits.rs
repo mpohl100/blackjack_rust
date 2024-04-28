@@ -128,18 +128,18 @@ impl WrappedGame {
     pub async fn new_from_strat(arc_strat: &mut WrappedStrategy) -> WrappedGame {
         let arc_strategy = arc_strat.get();
         let strat = arc_strategy.lock().await;
-        let game_map = strat.as_any().downcast_ref::<BlackjackStrategy>().map(|strategy| strategy);
-        let game_vec = strat.as_any().downcast_ref::<BlackjackStrategyVec>().map(|strategy| strategy);
+        let game_map = strat.as_any().downcast_ref::<BlackjackStrategy>();
+        let game_vec = strat.as_any().downcast_ref::<BlackjackStrategyVec>();
         let game_combined_hash_map = strat
             .as_any()
-            .downcast_ref::<BlackjackStrategyCombinedHashMap>().map(|strategy| strategy);
+            .downcast_ref::<BlackjackStrategyCombinedHashMap>();
         let game_combined_ordered_hash_map = strat
             .as_any()
-            .downcast_ref::<BlackjackStrategyCombinedOrderedHashMap>().map(|strategy| strategy);
+            .downcast_ref::<BlackjackStrategyCombinedOrderedHashMap>();
         let game_combined_vec = strat
             .as_any()
-            .downcast_ref::<BlackjackStrategyCombinedVec>().map(|strategy| strategy);
-        let game_counted = strat.as_any().downcast_ref::<CountedBlackjackStrategy>().map(|strategy| strategy);
+            .downcast_ref::<BlackjackStrategyCombinedVec>();
+        let game_counted = strat.as_any().downcast_ref::<CountedBlackjackStrategy>();
         match game_map {
             Some(game_map_inner) => WrappedGame::new(game_map_inner.clone()),
             None => match game_vec {
