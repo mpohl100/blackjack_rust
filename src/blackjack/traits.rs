@@ -118,7 +118,8 @@ impl WrappedGame{
     }
 
     pub fn new_from_strat(arc_strat: &mut WrappedStrategy) -> WrappedGame {
-        let strat = arc_strat.get().lock().unwrap();
+        let arc_strategy = arc_strat.get();
+        let strat = arc_strategy.lock().unwrap();
         let game_map = match strat.as_any().downcast_ref::<BlackjackStrategy>(){
             Some(strategy) => {
                 Some(strategy)
