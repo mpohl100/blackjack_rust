@@ -6,8 +6,8 @@ use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::play_blackjack_hand::play_blackjack_hand;
 use crate::blackjack::play_blackjack_hand::PlayMode;
 use crate::blackjack::rng::RandomNumberGenerator;
-use crate::blackjack::traits::WrappedStrategy;
 use crate::blackjack::traits::WrappedGame;
+use crate::blackjack::traits::WrappedStrategy;
 
 use super::deck::WrappedDeck;
 
@@ -39,7 +39,8 @@ pub async fn play_blackjack(
             blackjack_game.clone(),
             &mut rng,
             PlayMode::All,
-        ).await;
+        )
+        .await;
     }
     result
 }

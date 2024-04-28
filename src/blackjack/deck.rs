@@ -14,7 +14,7 @@ pub trait Deck {
     fn get_nb_cards(&self) -> i32;
 }
 
-pub struct WrappedDeck{
+pub struct WrappedDeck {
     deck: Arc<Mutex<Box<dyn Deck + Send>>>,
 }
 

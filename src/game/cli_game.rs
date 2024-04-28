@@ -12,8 +12,8 @@ use crate::blackjack::strategy::blackjack_strategy_combined_ordered_hash_map::Bl
 
 use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
 use crate::blackjack::traits::BlackjackGame;
-use crate::blackjack::traits::WrappedStrategy;
 use crate::blackjack::traits::WrappedGame;
+use crate::blackjack::traits::WrappedStrategy;
 
 use std::cmp::Ordering;
 
@@ -73,7 +73,8 @@ impl GameState {
             game_strat,
             &mut self.rng,
             PlayMode::All,
-        ).await;
+        )
+        .await;
     }
 
     pub fn print_after_hand(&self) {
@@ -183,7 +184,12 @@ impl BlackjackGame for GameStrategy {
             .read_line(&mut input)
             .expect("Failed to read line");
         let result = input.trim() == "y";
-        if result == self.optimal_strategy.get_double_down(situation, _deck).await {
+        if result
+            == self
+                .optimal_strategy
+                .get_double_down(situation, _deck)
+                .await
+        {
             println!("Right decision");
         } else {
             println!("Wrong decision");

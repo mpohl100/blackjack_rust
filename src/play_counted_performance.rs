@@ -38,7 +38,6 @@ async fn play<BlackjackStrategyType>(
     println!("result: {} after {} hands", result, play_config.nb_hands);
 }
 
-
 #[tokio::main]
 async fn main() {
     let description = "Play as many hands as specified with the optimal blackjack strategy with card counting and compare the performance of the storage approaches of the blackjack strategy";
@@ -51,47 +50,55 @@ async fn main() {
         play_config.clone(),
         strat_config.clone(),
         "HashMap".to_string(),
-    ).await;
+    )
+    .await;
     play(
         BlackjackStrategy::new(false),
         play_config.clone(),
         strat_config.clone(),
         "OrderedMap".to_string(),
-    ).await;
+    )
+    .await;
     play(
         BlackjackStrategyVec::new(false),
         play_config.clone(),
         strat_config.clone(),
         "ReversedVec".to_string(),
-    ).await;
+    )
+    .await;
     play(
         BlackjackStrategyVec::new(true),
         play_config.clone(),
         strat_config.clone(),
         "Vec".to_string(),
-    ).await;
+    )
+    .await;
     play(
         BlackjackStrategyCombinedHashMap::new(),
         play_config.clone(),
         strat_config.clone(),
         "CombinedHashMap".to_string(),
-    ).await;
+    )
+    .await;
     play(
         BlackjackStrategyCombinedOrderedHashMap::new(),
         play_config.clone(),
         strat_config.clone(),
         "CombinedOrderedHashMap".to_string(),
-    ).await;
+    )
+    .await;
     play(
         BlackjackStrategyCombinedVec::new(false),
         play_config.clone(),
         strat_config.clone(),
         "CombinedVec".to_string(),
-    ).await;
+    )
+    .await;
     play(
         BlackjackStrategyCombinedVec::new(true),
         play_config,
         strat_config,
         "CombinedReversedVec".to_string(),
-    ).await;
+    )
+    .await;
 }

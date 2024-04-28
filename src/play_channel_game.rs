@@ -1,6 +1,6 @@
-use tokio::sync::mpsc;
 use blackjack_rust::game::channel_game::ChannelGame;
 use blackjack_rust::game::channel_game::GameAction;
+use tokio::sync::mpsc;
 
 #[tokio::main]
 async fn main() {
@@ -24,7 +24,7 @@ async fn main() {
     let option_sender_clone = option_sender.clone();
     let t = tokio::spawn(async move {
         let mut channel_game = ChannelGame::new(action_receiver, option_sender_clone).await;
-        loop{
+        loop {
             channel_game.play().await;
             if !channel_game.ask_to_play_another_hand() {
                 break;
@@ -32,7 +32,7 @@ async fn main() {
         }
     });
 
-    loop{
+    loop {
         let options = option_receiver.recv().await.unwrap();
         if options.len() == 0 {
             break;

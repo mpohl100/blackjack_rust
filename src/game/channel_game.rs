@@ -1,8 +1,8 @@
 use crate::blackjack::blackjack_situation::HandSituation;
 use crate::blackjack::blackjack_situation::SplitSituation;
 use crate::blackjack::deck::Card;
-use crate::blackjack::deck::WrappedDeck;
 use crate::blackjack::deck::EightDecks;
+use crate::blackjack::deck::WrappedDeck;
 use crate::blackjack::hand::DealerHand;
 use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::play_blackjack_hand::play_blackjack_hand;
@@ -12,19 +12,19 @@ use crate::blackjack::strategy::blackjack_strategy_combined_ordered_hash_map::Bl
 
 use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
 use crate::blackjack::traits::BlackjackGame;
-use crate::blackjack::traits::WrappedStrategy;
 use crate::blackjack::traits::WrappedGame;
+use crate::blackjack::traits::WrappedStrategy;
 
 use std::cmp::Ordering;
 
 use async_trait::async_trait;
 
+use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio::sync::Mutex;
-use std::sync::Arc;
 
 #[derive(Clone, Copy)]
-pub enum GameAction{
+pub enum GameAction {
     Stop,
     Continue,
     Split,
@@ -42,7 +42,11 @@ struct GameData {
 }
 
 impl GameData {
-    pub fn new(optimal_strategy: WrappedStrategy, action_receiver: mpsc::Receiver<GameAction>, option_sender: mpsc::Sender<Vec<GameAction>>) -> GameData {
+    pub fn new(
+        optimal_strategy: WrappedStrategy,
+        action_receiver: mpsc::Receiver<GameAction>,
+        option_sender: mpsc::Sender<Vec<GameAction>>,
+    ) -> GameData {
         GameData {
             optimal_strategy,
             nb_hands_played: 0,
@@ -66,7 +70,11 @@ struct GameState {
 }
 
 impl GameState {
-    pub fn new(optimal_strategy: WrappedStrategy, action_receiver: mpsc::Receiver<GameAction>, option_sender: mpsc::Sender<Vec<GameAction>>) -> GameState {
+    pub fn new(
+        optimal_strategy: WrappedStrategy,
+        action_receiver: mpsc::Receiver<GameAction>,
+        option_sender: mpsc::Sender<Vec<GameAction>>,
+    ) -> GameState {
         GameState {
             rng: RandomNumberGenerator::new(),
             deck: WrappedDeck::new(Box::new(EightDecks::new())),
@@ -76,7 +84,11 @@ impl GameState {
             previous_balance: 1000.0,
             nb_hands_played: 0,
             player_bet: 1.0,
-            game_data: Arc::new(Mutex::new(GameData::new(optimal_strategy, action_receiver, option_sender))),
+            game_data: Arc::new(Mutex::new(GameData::new(
+                optimal_strategy,
+                action_receiver,
+                option_sender,
+            ))),
         }
     }
 
@@ -109,7 +121,8 @@ impl GameState {
             wrapped_game,
             &mut self.rng,
             PlayMode::All,
-        ).await;
+        )
+        .await;
     }
 
     pub fn print_after_hand(&self) {
@@ -129,7 +142,10 @@ pub struct ChannelGame {
 }
 
 impl ChannelGame {
-    pub async fn new(action_receiver: mpsc::Receiver<GameAction>, option_sender: mpsc::Sender<Vec<GameAction>>) -> ChannelGame {
+    pub async fn new(
+        action_receiver: mpsc::Receiver<GameAction>,
+        option_sender: mpsc::Sender<Vec<GameAction>>,
+    ) -> ChannelGame {
         let game_strat = WrappedStrategy::new(BlackjackStrategyCombinedOrderedHashMap::new());
         let optimal_strategy = optimize_blackjack(game_strat, 0).await;
         ChannelGame {
@@ -189,7 +205,15 @@ impl BlackjackGame for GameStrategy {
             .read_line(&mut input)
             .expect("Failed to read line");
         let result = input.trim() == "y";
-        if result == self.game_data.lock().await.optimal_strategy.get_draw(situation, _deck).await {
+        if result
+            == self
+                .game_data
+                .lock()
+                .await
+                .optimal_strategy
+                .get_draw(situation, _deck)
+                .await
+        {
             println!("Right decision");
             self.game_data.lock().await.nb_right_decisions += 1;
         } else {
@@ -223,9 +247,12 @@ impl BlackjackGame for GameStrategy {
         let result = input.trim() == "y";
         if result
             == self
-                .game_data.lock().await
+                .game_data
+                .lock()
+                .await
                 .optimal_strategy
-                .get_double_down(situation, _deck).await
+                .get_double_down(situation, _deck)
+                .await
         {
             println!("Right decision");
             self.game_data.lock().await.nb_right_decisions += 1;
@@ -252,15 +279,41 @@ impl BlackjackGame for GameStrategy {
                 .to_blackjack_score()
         );
         println!("Your options are split (s), double down (d), hit (h), stand (t)");
-        let _ = self.game_data.lock().await.option_sender.send(vec![GameAction::Split, GameAction::DoubleDown, GameAction::Hit, GameAction::Stand]).await;
-        let _choice = self.game_data.lock().await.action_receiver.recv().await.unwrap();
+        let _ = self
+            .game_data
+            .lock()
+            .await
+            .option_sender
+            .send(vec![
+                GameAction::Split,
+                GameAction::DoubleDown,
+                GameAction::Hit,
+                GameAction::Stand,
+            ])
+            .await;
+        let _choice = self
+            .game_data
+            .lock()
+            .await
+            .action_receiver
+            .recv()
+            .await
+            .unwrap();
         let mut input = String::new();
         println!("Do you want to split? (y/n)");
         std::io::stdin()
             .read_line(&mut input)
             .expect("Failed to read line");
         let result = input.trim() == "y";
-        if result == self.game_data.lock().await.optimal_strategy.get_split(situation, _deck).await {
+        if result
+            == self
+                .game_data
+                .lock()
+                .await
+                .optimal_strategy
+                .get_split(situation, _deck)
+                .await
+        {
             println!("Right decision");
             self.game_data.lock().await.nb_right_decisions += 1;
         } else {

@@ -152,15 +152,18 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec {
         let mut blackjack_strategy_sorted = BlackjackStrategy::new(false);
         for situation_strategy in &self.data.drawing_percentages {
             blackjack_strategy_sorted
-                .add_draw(situation_strategy.situation, situation_strategy.do_it).await;
+                .add_draw(situation_strategy.situation, situation_strategy.do_it)
+                .await;
         }
         for situation_strategy in &self.data.double_down_percentages {
             blackjack_strategy_sorted
-                .add_double_down(situation_strategy.situation, situation_strategy.do_it).await;
+                .add_double_down(situation_strategy.situation, situation_strategy.do_it)
+                .await;
         }
         for situation_strategy in &self.data.split_percentages {
             blackjack_strategy_sorted
-                .add_split(situation_strategy.situation, situation_strategy.do_it).await;
+                .add_split(situation_strategy.situation, situation_strategy.do_it)
+                .await;
         }
         blackjack_strategy_sorted.to_string_mat2().await
     }
