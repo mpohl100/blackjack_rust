@@ -3,7 +3,7 @@ use rand::prelude::*;
 use std::vec::Vec;
 
 pub struct RandomNumberGenerator {
-    rd: ThreadRng,
+    rd: StdRng,
 }
 
 impl Default for RandomNumberGenerator {
@@ -15,7 +15,7 @@ impl Default for RandomNumberGenerator {
 impl RandomNumberGenerator {
     pub fn new() -> RandomNumberGenerator {
         RandomNumberGenerator {
-            rd: rand::thread_rng(),
+            rd: StdRng::from_entropy(),
         }
     }
 
