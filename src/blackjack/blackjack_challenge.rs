@@ -9,8 +9,8 @@ use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::play_blackjack_hand::play_blackjack_hand;
 use crate::blackjack::play_blackjack_hand::PlayMode;
 
-use crate::blackjack::traits::WrappedStrategy;
 use crate::blackjack::traits::WrappedGame;
+use crate::blackjack::traits::WrappedStrategy;
 
 pub struct BlackjackChallenge {
     game_situation_: GameSituation,
@@ -44,7 +44,9 @@ impl BlackjackChallenge {
             GameSituation::DoubleDown(hand_situation) => {
                 self.strat.add_double_down(hand_situation, do_it).await
             }
-            GameSituation::Split(split_situation) => self.strat.add_split(split_situation, do_it).await,
+            GameSituation::Split(split_situation) => {
+                self.strat.add_split(split_situation, do_it).await
+            }
         }
         let mut rng = RandomNumberGenerator::new();
         let mut result = 0.0;
@@ -63,7 +65,8 @@ impl BlackjackChallenge {
                 blackjack_game.clone(),
                 &mut rng,
                 play_mode,
-            ).await;
+            )
+            .await;
         }
         result
     }

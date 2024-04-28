@@ -6,8 +6,7 @@ use blackjack_rust::{
     blackjack::blackjack_configuration::StrategyConfiguration,
     blackjack::play_blackjack::play_blackjack,
     blackjack::strategy::blackjack_strategy_map::BlackjackStrategy,
-    blackjack::traits::BlackjackStrategyTrait,
-    blackjack::traits::WrappedStrategy,
+    blackjack::traits::BlackjackStrategyTrait, blackjack::traits::WrappedStrategy,
 };
 
 pub async fn play<BlackjackStrategyType>(
@@ -47,7 +46,8 @@ async fn play_blackjack_normal() {
         play_configuration.clone(),
         strategy_configuration.clone(),
         "HashMap".to_string(),
-    ).await;
+    )
+    .await;
     //let result_ordinary_map = play(BlackjackStrategy::new(false), play_configuration.clone(), strategy_configuration.clone(), &thread_pool,"OrderedMap".to_string());
     //let result_vec = play(BlackjackStrategyVec::new(false), play_configuration.clone(), strategy_configuration.clone(), &thread_pool,"ReversedVec".to_string());
     //let result_vec_reversed = play(BlackjackStrategyVec::new(true), play_configuration, strategy_configuration.clone(), &thread_pool,"Vec".to_string());

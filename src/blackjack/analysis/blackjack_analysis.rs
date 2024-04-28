@@ -102,24 +102,24 @@ async fn calculate_draw(
     hand_situations: Vec<HandSituation>,
     deck: CountedDeck,
     blackjack_strategy: WrappedStrategy,
-) -> WrappedStrategy
-{
+) -> WrappedStrategy {
     let result = blackjack_strategy;
     for hand_situation in hand_situations.iter().rev() {
         let mut situation = BlackjackGameSituation {
             game_situation: GameSituation::Draw(*hand_situation),
             strat: result.clone(),
         };
-        result.add_draw(*hand_situation, optimize_situation(&mut situation, &deck).await).await;
+        result
+            .add_draw(
+                *hand_situation,
+                optimize_situation(&mut situation, &deck).await,
+            )
+            .await;
     }
     result
 }
 
-async fn optimize_draw(
-    blackjack_strategy: WrappedStrategy,
-    card_count: i32,
-) -> WrappedStrategy
-{
+async fn optimize_draw(blackjack_strategy: WrappedStrategy, card_count: i32) -> WrappedStrategy {
     let result = blackjack_strategy;
     let deck = CountedDeck::new(card_count);
     // first optimize drawing
@@ -148,8 +148,7 @@ async fn optimize_draw(
     }
     // receive results
     for (_, _) in buckets.iter() {
-        let bucket_result = receiver
-            .recv().await;
+        let bucket_result = receiver.recv().await;
         match bucket_result {
             Some(bucket_result) => result.combine(&bucket_result.dump().await).await,
             None => panic!("Error receiving draw result"),
@@ -161,8 +160,7 @@ async fn optimize_draw(
 async fn optimize_double_down(
     blackjack_strategy: WrappedStrategy,
     card_count: i32,
-) -> WrappedStrategy
-{
+) -> WrappedStrategy {
     let result = blackjack_strategy.clone();
     let deck = CountedDeck::new(card_count);
     let (transaction, mut receiver) = channel(32);
@@ -177,27 +175,20 @@ async fn optimize_double_down(
                 strat: result_clone.clone(),
             };
             let do_it = optimize_situation(&mut situation, &deck_clone).await;
-            let _ = tr_clone
-                .send((hand_situation_clone, do_it)).await;
+            let _ = tr_clone.send((hand_situation_clone, do_it)).await;
         });
     }
     for _ in HandSituation::create_all() {
-        let (hand_situation, do_it) = match receiver
-            .recv().await
-            {
-                Some(result) => result,
-                None => panic!("Did not receive blackjack strategy double down calculation"),
-            };
+        let (hand_situation, do_it) = match receiver.recv().await {
+            Some(result) => result,
+            None => panic!("Did not receive blackjack strategy double down calculation"),
+        };
         result.add_double_down(hand_situation, do_it).await;
     }
     result
 }
 
-async fn optimize_split(
-    blackjack_strategy: WrappedStrategy,
-    card_count: i32,
-) -> WrappedStrategy
-{
+async fn optimize_split(blackjack_strategy: WrappedStrategy, card_count: i32) -> WrappedStrategy {
     let result = blackjack_strategy.clone();
     let deck = CountedDeck::new(card_count);
     let (transaction, mut receiver) = channel(32);
@@ -212,16 +203,14 @@ async fn optimize_split(
                 strat: result_clone,
             };
             let do_it = optimize_situation(&mut situation, &deck_clone).await;
-            let _ = tr_clone
-                .send((split_situation_clone, do_it)).await;
+            let _ = tr_clone.send((split_situation_clone, do_it)).await;
         });
     }
     for _ in SplitSituation::create_all() {
-        let (split_situation, do_it) = match receiver
-            .recv().await{
-                Some(result) => result,
-                None => panic!("Did not receive blackjack strategy split calculation"),
-            };
+        let (split_situation, do_it) = match receiver.recv().await {
+            Some(result) => result,
+            None => panic!("Did not receive blackjack strategy split calculation"),
+        };
         result.add_split(split_situation, do_it).await;
     }
     result
@@ -230,8 +219,7 @@ async fn optimize_split(
 pub async fn optimize_blackjack(
     blackjack_strategy: WrappedStrategy,
     card_count: i32,
-) -> WrappedStrategy
-{
+) -> WrappedStrategy {
     let mut result = optimize_draw(blackjack_strategy, card_count).await;
     let _deck = CountedDeck::new(card_count);
 

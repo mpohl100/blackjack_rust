@@ -5,8 +5,8 @@ use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
 use crate::blackjack::traits::BlackjackGame;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::traits::WrappedStrategy;
-use std::collections::BTreeMap;
 use async_trait::async_trait;
+use std::collections::BTreeMap;
 
 #[derive(Default, Clone)]
 pub struct CountedBlackjackStrategy {

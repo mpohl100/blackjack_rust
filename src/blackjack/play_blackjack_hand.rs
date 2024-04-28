@@ -70,7 +70,8 @@ pub async fn play_blackjack_hand(
                 player_strategy.clone(),
                 rng,
                 play_mode,
-            )).await;
+            ))
+            .await;
             overall_result += Box::pin(play_blackjack_hand(
                 player_bet,
                 second,
@@ -79,7 +80,8 @@ pub async fn play_blackjack_hand(
                 player_strategy,
                 rng,
                 play_mode,
-            )).await;
+            ))
+            .await;
             return overall_result;
         }
     }
@@ -88,10 +90,12 @@ pub async fn play_blackjack_hand(
     let mut only_draw_once = false;
     if play_mode == PlayMode::All || play_mode == PlayMode::DoubleDown {
         player_points = evaluate_blackjack_hand(&player_hand.get_blackjack_hand());
-        only_draw_once = player_strategy.get_double_down(
-            HandSituation::new(player_points, dealer_hand.open_card()),
-            deck,
-        ).await;
+        only_draw_once = player_strategy
+            .get_double_down(
+                HandSituation::new(player_points, dealer_hand.open_card()),
+                deck,
+            )
+            .await;
         if only_draw_once {
             player_bet *= 2.0;
         }
@@ -106,10 +110,12 @@ pub async fn play_blackjack_hand(
             if player_points.lower() > 21 {
                 break;
             }
-            let draw = player_strategy.get_draw(
-                HandSituation::new(player_points, dealer_hand.open_card()),
-                deck,
-            ).await;
+            let draw = player_strategy
+                .get_draw(
+                    HandSituation::new(player_points, dealer_hand.open_card()),
+                    deck,
+                )
+                .await;
             if !draw {
                 break;
             }

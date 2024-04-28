@@ -7,9 +7,9 @@ use crate::blackjack::traits::Allable;
 use crate::blackjack::traits::BlackjackGame;
 use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::traits::Stringable;
+use async_trait::async_trait;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
-use async_trait::async_trait;
 
 #[derive(Default, Clone)]
 pub struct BlackjackStrategyData {

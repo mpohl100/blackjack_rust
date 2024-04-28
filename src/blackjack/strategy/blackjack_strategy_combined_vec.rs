@@ -140,7 +140,9 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
                     blackjack_strategy.add_draw(*hand_situation, *do_it).await;
                 }
                 GameSituation::DoubleDown(hand_situation) => {
-                    blackjack_strategy.add_double_down(*hand_situation, *do_it).await;
+                    blackjack_strategy
+                        .add_double_down(*hand_situation, *do_it)
+                        .await;
                 }
                 GameSituation::Split(split_situation) => {
                     blackjack_strategy.add_split(*split_situation, *do_it).await;
