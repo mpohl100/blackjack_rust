@@ -34,7 +34,7 @@ async fn main() {
 
     loop {
         let options = option_receiver.recv().await.unwrap();
-        if options.len() == 0 {
+        if options.is_empty() {
             break;
         }
         let first_option = options.first().unwrap();
