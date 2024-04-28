@@ -253,7 +253,7 @@ impl BlackjackGame for GameStrategy {
         );
         println!("Your options are split (s), double down (d), hit (h), stand (t)");
         self.game_data.lock().await.option_sender.send(vec![GameAction::Split, GameAction::DoubleDown, GameAction::Hit, GameAction::Stand]);
-        let choice = self.game_data.lock().await.action_receiver.recv().await.unwrap();
+        let _choice = self.game_data.lock().await.action_receiver.recv().await.unwrap();
         let mut input = String::new();
         println!("Do you want to split? (y/n)");
         std::io::stdin()

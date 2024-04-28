@@ -104,7 +104,7 @@ async fn calculate_draw(
     blackjack_strategy: WrappedStrategy,
 ) -> WrappedStrategy
 {
-    let mut result = blackjack_strategy;
+    let result = blackjack_strategy;
     for hand_situation in hand_situations.iter().rev() {
         let mut situation = BlackjackGameSituation {
             game_situation: GameSituation::Draw(*hand_situation),
@@ -120,7 +120,7 @@ async fn optimize_draw(
     card_count: i32,
 ) -> WrappedStrategy
 {
-    let mut result = blackjack_strategy;
+    let result = blackjack_strategy;
     let deck = CountedDeck::new(card_count);
     // first optimize drawing
     let all_situations = HandSituation::create_all();
@@ -163,7 +163,7 @@ async fn optimize_double_down(
     card_count: i32,
 ) -> WrappedStrategy
 {
-    let mut result = blackjack_strategy.clone();
+    let result = blackjack_strategy.clone();
     let deck = CountedDeck::new(card_count);
     let (transaction, mut receiver) = channel(32);
     for hand_situation in HandSituation::create_all() {
@@ -198,7 +198,7 @@ async fn optimize_split(
     card_count: i32,
 ) -> WrappedStrategy
 {
-    let mut result = blackjack_strategy.clone();
+    let result = blackjack_strategy.clone();
     let deck = CountedDeck::new(card_count);
     let (transaction, mut receiver) = channel(32);
     for split_situation in SplitSituation::create_all() {

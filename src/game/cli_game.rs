@@ -64,7 +64,7 @@ impl GameState {
 
     pub async fn play(&mut self) {
         self.previous_balance = self.current_balance;
-        let mut game_strat = WrappedGame::new(GameStrategy::new(self.optimal_strategy.clone()));
+        let game_strat = WrappedGame::new(GameStrategy::new(self.optimal_strategy.clone()));
         self.current_balance += play_blackjack_hand(
             self.player_bet,
             self.player_hand.clone(),

@@ -10,7 +10,7 @@ use blackjack_rust::commandline_params::get_strat_config;
 async fn main() {
     let description = "Play as many hands as specified with the optimal blackjack strategy";
     let app = get_commandline_params("play_normal".to_string(), description);
-    let strat_config = get_strat_config(app.clone());
+    let _strat_config = get_strat_config(app.clone());
     let mut strat = optimize_blackjack(WrappedStrategy::new(BlackjackStrategy::new(true)), 0).await;
     println!("Card count {}", 0);
     println!("{}\n", strat.to_string_mat2().await);
