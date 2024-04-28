@@ -91,8 +91,7 @@ impl WrappedStrategy {
         strat.dump()
     }
 
-    pub fn upcast_mut(&self) -> &mut dyn BlackjackGame {
-        let mut strat = self.strat.lock().unwrap();
-        strat.upcast_mut()
+    pub fn get(&mut self) -> Arc<Mutex<Box<dyn BlackjackStrategyTrait + Send>>> {
+        self.strat.clone()
     }
 }
