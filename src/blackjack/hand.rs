@@ -145,7 +145,6 @@ mod player_hand_tests {
     use super::*;
     use crate::blackjack::card::Rank;
     use crate::blackjack::card::Suit;
-    use crate::blackjack::deck::Deck;
 
     #[test]
     fn test_new() {

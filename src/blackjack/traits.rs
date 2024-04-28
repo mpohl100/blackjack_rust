@@ -128,39 +128,18 @@ impl WrappedGame {
     pub async fn new_from_strat(arc_strat: &mut WrappedStrategy) -> WrappedGame {
         let arc_strategy = arc_strat.get();
         let strat = arc_strategy.lock().await;
-        let game_map = match strat.as_any().downcast_ref::<BlackjackStrategy>() {
-            Some(strategy) => Some(strategy),
-            None => None,
-        };
-        let game_vec = match strat.as_any().downcast_ref::<BlackjackStrategyVec>() {
-            Some(strategy) => Some(strategy),
-            None => None,
-        };
-        let game_combined_hash_map = match strat
+        let game_map = strat.as_any().downcast_ref::<BlackjackStrategy>().map(|strategy| strategy);
+        let game_vec = strat.as_any().downcast_ref::<BlackjackStrategyVec>().map(|strategy| strategy);
+        let game_combined_hash_map = strat
             .as_any()
-            .downcast_ref::<BlackjackStrategyCombinedHashMap>()
-        {
-            Some(strategy) => Some(strategy),
-            None => None,
-        };
-        let game_combined_ordered_hash_map = match strat
+            .downcast_ref::<BlackjackStrategyCombinedHashMap>().map(|strategy| strategy);
+        let game_combined_ordered_hash_map = strat
             .as_any()
-            .downcast_ref::<BlackjackStrategyCombinedOrderedHashMap>(
-        ) {
-            Some(strategy) => Some(strategy),
-            None => None,
-        };
-        let game_combined_vec = match strat
+            .downcast_ref::<BlackjackStrategyCombinedOrderedHashMap>().map(|strategy| strategy);
+        let game_combined_vec = strat
             .as_any()
-            .downcast_ref::<BlackjackStrategyCombinedVec>()
-        {
-            Some(strategy) => Some(strategy),
-            None => None,
-        };
-        let game_counted = match strat.as_any().downcast_ref::<CountedBlackjackStrategy>() {
-            Some(strategy) => Some(strategy),
-            None => None,
-        };
+            .downcast_ref::<BlackjackStrategyCombinedVec>().map(|strategy| strategy);
+        let game_counted = strat.as_any().downcast_ref::<CountedBlackjackStrategy>().map(|strategy| strategy);
         match game_map {
             Some(game_map_inner) => WrappedGame::new(game_map_inner.clone()),
             None => match game_vec {

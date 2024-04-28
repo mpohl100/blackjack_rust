@@ -51,8 +51,8 @@ impl GameData {
             optimal_strategy,
             nb_hands_played: 0,
             nb_right_decisions: 0,
-            action_receiver: action_receiver,
-            option_sender: option_sender,
+            action_receiver,
+            option_sender,
         }
     }
 }
