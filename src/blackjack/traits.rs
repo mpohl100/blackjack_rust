@@ -105,7 +105,8 @@ impl WrappedStrategy {
     }
 }
 
-struct WrappedGame{
+#[derive(Clone)]
+pub struct WrappedGame{
     game: Arc<Mutex<Box<dyn BlackjackGame + Send>>>,
 }
 
@@ -116,7 +117,8 @@ impl WrappedGame{
         }
     }
 
-    pub fn new_from_strat(strat: Box<dyn BlackjackStrategyTrait + Send>) -> WrappedGame {
+    pub fn new_from_strat(arc_strat: &mut WrappedStrategy) -> WrappedGame {
+        let strat = arc_strat.get().lock().unwrap();
         let game_map = match strat.as_any().downcast_ref::<BlackjackStrategy>(){
             Some(strategy) => {
                 Some(strategy)

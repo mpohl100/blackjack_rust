@@ -7,6 +7,8 @@ use crate::blackjack::traits::BlackjackStrategyTrait;
 use crate::blackjack::traits::WrappedStrategy;
 use std::collections::BTreeMap;
 use async_trait::async_trait;
+
+#[derive(Default, Clone)]
 pub struct CountedBlackjackStrategy {
     counted_strategies: BTreeMap<i32, WrappedStrategy>,
     max_count: i32,
