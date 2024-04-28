@@ -151,7 +151,7 @@ async fn optimize_draw(
         let bucket_result = receiver
             .recv().await;
         match bucket_result {
-            Some(bucket_result) => result.combine(&bucket_result.dump()),
+            Some(bucket_result) => result.combine(&bucket_result.dump().await).await,
             None => panic!("Error receiving draw result"),
         }
     }
