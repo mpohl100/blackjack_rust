@@ -21,7 +21,7 @@ pub async fn play_blackjack(
     };
     let mut rng = RandomNumberGenerator::new();
     let mut result = 0.0;
-    let blackjack_game = WrappedGame::new_from_strat(blackjack_strategy);
+    let blackjack_game = WrappedGame::new_from_strat(blackjack_strategy).await;
     for _ in 0..play_config.nb_hands {
         let player_hand = PlayerHand::new(&[
             boxed_deck.deal_card(&mut rng),

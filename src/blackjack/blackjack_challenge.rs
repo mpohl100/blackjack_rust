@@ -40,16 +40,16 @@ impl BlackjackChallenge {
     pub async fn score(&mut self, do_it: bool) -> f64 {
         let _points = evaluate_blackjack_hand(&self.player_hand.get_blackjack_hand());
         match self.game_situation_ {
-            GameSituation::Draw(hand_situation) => self.strat.add_draw(hand_situation, do_it),
+            GameSituation::Draw(hand_situation) => self.strat.add_draw(hand_situation, do_it).await,
             GameSituation::DoubleDown(hand_situation) => {
-                self.strat.add_double_down(hand_situation, do_it)
+                self.strat.add_double_down(hand_situation, do_it).await
             }
-            GameSituation::Split(split_situation) => self.strat.add_split(split_situation, do_it),
+            GameSituation::Split(split_situation) => self.strat.add_split(split_situation, do_it).await,
         }
         let mut rng = RandomNumberGenerator::new();
         let mut result = 0.0;
         let play_mode = self.get_play_mode();
-        let blackjack_game = WrappedGame::new_from_strat(&mut self.strat);
+        let blackjack_game = WrappedGame::new_from_strat(&mut self.strat).await;
         for _ in 0..2000 {
             let dealer_hand = DealerHand::new(&[
                 self.dealer_rank.get_representative_card(),
