@@ -3,28 +3,28 @@ use super::rng::RandomNumberGenerator;
 
 use crate::blackjack::blackjack_situation::GameSituation;
 use crate::blackjack::card::BlackjackRank;
-use crate::blackjack::deck::Deck;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 use crate::blackjack::hand::DealerHand;
 use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::play_blackjack_hand::play_blackjack_hand;
 use crate::blackjack::play_blackjack_hand::PlayMode;
 use crate::blackjack::traits::BlackjackStrategyTrait;
+use crate::blackjack::traits::WrappedStrategy;
 
-pub struct BlackjackChallenge<'a> {
+pub struct BlackjackChallenge {
     game_situation_: GameSituation,
     dealer_rank: BlackjackRank,
     player_hand: PlayerHand,
-    strat: &'a mut dyn BlackjackStrategyTrait,
+    strat: WrappedStrategy,
     deck: WrappedDeck,
 }
 
-impl BlackjackChallenge<'_> {
+impl BlackjackChallenge {
     pub fn new(
         game_situation: GameSituation,
         dealer_card: BlackjackRank,
         player_hand: PlayerHand,
-        strat: &mut dyn BlackjackStrategyTrait,
+        strat: WrappedStrategy,
         deck: WrappedDeck,
     ) -> BlackjackChallenge {
         BlackjackChallenge {

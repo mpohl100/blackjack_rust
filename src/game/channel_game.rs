@@ -12,7 +12,7 @@ use crate::blackjack::strategy::blackjack_strategy_combined_ordered_hash_map::Bl
 
 use crate::blackjack::analysis::blackjack_analysis::optimize_blackjack;
 use crate::blackjack::traits::BlackjackGame;
-use crate::blackjack::traits::BlackjackStrategyTrait;
+use crate::blackjack::traits::WrappedStrategy;
 
 use std::cmp::Ordering;
 
@@ -31,7 +31,7 @@ pub enum GameAction{
 }
 
 struct GameData {
-    optimal_strategy: Box<dyn BlackjackStrategyTrait + Send>,
+    optimal_strategy: WrappedStrategy,
     nb_hands_played: i32,
     nb_right_decisions: i32,
     action_receiver: mpsc::Receiver<GameAction>,
@@ -39,7 +39,7 @@ struct GameData {
 }
 
 impl GameData {
-    pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait + Send>, action_receiver: mpsc::Receiver<GameAction>, option_sender: mpsc::Sender<Vec<GameAction>>) -> GameData {
+    pub fn new(optimal_strategy: WrappedStrategy, action_receiver: mpsc::Receiver<GameAction>, option_sender: mpsc::Sender<Vec<GameAction>>) -> GameData {
         GameData {
             optimal_strategy,
             nb_hands_played: 0,
@@ -63,7 +63,7 @@ struct GameState {
 }
 
 impl GameState {
-    pub fn new(optimal_strategy: Box<dyn BlackjackStrategyTrait + Send>, action_receiver: mpsc::Receiver<GameAction>, option_sender: mpsc::Sender<Vec<GameAction>>) -> GameState {
+    pub fn new(optimal_strategy: WrappedStrategy, action_receiver: mpsc::Receiver<GameAction>, option_sender: mpsc::Sender<Vec<GameAction>>) -> GameState {
         GameState {
             rng: RandomNumberGenerator::new(),
             deck: WrappedDeck::new(Box::new(EightDecks::new())),
@@ -126,10 +126,10 @@ pub struct ChannelGame {
 
 impl ChannelGame {
     pub async fn new(action_receiver: mpsc::Receiver<GameAction>, option_sender: mpsc::Sender<Vec<GameAction>>) -> ChannelGame {
-        let game_strat = BlackjackStrategyCombinedOrderedHashMap::new();
+        let game_strat = WrappedStrategy::new(BlackjackStrategyCombinedOrderedHashMap::new());
         let optimal_strategy = optimize_blackjack(game_strat, 0).await;
         ChannelGame {
-            game_state: GameState::new(Box::new(optimal_strategy), action_receiver, option_sender),
+            game_state: GameState::new(optimal_strategy, action_receiver, option_sender),
         }
     }
 

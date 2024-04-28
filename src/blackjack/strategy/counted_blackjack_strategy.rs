@@ -4,16 +4,17 @@ use crate::blackjack::deck::WrappedDeck;
 use crate::blackjack::strategy::blackjack_strategy_map::BlackjackStrategyData;
 use crate::blackjack::traits::BlackjackGame;
 use crate::blackjack::traits::BlackjackStrategyTrait;
+use crate::blackjack::traits::WrappedStrategy;
 use std::collections::BTreeMap;
 use async_trait::async_trait;
 pub struct CountedBlackjackStrategy {
-    counted_strategies: BTreeMap<i32, Box<dyn BlackjackStrategyTrait + Send>>,
+    counted_strategies: BTreeMap<i32, WrappedStrategy>,
     max_count: i32,
     min_count: i32,
 }
 
 impl CountedBlackjackStrategy {
-    pub fn new(data: BTreeMap<i32, Box<dyn BlackjackStrategyTrait + Send>>) -> CountedBlackjackStrategy {
+    pub fn new(data: BTreeMap<i32, WrappedStrategy>) -> CountedBlackjackStrategy {
         let max_count = match data.keys().next_back() {
             Some(value) => *value,
             _ => panic!("max_count not found in data"),
