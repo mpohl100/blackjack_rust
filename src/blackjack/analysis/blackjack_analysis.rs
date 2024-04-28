@@ -143,7 +143,7 @@ async fn optimize_draw(
         let result_clone = result.clone();
         tokio::spawn(async move {
             let bucket_result = calculate_draw(bucket_clone, deck_clone, result_clone).await;
-            tr_clone.send(bucket_result).await;
+            let _ = tr_clone.send(bucket_result).await;
         });
     }
     // receive results
@@ -177,7 +177,7 @@ async fn optimize_double_down(
                 strat: result_clone.clone(),
             };
             let do_it = optimize_situation(&mut situation, &deck_clone).await;
-            tr_clone
+            let _ = tr_clone
                 .send((hand_situation_clone, do_it)).await;
         });
     }
@@ -212,7 +212,7 @@ async fn optimize_split(
                 strat: result_clone,
             };
             let do_it = optimize_situation(&mut situation, &deck_clone).await;
-            tr_clone
+            let _ = tr_clone
                 .send((split_situation_clone, do_it)).await;
         });
     }

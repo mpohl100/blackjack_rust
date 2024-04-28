@@ -1,7 +1,6 @@
 use crate::blackjack::card::Card;
 
 use crate::blackjack::card::BlackjackRank;
-use crate::blackjack::deck::Deck;
 use crate::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 
 use super::deck::WrappedDeck;
@@ -146,6 +145,7 @@ mod player_hand_tests {
     use super::*;
     use crate::blackjack::card::Rank;
     use crate::blackjack::card::Suit;
+    use crate::blackjack::deck::Deck;
 
     #[test]
     fn test_new() {
@@ -218,6 +218,7 @@ mod dealer_hand_tests {
     use super::*;
     use crate::blackjack::card::Rank;
     use crate::blackjack::card::Suit;
+    use crate::blackjack::deck::Deck;
 
     pub struct DeterministicDeck {
         cards: Vec<Card>,

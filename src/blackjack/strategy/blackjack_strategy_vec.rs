@@ -152,30 +152,30 @@ impl BlackjackStrategyTrait for BlackjackStrategyVec {
         let mut blackjack_strategy_sorted = BlackjackStrategy::new(false);
         for situation_strategy in &self.data.drawing_percentages {
             blackjack_strategy_sorted
-                .add_draw(situation_strategy.situation, situation_strategy.do_it);
+                .add_draw(situation_strategy.situation, situation_strategy.do_it).await;
         }
         for situation_strategy in &self.data.double_down_percentages {
             blackjack_strategy_sorted
-                .add_double_down(situation_strategy.situation, situation_strategy.do_it);
+                .add_double_down(situation_strategy.situation, situation_strategy.do_it).await;
         }
         for situation_strategy in &self.data.split_percentages {
             blackjack_strategy_sorted
-                .add_split(situation_strategy.situation, situation_strategy.do_it);
+                .add_split(situation_strategy.situation, situation_strategy.do_it).await;
         }
         blackjack_strategy_sorted.to_string_mat2().await
     }
 
     async fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData) {
         for (sit, do_it) in blackjack_strategy.drawing_decisions.iter() {
-            self.add_draw(*sit, *do_it);
+            self.add_draw(*sit, *do_it).await;
         }
 
         for (sit, do_it) in blackjack_strategy.double_down_decisions.iter() {
-            self.add_double_down(*sit, *do_it);
+            self.add_double_down(*sit, *do_it).await;
         }
 
         for (sit, do_it) in blackjack_strategy.split_decisions.iter() {
-            self.add_split(*sit, *do_it);
+            self.add_split(*sit, *do_it).await;
         }
     }
 

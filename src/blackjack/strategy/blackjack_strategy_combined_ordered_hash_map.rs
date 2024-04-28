@@ -90,15 +90,15 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedOrderedHashMap {
 
     async fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData) {
         for (sit, do_it) in blackjack_strategy.drawing_decisions.iter() {
-            self.add_draw(*sit, *do_it);
+            self.add_draw(*sit, *do_it).await;
         }
 
         for (sit, do_it) in blackjack_strategy.double_down_decisions.iter() {
-            self.add_double_down(*sit, *do_it);
+            self.add_double_down(*sit, *do_it).await;
         }
 
         for (sit, do_it) in blackjack_strategy.split_decisions.iter() {
-            self.add_split(*sit, *do_it);
+            self.add_split(*sit, *do_it).await;
         }
     }
 

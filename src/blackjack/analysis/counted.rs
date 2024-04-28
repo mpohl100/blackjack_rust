@@ -20,7 +20,7 @@ where
         let wrapped_blackjack_strategy = WrappedStrategy::new(blackjack_strategy_clone.clone());
         tokio::spawn(async move {
             let strat = optimize_blackjack(wrapped_blackjack_strategy, i).await;
-            tr.send((i, strat)).await;
+            let _ = tr.send((i, strat)).await;
         });
     }
     for _ in -10..11 {
