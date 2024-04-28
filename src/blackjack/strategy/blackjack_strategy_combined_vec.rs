@@ -82,6 +82,7 @@ impl BlackjackGame for BlackjackStrategyCombinedVec {
     }
 }
 
+#[async_trait]
 impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
     fn as_any(&self) -> &dyn std::any::Any {
         self
@@ -91,7 +92,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
         self
     }
 
-    fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
+    async fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
         let mut iter = self.data.iter_mut();
         let res = iter.find(|x| x.0 == GameSituation::Draw(situation));
         match res {
@@ -104,7 +105,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
         }
     }
 
-    fn add_double_down(&mut self, situation: HandSituation, do_it: bool) {
+    async fn add_double_down(&mut self, situation: HandSituation, do_it: bool) {
         let mut iter = self.data.iter_mut();
         let res = iter.find(|x| x.0 == GameSituation::DoubleDown(situation));
         match res {
@@ -118,7 +119,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
         }
     }
 
-    fn add_split(&mut self, situation: SplitSituation, do_it: bool) {
+    async fn add_split(&mut self, situation: SplitSituation, do_it: bool) {
         let mut iter = self.data.iter_mut();
         let res = iter.find(|x| x.0 == GameSituation::Split(situation));
         match res {
@@ -131,7 +132,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
         }
     }
 
-    fn to_string_mat2(&self) -> String {
+    async fn to_string_mat2(&self) -> String {
         let mut blackjack_strategy = BlackjackStrategy::new(false);
         for (situation, do_it) in &self.data {
             match situation {
@@ -146,10 +147,10 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
                 }
             }
         }
-        blackjack_strategy.to_string_mat2()
+        blackjack_strategy.to_string_mat2().await
     }
 
-    fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData) {
+    async fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData) {
         for (sit, do_it) in blackjack_strategy.drawing_decisions.iter() {
             self.add_draw(*sit, *do_it);
         }
@@ -163,7 +164,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
         }
     }
 
-    fn dump(&self) -> BlackjackStrategyData {
+    async fn dump(&self) -> BlackjackStrategyData {
         let mut result = BlackjackStrategyData::default();
 
         for (situation, do_it) in &self.data {

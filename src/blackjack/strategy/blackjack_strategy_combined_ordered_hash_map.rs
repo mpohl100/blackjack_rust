@@ -47,6 +47,7 @@ impl BlackjackGame for BlackjackStrategyCombinedOrderedHashMap {
     }
 }
 
+#[async_trait]
 impl BlackjackStrategyTrait for BlackjackStrategyCombinedOrderedHashMap {
     fn as_any(&self) -> &dyn std::any::Any {
         self
@@ -56,38 +57,38 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedOrderedHashMap {
         self
     }
 
-    fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
+    async fn add_draw(&mut self, situation: HandSituation, do_it: bool) {
         self.data.insert(GameSituation::Draw(situation), do_it);
     }
 
-    fn add_double_down(&mut self, situation: HandSituation, do_it: bool) {
+    async fn add_double_down(&mut self, situation: HandSituation, do_it: bool) {
         self.data
             .insert(GameSituation::DoubleDown(situation), do_it);
     }
 
-    fn add_split(&mut self, situation: SplitSituation, do_it: bool) {
+    async fn add_split(&mut self, situation: SplitSituation, do_it: bool) {
         self.data.insert(GameSituation::Split(situation), do_it);
     }
 
-    fn to_string_mat2(&self) -> String {
+    async fn to_string_mat2(&self) -> String {
         let mut blackjack_strategy = BlackjackStrategy::new(false);
         for (situation, do_it) in &self.data {
             match situation {
                 GameSituation::Draw(hand_situation) => {
-                    blackjack_strategy.add_draw(*hand_situation, *do_it);
+                    blackjack_strategy.add_draw(*hand_situation, *do_it).await;
                 }
                 GameSituation::DoubleDown(hand_situation) => {
-                    blackjack_strategy.add_double_down(*hand_situation, *do_it);
+                    blackjack_strategy.add_double_down(*hand_situation, *do_it).await;
                 }
                 GameSituation::Split(split_situation) => {
-                    blackjack_strategy.add_split(*split_situation, *do_it);
+                    blackjack_strategy.add_split(*split_situation, *do_it).await;
                 }
             }
         }
-        blackjack_strategy.to_string_mat2()
+        blackjack_strategy.to_string_mat2().await
     }
 
-    fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData) {
+    async fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData) {
         for (sit, do_it) in blackjack_strategy.drawing_decisions.iter() {
             self.add_draw(*sit, *do_it);
         }
@@ -101,7 +102,7 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedOrderedHashMap {
         }
     }
 
-    fn dump(&self) -> BlackjackStrategyData {
+    async fn dump(&self) -> BlackjackStrategyData {
         let mut result = BlackjackStrategyData::default();
 
         for (situation, do_it) in &self.data {

@@ -83,6 +83,7 @@ impl BlackjackGame for CountedBlackjackStrategy {
     }
 }
 
+#[async_trait]
 impl BlackjackStrategyTrait for CountedBlackjackStrategy {
     fn as_any(&self) -> &dyn std::any::Any {
         self
@@ -92,32 +93,32 @@ impl BlackjackStrategyTrait for CountedBlackjackStrategy {
         self
     }
 
-    fn add_draw(&mut self, _situation: HandSituation, _do_it: bool) {
+    async fn add_draw(&mut self, _situation: HandSituation, _do_it: bool) {
         unimplemented!()
     }
 
-    fn add_double_down(&mut self, _situation: HandSituation, _do_it: bool) {
+    async fn add_double_down(&mut self, _situation: HandSituation, _do_it: bool) {
         unimplemented!()
     }
 
-    fn add_split(&mut self, _situation: SplitSituation, _do_it: bool) {
+    async fn add_split(&mut self, _situation: SplitSituation, _do_it: bool) {
         unimplemented!()
     }
 
-    fn to_string_mat2(&self) -> String {
+    async fn to_string_mat2(&self) -> String {
         let mut ret = String::new();
         for (count, strat) in &self.counted_strategies {
             ret.push_str(&("Count ".to_owned() + &count.to_string()));
-            ret.push_str(&("Strategy: ".to_owned() + &strat.to_string_mat2() + "\n\n"));
+            ret.push_str(&("Strategy: ".to_owned() + &strat.to_string_mat2().await + "\n\n"));
         }
         ret
     }
 
-    fn combine(&mut self, _blackjack_strategy: &BlackjackStrategyData) {
+    async fn combine(&mut self, _blackjack_strategy: &BlackjackStrategyData) {
         unimplemented!()
     }
 
-    fn dump(&self) -> BlackjackStrategyData {
+    async fn dump(&self) -> BlackjackStrategyData {
         unimplemented!()
     }
 }
