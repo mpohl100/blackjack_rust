@@ -75,13 +75,13 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedHashMap {
         for (situation, do_it) in &self.data {
             match situation {
                 GameSituation::Draw(hand_situation) => {
-                    blackjack_strategy.add_draw(*hand_situation, *do_it);
+                    blackjack_strategy.add_draw(*hand_situation, *do_it).await;
                 }
                 GameSituation::DoubleDown(hand_situation) => {
-                    blackjack_strategy.add_double_down(*hand_situation, *do_it);
+                    blackjack_strategy.add_double_down(*hand_situation, *do_it).await;
                 }
                 GameSituation::Split(split_situation) => {
-                    blackjack_strategy.add_split(*split_situation, *do_it);
+                    blackjack_strategy.add_split(*split_situation, *do_it).await;
                 }
             }
         }

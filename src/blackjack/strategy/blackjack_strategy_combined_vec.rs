@@ -137,13 +137,13 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
         for (situation, do_it) in &self.data {
             match situation {
                 GameSituation::Draw(hand_situation) => {
-                    blackjack_strategy.add_draw(*hand_situation, *do_it);
+                    blackjack_strategy.add_draw(*hand_situation, *do_it).await;
                 }
                 GameSituation::DoubleDown(hand_situation) => {
-                    blackjack_strategy.add_double_down(*hand_situation, *do_it);
+                    blackjack_strategy.add_double_down(*hand_situation, *do_it).await;
                 }
                 GameSituation::Split(split_situation) => {
-                    blackjack_strategy.add_split(*split_situation, *do_it);
+                    blackjack_strategy.add_split(*split_situation, *do_it).await;
                 }
             }
         }
@@ -152,15 +152,15 @@ impl BlackjackStrategyTrait for BlackjackStrategyCombinedVec {
 
     async fn combine(&mut self, blackjack_strategy: &BlackjackStrategyData) {
         for (sit, do_it) in blackjack_strategy.drawing_decisions.iter() {
-            self.add_draw(*sit, *do_it);
+            self.add_draw(*sit, *do_it).await;
         }
 
         for (sit, do_it) in blackjack_strategy.double_down_decisions.iter() {
-            self.add_double_down(*sit, *do_it);
+            self.add_double_down(*sit, *do_it).await;
         }
 
         for (sit, do_it) in blackjack_strategy.split_decisions.iter() {
-            self.add_split(*sit, *do_it);
+            self.add_split(*sit, *do_it).await;
         }
     }
 
