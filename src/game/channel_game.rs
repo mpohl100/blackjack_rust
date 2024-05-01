@@ -23,7 +23,7 @@ use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio::sync::Mutex;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum GameAction {
     Stop,
     Continue,
@@ -78,6 +78,7 @@ struct GameData {
     nb_right_decisions: i32,
     action_receiver: mpsc::Receiver<GameAction>,
     option_sender: mpsc::Sender<Vec<GameAction>>,
+    cached_decision: Option<GameAction>,
 }
 
 impl GameData {
@@ -92,6 +93,7 @@ impl GameData {
             nb_right_decisions: 0,
             action_receiver,
             option_sender,
+            cached_decision: None,
         }
     }
 }
@@ -218,6 +220,58 @@ impl GameStrategy {
     pub fn new(game_data: Arc<Mutex<GameData>>) -> GameStrategy {
         GameStrategy { game_data }
     }
+
+    async fn evaluate_double_down(&mut self, action: GameAction, situation: HandSituation, _deck: &mut WrappedDeck) -> bool {
+        let do_double_down = action == GameAction::DoubleDown;
+        if do_double_down
+            == self
+                .game_data
+                .lock()
+                .await
+                .optimal_strategy
+                .get_double_down(situation, _deck)
+                .await
+        {
+            println!("Right decision for double down");
+            self.game_data.lock().await.nb_right_decisions += 1;
+        } else {
+            println!("Wrong decision for double down");
+        }
+        self.game_data.lock().await.nb_hands_played += 1;
+        if do_double_down{
+            self.game_data.lock().await.cached_decision = None;
+            true
+        }
+        else{
+            false
+        }
+    }
+
+    async fn evaluate_draw(&mut self, action: GameAction, situation: HandSituation, _deck: &mut WrappedDeck) -> bool {
+        let do_draw = action == GameAction::Hit;
+        if do_draw
+            == self
+                .game_data
+                .lock()
+                .await
+                .optimal_strategy
+                .get_draw(situation, _deck)
+                .await
+        {
+            println!("Right decision for draw");
+            self.game_data.lock().await.nb_right_decisions += 1;
+        } else {
+            println!("Wrong decision for draw");
+        }
+        self.game_data.lock().await.nb_hands_played += 1;
+        if do_draw{
+            self.game_data.lock().await.cached_decision = None;
+            true
+        }
+        else{
+            false
+        }
+    }
 }
 
 #[async_trait]
@@ -238,28 +292,38 @@ impl BlackjackGame for GameStrategy {
             },
             situation.situation().upper()
         );
-        let mut input = String::new();
-        println!("Do you want to draw? (y/n)");
-        std::io::stdin()
-            .read_line(&mut input)
-            .expect("Failed to read line");
-        let result = input.trim() == "y";
-        if result
-            == self
-                .game_data
-                .lock()
-                .await
-                .optimal_strategy
-                .get_draw(situation, _deck)
-                .await
-        {
-            println!("Right decision");
-            self.game_data.lock().await.nb_right_decisions += 1;
-        } else {
-            println!("Wrong decision");
+        let mut evaluate_now = false;
+        if let Some(cached_decision) = self.game_data.lock().await.cached_decision{
+            if cached_decision == GameAction::Stop{
+                return false;
+            } else if cached_decision == GameAction::Hit{
+                evaluate_now = true;
+            }
         }
-        self.game_data.lock().await.nb_hands_played += 1;
-        result
+        if evaluate_now{
+            return self.evaluate_draw(GameAction::Hit, situation, _deck).await;
+        }
+        let _ = self
+            .game_data
+            .lock()
+            .await
+            .option_sender
+            .send(vec![
+                GameAction::Hit,
+                GameAction::Stand,
+                GameAction::Stop,
+            ])
+            .await;
+        let choice = self
+            .game_data
+            .lock()
+            .await
+            .action_receiver
+            .recv()
+            .await
+            .unwrap();
+        self.evaluate_draw(choice, situation, _deck).await
+    
     }
 
     async fn get_double_down(&mut self, situation: HandSituation, _deck: &mut WrappedDeck) -> bool {
@@ -278,28 +342,38 @@ impl BlackjackGame for GameStrategy {
             },
             situation.situation().upper()
         );
-        let mut input = String::new();
-        println!("Do you want to double down? (y/n)");
-        std::io::stdin()
-            .read_line(&mut input)
-            .expect("Failed to read line");
-        let result = input.trim() == "y";
-        if result
-            == self
-                .game_data
-                .lock()
-                .await
-                .optimal_strategy
-                .get_double_down(situation, _deck)
-                .await
-        {
-            println!("Right decision");
-            self.game_data.lock().await.nb_right_decisions += 1;
-        } else {
-            println!("Wrong decision");
+        let mut evaluate_now = false;
+        if let Some(cached_decision) = self.game_data.lock().await.cached_decision{
+            if cached_decision == GameAction::Stop{
+                return false;
+            } else if cached_decision == GameAction::DoubleDown{
+                evaluate_now = true;
+            }
         }
-        self.game_data.lock().await.nb_hands_played += 1;
-        result
+        if evaluate_now{
+            return self.evaluate_double_down(GameAction::DoubleDown, situation, _deck).await;
+        }
+        let _ = self
+            .game_data
+            .lock()
+            .await
+            .option_sender
+            .send(vec![
+                GameAction::DoubleDown,
+                GameAction::Hit,
+                GameAction::Stand,
+                GameAction::Stop,
+            ])
+            .await;
+        let choice = self
+            .game_data
+            .lock()
+            .await
+            .action_receiver
+            .recv()
+            .await
+            .unwrap();
+        self.evaluate_double_down(choice, situation, _deck).await
     }
 
     async fn get_split(&mut self, situation: SplitSituation, _deck: &mut WrappedDeck) -> bool {
@@ -317,7 +391,11 @@ impl BlackjackGame for GameStrategy {
                 .get_representative_card()
                 .to_blackjack_score()
         );
-        println!("Your options are split (s), double down (d), hit (h), stand (t)");
+        if let Some(cached_decision) = self.game_data.lock().await.cached_decision{
+            if cached_decision == GameAction::Stop{
+                return false;
+            }
+        }
         let _ = self
             .game_data
             .lock()
@@ -328,9 +406,10 @@ impl BlackjackGame for GameStrategy {
                 GameAction::DoubleDown,
                 GameAction::Hit,
                 GameAction::Stand,
+                GameAction::Stop,
             ])
             .await;
-        let _choice = self
+        let choice = self
             .game_data
             .lock()
             .await
@@ -338,13 +417,8 @@ impl BlackjackGame for GameStrategy {
             .recv()
             .await
             .unwrap();
-        let mut input = String::new();
-        println!("Do you want to split? (y/n)");
-        std::io::stdin()
-            .read_line(&mut input)
-            .expect("Failed to read line");
-        let result = input.trim() == "y";
-        if result
+        let do_it = choice == GameAction::Split;
+        if do_it
             == self
                 .game_data
                 .lock()
@@ -353,12 +427,19 @@ impl BlackjackGame for GameStrategy {
                 .get_split(situation, _deck)
                 .await
         {
-            println!("Right decision");
+            println!("Right decision for split");
             self.game_data.lock().await.nb_right_decisions += 1;
         } else {
-            println!("Wrong decision");
+            println!("Wrong decision for split");
+            // cache the decision for later
+            self.game_data.lock().await.cached_decision = Some(choice);
         }
         self.game_data.lock().await.nb_hands_played += 1;
-        result
+        if do_it{
+            self.game_data.lock().await.cached_decision = None;
+            true
+        }else{
+            false
+        }
     }
 }
