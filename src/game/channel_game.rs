@@ -37,11 +37,17 @@ pub fn get_options_string(options: &Vec<GameAction>) -> String {
     let mut options_str = String::new();
     for option in options {
         match option {
-            GameAction::Split => options_str.push_str(&("Split (".to_owned() + &get_short_letter(GameAction::Split) + ") ")),
-            GameAction::DoubleDown => options_str.push_str(&("Double Down (".to_owned() + &get_short_letter(GameAction::DoubleDown)+ ") ")),
-            GameAction::Hit => options_str.push_str(&("Hit (".to_owned() + &get_short_letter(GameAction::Hit)+ ") ")),
-            GameAction::Stand => options_str.push_str(&("Stand (".to_owned() + &get_short_letter(GameAction::Stand) + ") ")),
-            GameAction::Stop => options_str.push_str(&("Stop (".to_owned() + &get_short_letter(GameAction::Stop)+ ") ")),
+            GameAction::Split => options_str
+                .push_str(&("Split (".to_owned() + &get_short_letter(GameAction::Split) + ") ")),
+            GameAction::DoubleDown => options_str.push_str(
+                &("Double Down (".to_owned() + &get_short_letter(GameAction::DoubleDown) + ") "),
+            ),
+            GameAction::Hit => options_str
+                .push_str(&("Hit (".to_owned() + &get_short_letter(GameAction::Hit) + ") ")),
+            GameAction::Stand => options_str
+                .push_str(&("Stand (".to_owned() + &get_short_letter(GameAction::Stand) + ") ")),
+            GameAction::Stop => options_str
+                .push_str(&("Stop (".to_owned() + &get_short_letter(GameAction::Stop) + ") ")),
             _ => (),
         }
     }
@@ -203,8 +209,8 @@ impl ChannelGame {
     }
 
     pub async fn ask_to_play_another_hand(&self) -> bool {
-        if let Some(cached_decision) = self.game_state.game_data.lock().await.cached_decision{
-            if cached_decision == GameAction::Stop{
+        if let Some(cached_decision) = self.game_state.game_data.lock().await.cached_decision {
+            if cached_decision == GameAction::Stop {
                 return false;
             }
         }
@@ -222,7 +228,12 @@ impl GameStrategy {
         GameStrategy { game_data }
     }
 
-    async fn evaluate_double_down(&mut self, action: GameAction, situation: HandSituation, _deck: &mut WrappedDeck) -> bool {
+    async fn evaluate_double_down(
+        &mut self,
+        action: GameAction,
+        situation: HandSituation,
+        _deck: &mut WrappedDeck,
+    ) -> bool {
         let do_double_down = action == GameAction::DoubleDown;
         if do_double_down
             == self
@@ -239,17 +250,21 @@ impl GameStrategy {
             println!("Wrong decision for double down");
         }
         self.game_data.lock().await.nb_hands_played += 1;
-        if do_double_down{
+        if do_double_down {
             self.game_data.lock().await.cached_decision = None;
             true
-        }
-        else{
+        } else {
             self.game_data.lock().await.cached_decision = Some(action);
             false
         }
     }
 
-    async fn evaluate_draw(&mut self, action: GameAction, situation: HandSituation, _deck: &mut WrappedDeck) -> bool {
+    async fn evaluate_draw(
+        &mut self,
+        action: GameAction,
+        situation: HandSituation,
+        _deck: &mut WrappedDeck,
+    ) -> bool {
         let do_draw = action == GameAction::Hit;
         if do_draw
             == self
@@ -266,11 +281,10 @@ impl GameStrategy {
             println!("Wrong decision for draw");
         }
         self.game_data.lock().await.nb_hands_played += 1;
-        if do_draw{
+        if do_draw {
             self.game_data.lock().await.cached_decision = None;
             true
-        }
-        else{
+        } else {
             self.game_data.lock().await.cached_decision = Some(action);
             false
         }
@@ -296,14 +310,14 @@ impl BlackjackGame for GameStrategy {
             situation.situation().upper()
         );
         let mut evaluate_now = false;
-        if let Some(cached_decision) = self.game_data.lock().await.cached_decision{
-            if cached_decision == GameAction::Stop{
+        if let Some(cached_decision) = self.game_data.lock().await.cached_decision {
+            if cached_decision == GameAction::Stop {
                 return false;
-            } else if cached_decision == GameAction::Hit || cached_decision == GameAction::Stand{
+            } else if cached_decision == GameAction::Hit || cached_decision == GameAction::Stand {
                 evaluate_now = true;
             }
         }
-        if evaluate_now{
+        if evaluate_now {
             let choice = self.game_data.lock().await.cached_decision.unwrap();
             return self.evaluate_draw(choice, situation, _deck).await;
         }
@@ -312,11 +326,7 @@ impl BlackjackGame for GameStrategy {
             .lock()
             .await
             .option_sender
-            .send(vec![
-                GameAction::Hit,
-                GameAction::Stand,
-                GameAction::Stop,
-            ])
+            .send(vec![GameAction::Hit, GameAction::Stand, GameAction::Stop])
             .await;
         let choice = self
             .game_data
@@ -327,7 +337,6 @@ impl BlackjackGame for GameStrategy {
             .await
             .unwrap();
         self.evaluate_draw(choice, situation, _deck).await
-    
     }
 
     async fn get_double_down(&mut self, situation: HandSituation, _deck: &mut WrappedDeck) -> bool {
@@ -347,15 +356,17 @@ impl BlackjackGame for GameStrategy {
             situation.situation().upper()
         );
         let mut evaluate_now = false;
-        if let Some(cached_decision) = self.game_data.lock().await.cached_decision{
-            if cached_decision == GameAction::Stop{
+        if let Some(cached_decision) = self.game_data.lock().await.cached_decision {
+            if cached_decision == GameAction::Stop {
                 return false;
-            } else if cached_decision == GameAction::DoubleDown{
+            } else if cached_decision == GameAction::DoubleDown {
                 evaluate_now = true;
             }
         }
-        if evaluate_now{
-            return self.evaluate_double_down(GameAction::DoubleDown, situation, _deck).await;
+        if evaluate_now {
+            return self
+                .evaluate_double_down(GameAction::DoubleDown, situation, _deck)
+                .await;
         }
         let _ = self
             .game_data
@@ -395,8 +406,8 @@ impl BlackjackGame for GameStrategy {
                 .get_representative_card()
                 .to_blackjack_score()
         );
-        if let Some(cached_decision) = self.game_data.lock().await.cached_decision{
-            if cached_decision == GameAction::Stop{
+        if let Some(cached_decision) = self.game_data.lock().await.cached_decision {
+            if cached_decision == GameAction::Stop {
                 return false;
             }
         }
@@ -437,10 +448,10 @@ impl BlackjackGame for GameStrategy {
             println!("Wrong decision for split");
         }
         self.game_data.lock().await.nb_hands_played += 1;
-        if do_it{
+        if do_it {
             self.game_data.lock().await.cached_decision = None;
             true
-        }else{
+        } else {
             self.game_data.lock().await.cached_decision = Some(choice);
             false
         }
