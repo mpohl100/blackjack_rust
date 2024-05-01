@@ -202,13 +202,13 @@ impl ChannelGame {
         self.game_state.print_after_hand();
     }
 
-    pub fn ask_to_play_another_hand(&self) -> bool {
-        println!("Do you want to play another hand? (y/n)");
-        let mut input = String::new();
-        std::io::stdin()
-            .read_line(&mut input)
-            .expect("Failed to read line");
-        input.trim() == "y"
+    pub async fn ask_to_play_another_hand(&self) -> bool {
+        if let Some(cached_decision) = self.game_state.game_data.lock().await.cached_decision{
+            if cached_decision == GameAction::Stop{
+                return false;
+            }
+        }
+        true
     }
 }
 

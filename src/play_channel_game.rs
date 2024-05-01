@@ -27,7 +27,7 @@ async fn main() {
         let mut channel_game = ChannelGame::new(action_receiver, option_sender_clone).await;
         loop {
             channel_game.play().await;
-            if !channel_game.ask_to_play_another_hand() {
+            if !channel_game.ask_to_play_another_hand().await {
                 break;
             }
         }
@@ -45,7 +45,11 @@ async fn main() {
         std::io::stdin()
             .read_line(&mut input)
             .expect("Failed to read line");
-        let _ = action_sender.send(GameAction::from(input.to_lowercase().as_str().chars().next().unwrap().to_ascii_lowercase())).await.unwrap();
+        let choice = GameAction::from(input.to_lowercase().as_str().chars().next().unwrap().to_ascii_lowercase());
+        let _ = action_sender.send(choice).await.unwrap();
+        if choice == GameAction::Stop {
+            break;
+        }
     }
 
     t.await.unwrap();
