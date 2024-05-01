@@ -1,5 +1,6 @@
 use blackjack_rust::game::channel_game::ChannelGame;
 use blackjack_rust::game::channel_game::GameAction;
+use blackjack_rust::game::channel_game::get_options_string;
 use tokio::sync::mpsc;
 
 #[tokio::main]
@@ -37,8 +38,14 @@ async fn main() {
         if options.is_empty() {
             break;
         }
-        let first_option = options.first().unwrap();
-        action_sender.send(*first_option).await.unwrap();
+        println!("Which option do you want to choose?");
+        let options_str = get_options_string(&options);
+        println!("{}", options_str);
+        let mut input = String::new();
+        std::io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
+        let _ = action_sender.send(GameAction::from(input.to_lowercase().as_str().chars().next().unwrap().to_ascii_lowercase())).await.unwrap();
     }
 
     t.await.unwrap();

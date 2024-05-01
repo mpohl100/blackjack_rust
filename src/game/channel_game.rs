@@ -33,6 +33,45 @@ pub enum GameAction {
     Stand,
 }
 
+pub fn get_options_string(options: &Vec<GameAction>) -> String {
+    let mut options_str = String::new();
+    for option in options {
+        match option {
+            GameAction::Split => options_str.push_str(&("Split (".to_owned() + &get_short_letter(GameAction::Split) + ") ")),
+            GameAction::DoubleDown => options_str.push_str(&("Double Down (".to_owned() + &get_short_letter(GameAction::DoubleDown)+ ") ")),
+            GameAction::Hit => options_str.push_str(&("Hit (".to_owned() + &get_short_letter(GameAction::Hit)+ ") ")),
+            GameAction::Stand => options_str.push_str(&("Stand (".to_owned() + &get_short_letter(GameAction::Stand) + ") ")),
+            GameAction::Stop => options_str.push_str(&("Stop (".to_owned() + &get_short_letter(GameAction::Stop)+ ") ")),
+            _ => (),
+        }
+    }
+    options_str
+}
+
+pub fn get_short_letter(action: GameAction) -> String {
+    match action {
+        GameAction::Split => 's'.to_string(),
+        GameAction::DoubleDown => 'd'.to_string(),
+        GameAction::Hit => 'h'.to_string(),
+        GameAction::Stand => 't'.to_string(),
+        GameAction::Stop => 'x'.to_string(),
+        _ => ' '.to_string(),
+    }
+}
+
+impl From<char> for GameAction {
+    fn from(letter: char) -> GameAction {
+        match letter {
+            's' => GameAction::Split,
+            'd' => GameAction::DoubleDown,
+            'h' => GameAction::Hit,
+            't' => GameAction::Stand,
+            'x' => GameAction::Stop,
+            _ => GameAction::Continue,
+        }
+    }
+}
+
 struct GameData {
     optimal_strategy: WrappedStrategy,
     nb_hands_played: i32,
