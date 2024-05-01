@@ -208,6 +208,7 @@ impl ChannelGame {
                 return false;
             }
         }
+        self.game_state.game_data.lock().await.cached_decision = None;
         true
     }
 }
@@ -243,6 +244,7 @@ impl GameStrategy {
             true
         }
         else{
+            self.game_data.lock().await.cached_decision = Some(action);
             false
         }
     }
@@ -269,6 +271,7 @@ impl GameStrategy {
             true
         }
         else{
+            self.game_data.lock().await.cached_decision = Some(action);
             false
         }
     }
@@ -296,12 +299,13 @@ impl BlackjackGame for GameStrategy {
         if let Some(cached_decision) = self.game_data.lock().await.cached_decision{
             if cached_decision == GameAction::Stop{
                 return false;
-            } else if cached_decision == GameAction::Hit{
+            } else if cached_decision == GameAction::Hit || cached_decision == GameAction::Stand{
                 evaluate_now = true;
             }
         }
         if evaluate_now{
-            return self.evaluate_draw(GameAction::Hit, situation, _deck).await;
+            let choice = self.game_data.lock().await.cached_decision.unwrap();
+            return self.evaluate_draw(choice, situation, _deck).await;
         }
         let _ = self
             .game_data
@@ -431,14 +435,13 @@ impl BlackjackGame for GameStrategy {
             self.game_data.lock().await.nb_right_decisions += 1;
         } else {
             println!("Wrong decision for split");
-            // cache the decision for later
-            self.game_data.lock().await.cached_decision = Some(choice);
         }
         self.game_data.lock().await.nb_hands_played += 1;
         if do_it{
             self.game_data.lock().await.cached_decision = None;
             true
         }else{
+            self.game_data.lock().await.cached_decision = Some(choice);
             false
         }
     }
