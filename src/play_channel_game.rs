@@ -1,6 +1,6 @@
+use blackjack_rust::game::channel_game::get_options_string;
 use blackjack_rust::game::channel_game::ChannelGame;
 use blackjack_rust::game::channel_game::GameAction;
-use blackjack_rust::game::channel_game::get_options_string;
 use tokio::sync::mpsc;
 
 #[tokio::main]
@@ -45,7 +45,15 @@ async fn main() {
         std::io::stdin()
             .read_line(&mut input)
             .expect("Failed to read line");
-        let choice = GameAction::from(input.to_lowercase().as_str().chars().next().unwrap().to_ascii_lowercase());
+        let choice = GameAction::from(
+            input
+                .to_lowercase()
+                .as_str()
+                .chars()
+                .next()
+                .unwrap()
+                .to_ascii_lowercase(),
+        );
         let _ = action_sender.send(choice).await.unwrap();
         if choice == GameAction::Stop {
             break;
