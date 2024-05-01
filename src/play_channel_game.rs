@@ -54,7 +54,7 @@ async fn main() {
                 .unwrap()
                 .to_ascii_lowercase(),
         );
-        let _ = action_sender.send(choice).await.unwrap();
+        action_sender.send(choice).await.unwrap();
         if choice == GameAction::Stop {
             break;
         }
