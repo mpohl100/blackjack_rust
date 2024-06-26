@@ -32,7 +32,7 @@ struct GameState {
     winner: Option<String>,
 }
 
-async fn create_game(blackjack_service: web::Data<Mutex<BlackjackService>>) -> impl Responder {
+pub async fn create_game(blackjack_service: web::Data<Mutex<BlackjackService>>) -> impl Responder {
     let create_game_response = blackjack_service.lock().await.create_game().await;
     HttpResponse::Created().json(GameResponse {
         id: create_game_response.game_id,
@@ -40,7 +40,7 @@ async fn create_game(blackjack_service: web::Data<Mutex<BlackjackService>>) -> i
     })
 }
 
-async fn delete_game(
+pub async fn delete_game(
     blackjack_service: web::Data<Mutex<BlackjackService>>,
     req: HttpRequest,
     info: web::Path<(String,)>,
@@ -68,7 +68,7 @@ async fn delete_game(
     HttpResponse::Unauthorized()
 }
 
-async fn play_game(
+pub async fn play_game(
     blackjack_service: web::Data<Mutex<BlackjackService>>,
     req: HttpRequest,
     info: web::Path<(String,)>,
@@ -107,20 +107,6 @@ async fn play_game(
 }
 
 #[derive(Debug, Deserialize)]
-struct Action {
+pub struct Action {
     action: String,
-}
-
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
-        App::new()
-            .route("/blackjack", web::post().to(create_game))
-            .route("/blackjack/{game_id}", web::delete().to(delete_game))
-            .route("/blackjack/{game_id}/play", web::post().to(play_game))
-            .app_data(Data::new(Mutex::new(BlackjackService::new())))
-    })
-    .bind("127.0.0.1:8080")?
-    .run()
-    .await
 }
