@@ -48,4 +48,4 @@ path = "src/play_channel_game.rs"
 
 [[bin]]
 name = "server"
-path = "src/service/routes.rs"
+path = "src/server.rs"
