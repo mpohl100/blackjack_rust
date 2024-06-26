@@ -1,7 +1,7 @@
 use crate::service::domain::BlackjackService;
 
-use actix_web::web::Data;
-use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Responder};
+
+use actix_web::{web, HttpRequest, HttpResponse, Responder};
 use tokio::sync::Mutex;
 use serde::{Deserialize, Serialize};
 

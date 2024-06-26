@@ -87,7 +87,7 @@ impl BlackjackService {
         if let Some(game) = game {
             let sender = &game.lock().await.action_sender;
             if let Some(s) = sender {
-                s.send(GameAction::Stop).await;
+                let _ = s.send(GameAction::Stop).await;
             } else {
                 return false;
             }
@@ -103,7 +103,7 @@ impl BlackjackService {
     pub async fn play_game(&mut self, game_id: String, action: String) {
         if let Some(game) = self.games.lock().await.get_mut(&game_id) {
             if let Some(sender) = &game.lock().await.action_sender {
-                sender
+                let _ = sender
                     .send(GameAction::from(
                         action
                             .to_lowercase()
