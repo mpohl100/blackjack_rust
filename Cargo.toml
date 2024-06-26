@@ -53,4 +53,4 @@ path = "src/blackjack_game.rs"
 
 [[bin]]
 name = "server"
-path = "src/service/routes.rs"
+path = "src/server.rs"
