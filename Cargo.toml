@@ -53,4 +53,4 @@ path = "src/play_ratatui.rs"
 
 [[bin]]
 name = "server"
-path = "src/service/routes.rs"
+path = "src/server.rs"
