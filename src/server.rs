@@ -1,7 +1,7 @@
-use blackjack_rust::service::routes::{create_game, delete_game, play_game};
 use blackjack_rust::service::domain::BlackjackService;
+use blackjack_rust::service::routes::{create_game, delete_game, play_game};
 
-use actix_web::{web, App, HttpServer, web::Data};
+use actix_web::{web, web::Data, App, HttpServer};
 use tokio::sync::Mutex;
 
 #[actix_web::main]
