@@ -48,6 +48,12 @@ pub struct BlackjackService {
     games: Mutex<HashMap<String, Arc<Mutex<BlackjackGame>>>>,
 }
 
+impl Default for BlackjackService {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 pub struct CreateGameResponse {
     pub game_id: String,
     pub game_token: Uuid,
