@@ -7,9 +7,19 @@ async fn play_blackjack_through_server() {
   let app = spawn_app().await;
 
   // Create a game and assert success
+  // Act
+
+  // Assert
 
   // Play 10 actions and assert success
 
+  // Act
+
+  // Assert
+
   // Delete the game and assert success
 
+  // Act
+
+  // Assert
 }
