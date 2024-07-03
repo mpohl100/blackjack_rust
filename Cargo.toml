@@ -15,6 +15,9 @@ tokio = { version = "1.37.0", features = ["full"] }
 async-trait = "0.1.80"
 ratatui = "0.27.0"
 
+[dev-dependencies]
+reqwest = { version = "0.12.2", features = ["json"] }
+
 [dependencies.uuid]
 version = "1.9.1"
 features = [
