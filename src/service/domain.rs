@@ -75,7 +75,7 @@ impl BlackjackService {
         }
     }
 
-    pub async fn create_game(&mut self) -> CreateGameResponse {
+    pub async fn create_game(&self) -> CreateGameResponse {
         let game = Arc::new(Mutex::new(BlackjackGame::new().await));
         let mut data = self.games.lock().await;
         let game_id = data.len().to_string();
@@ -84,11 +84,11 @@ impl BlackjackService {
         CreateGameResponse::new(game_id, token)
     }
 
-    pub async fn get_game(&mut self, game_id: String) -> Option<Arc<Mutex<BlackjackGame>>> {
+    pub async fn get_game(&self, game_id: String) -> Option<Arc<Mutex<BlackjackGame>>> {
         self.games.lock().await.get(&game_id).cloned()
     }
 
-    pub async fn delete_game(&mut self, game_id: String) -> bool {
+    pub async fn delete_game(&self, game_id: String) -> bool {
         let game = self.games.lock().await.remove(&game_id);
         if let Some(game) = game {
             let sender = &game.lock().await.action_sender;
@@ -106,7 +106,7 @@ impl BlackjackService {
         true
     }
 
-    pub async fn play_game(&mut self, game_id: String, action: String) {
+    pub async fn play_game(&self, game_id: String, action: String) {
         if let Some(game) = self.games.lock().await.get_mut(&game_id) {
             if let Some(sender) = &game.lock().await.action_sender {
                 let _ = sender
