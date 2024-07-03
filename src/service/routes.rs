@@ -50,9 +50,7 @@ pub async fn delete_game(
                 // Check token validity and permission
                 let token = stripped;
                 let game_id = info.into_inner().0;
-                let blackjack_game = blackjack_service
-                    .get_game(game_id.clone())
-                    .await;
+                let blackjack_game = blackjack_service.get_game(game_id.clone()).await;
                 // Implement your token validation logic here
                 if let Some(game) = blackjack_game {
                     if game.lock().await.game_token.to_string() == token {
@@ -82,16 +80,12 @@ pub async fn play_game(
                 // Check token validity and permission
                 // Implement your token validation logic here
                 let game_id = info.into_inner().0;
-                let blackjack_game = blackjack_service
-                    .get_game(game_id.clone())
-                    .await;
+                let blackjack_game = blackjack_service.get_game(game_id.clone()).await;
                 if let Some(game) = blackjack_game {
                     if game.lock().await.game_token.to_string() == token {
                         // Implement your game playing logic here
                         let action = query.into_inner();
-                        blackjack_service
-                            .play_game(game_id, action.action)
-                            .await;
+                        blackjack_service.play_game(game_id, action.action).await;
                     }
                 }
                 return HttpResponse::Ok().json(GameState {
