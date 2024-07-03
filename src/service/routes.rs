@@ -2,7 +2,6 @@ use crate::service::domain::BlackjackService;
 
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
-use tokio::sync::Mutex;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct GameResponse {
@@ -31,8 +30,8 @@ struct GameState {
     winner: Option<String>,
 }
 
-pub async fn create_game(blackjack_service: web::Data<Mutex<BlackjackService>>) -> impl Responder {
-    let create_game_response = blackjack_service.lock().await.create_game().await;
+pub async fn create_game(blackjack_service: web::Data<BlackjackService>) -> impl Responder {
+    let create_game_response = blackjack_service.create_game().await;
     HttpResponse::Created().json(GameResponse {
         id: create_game_response.game_id,
         access_token: create_game_response.game_token.to_string(),
@@ -40,7 +39,7 @@ pub async fn create_game(blackjack_service: web::Data<Mutex<BlackjackService>>) 
 }
 
 pub async fn delete_game(
-    blackjack_service: web::Data<Mutex<BlackjackService>>,
+    blackjack_service: web::Data<BlackjackService>,
     req: HttpRequest,
     info: web::Path<(String,)>,
 ) -> impl Responder {
@@ -52,15 +51,13 @@ pub async fn delete_game(
                 let token = stripped;
                 let game_id = info.into_inner().0;
                 let blackjack_game = blackjack_service
-                    .lock()
-                    .await
                     .get_game(game_id.clone())
                     .await;
                 // Implement your token validation logic here
                 if let Some(game) = blackjack_game {
                     if game.lock().await.game_token.to_string() == token {
                         // Implement your game deletion logic here
-                        blackjack_service.lock().await.delete_game(game_id).await;
+                        blackjack_service.delete_game(game_id).await;
                         return HttpResponse::NoContent();
                     }
                 }
@@ -72,7 +69,7 @@ pub async fn delete_game(
 }
 
 pub async fn play_game(
-    blackjack_service: web::Data<Mutex<BlackjackService>>,
+    blackjack_service: web::Data<BlackjackService>,
     req: HttpRequest,
     info: web::Path<(String,)>,
     query: web::Query<Action>,
@@ -86,8 +83,6 @@ pub async fn play_game(
                 // Implement your token validation logic here
                 let game_id = info.into_inner().0;
                 let blackjack_game = blackjack_service
-                    .lock()
-                    .await
                     .get_game(game_id.clone())
                     .await;
                 if let Some(game) = blackjack_game {
@@ -95,8 +90,6 @@ pub async fn play_game(
                         // Implement your game playing logic here
                         let action = query.into_inner();
                         blackjack_service
-                            .lock()
-                            .await
                             .play_game(game_id, action.action)
                             .await;
                     }
