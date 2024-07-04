@@ -45,24 +45,44 @@ fn ui(frame: &mut Frame) {
         [
             Constraint::Length(1),
             Constraint::Min(0),
+            Constraint::Min(0),
             Constraint::Length(1),
         ],
     )
     .split(frame.size());
     frame.render_widget(
-        Block::new().borders(Borders::TOP).title("Title Bar"),
+        Block::new().borders(Borders::TOP).title("Blackjack Game"),
         main_layout[0],
     );
     frame.render_widget(
-        Block::new().borders(Borders::TOP).title("Status Bar"),
-        main_layout[2],
+        Block::new().borders(Borders::TOP).title("Available Actions"),
+        main_layout[3],
     );
 
-    let inner_layout = Layout::new(
+    let hands_layout = Layout::new(
         Direction::Horizontal,
         [Constraint::Percentage(50), Constraint::Percentage(50)],
     )
     .split(main_layout[1]);
-    frame.render_widget(Block::bordered().title("Left"), inner_layout[0]);
-    frame.render_widget(Block::bordered().title("Right"), inner_layout[1]);
+
+    let money_layout = Layout::new(
+        Direction::Horizontal,
+        [Constraint::Percentage(50), Constraint::Percentage(50)],
+    ).split(main_layout[2]);
+
+    let your_hand = Block::bordered().title("Your hand");
+    let dealer_hand = Block::bordered().title("Dealer hand");
+    frame.render_widget(your_hand.clone(), hands_layout[0]);
+    frame.render_widget(dealer_hand.clone(), hands_layout[1]);
+
+    let your_money = Block::bordered().title("Your money");
+    let your_bet = Block::bordered().title("Bet"); 
+    frame.render_widget(your_money.clone(), money_layout[0]);
+    frame.render_widget(your_bet.clone(), money_layout[1]);
+
+    frame.render_widget(Paragraph::new("Ad 2h"), your_hand.inner(hands_layout[0]));
+    frame.render_widget(Paragraph::new("Kd *"), dealer_hand.inner(hands_layout[1]));
+
+    frame.render_widget(Paragraph::new("$1000"), your_money.inner(money_layout[0]));
+    frame.render_widget(Paragraph::new("$1"), your_bet.inner(money_layout[1]));
 }
