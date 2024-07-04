@@ -13,6 +13,7 @@ serde = "1.0"
 serde_json = "1.0"
 tokio = { version = "1.37.0", features = ["full"] }
 async-trait = "0.1.80"
+ratatui = "0.27.0"
 
 [[bin]]
 name = "play_normal"
@@ -37,6 +38,10 @@ path = "src/play_cli_game.rs"
 [[bin]]
 name = "play_channel_game"
 path = "src/play_channel_game.rs"
+
+[[bin]]
+name = "play_ratatui"
+path = "src/play_ratatui.rs"
 
 [[bin]]
 name = "server"
