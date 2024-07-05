@@ -188,6 +188,16 @@ pub struct ChannelGame {
     game_state: GameState,
 }
 
+#[derive(Clone)]
+pub struct GameInfo {
+    pub dealer_hand: DealerHand,
+    pub player_hand: PlayerHand,
+    pub current_balance: f64,
+    pub nb_hands_played: i32,
+    pub nb_right_decisions: i32,
+    pub player_bet: f64,
+}
+
 impl ChannelGame {
     pub async fn new(
         action_receiver: mpsc::Receiver<GameAction>,
@@ -197,6 +207,17 @@ impl ChannelGame {
         let optimal_strategy = optimize_blackjack(game_strat, 0).await;
         ChannelGame {
             game_state: GameState::new(optimal_strategy, action_receiver, option_sender),
+        }
+    }
+
+    pub async fn get_game_info(&self) -> GameInfo {
+        GameInfo {
+            dealer_hand: self.game_state.dealer_hand.clone(),
+            player_hand: self.game_state.player_hand.clone(),
+            current_balance: self.game_state.current_balance,
+            nb_hands_played: self.game_state.nb_hands_played,
+            nb_right_decisions: self.game_state.game_data.lock().await.nb_right_decisions,
+            player_bet: self.game_state.player_bet,
         }
     }
 
