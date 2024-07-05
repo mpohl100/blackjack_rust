@@ -148,6 +148,10 @@ impl Card {
             Rank::King => 10,
         }
     }
+
+    pub fn to_string_internal(&self) -> String {
+        format!("{}{}", self.rank.to_string_internal(), self.suit.to_string_internal())
+    }
 }
 
 #[derive(Debug, Default, Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]

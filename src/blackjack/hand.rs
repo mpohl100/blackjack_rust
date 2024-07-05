@@ -54,6 +54,14 @@ impl PlayerHand {
     pub fn get_blackjack_hand(&self) -> BlackjackHand {
         self.blackjack_hand.clone()
     }
+
+    pub fn to_string_internal(&self) -> String {
+        let mut result = String::new();
+        for card in &self.blackjack_hand.cards {
+            result.push_str(&format!("{} ", card.to_string_internal()));
+        }
+        result
+    }
 }
 
 #[derive(Default, Clone)]
@@ -97,6 +105,17 @@ impl DealerHand {
 
     pub fn open_card(&self) -> BlackjackRank {
         BlackjackRank::new(self.get_cards()[0].rank())
+    }
+
+    pub fn to_string_internal(&self, only_open_card: bool) -> String {
+        if only_open_card {
+            return format!("{} *", self.get_cards()[0].to_string_internal());
+        }
+        let mut result = String::new();
+        for card in &self.blackjack_hand.cards {
+            result.push_str(&format!("{} ", card.to_string_internal()));
+        }
+        result
     }
 }
 
