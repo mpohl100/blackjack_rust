@@ -65,6 +65,17 @@ pub fn get_short_letter(action: GameAction) -> String {
     }
 }
 
+pub fn get_word(action: GameAction) -> String {
+    match action {
+        GameAction::Split => return "Split".to_owned(),
+        GameAction::DoubleDown => return "Double Down".to_owned(),
+        GameAction::Hit => "Hit".to_owned(),
+        GameAction::Stand => "Stand".to_owned(),
+        GameAction::Stop => "Stop".to_owned(),
+        _ => "Error".to_owned(),
+    }   
+}
+
 impl From<char> for GameAction {
     fn from(letter: char) -> GameAction {
         match letter {
