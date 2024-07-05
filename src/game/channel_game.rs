@@ -73,7 +73,7 @@ pub fn get_word(action: GameAction) -> String {
         GameAction::Stand => "Stand".to_owned(),
         GameAction::Stop => "Stop".to_owned(),
         _ => "Error".to_owned(),
-    }   
+    }
 }
 
 impl From<char> for GameAction {
@@ -125,6 +125,7 @@ struct GameState {
     nb_hands_played: i32,
     player_bet: f64,
     game_data: Arc<Mutex<GameData>>,
+    do_print: bool,
 }
 
 impl GameState {
@@ -132,6 +133,7 @@ impl GameState {
         optimal_strategy: WrappedStrategy,
         action_receiver: mpsc::Receiver<GameAction>,
         option_sender: mpsc::Sender<Vec<GameAction>>,
+        do_print: bool,
     ) -> GameState {
         GameState {
             rng: RandomNumberGenerator::new(),
@@ -147,6 +149,7 @@ impl GameState {
                 action_receiver,
                 option_sender,
             ))),
+            do_print: do_print,
         }
     }
 
@@ -169,7 +172,7 @@ impl GameState {
 
     pub async fn play(&mut self) {
         self.previous_balance = self.current_balance;
-        let game = GameStrategy::new(self.game_data.clone());
+        let game = GameStrategy::new(self.game_data.clone(), self.do_print);
         let wrapped_game = WrappedGame::new(game);
         self.current_balance += play_blackjack_hand(
             self.player_bet,
@@ -197,6 +200,7 @@ impl GameState {
 
 pub struct ChannelGame {
     game_state: GameState,
+    do_print: bool,
 }
 
 #[derive(Clone)]
@@ -213,11 +217,13 @@ impl ChannelGame {
     pub async fn new(
         action_receiver: mpsc::Receiver<GameAction>,
         option_sender: mpsc::Sender<Vec<GameAction>>,
+        do_print: bool,
     ) -> ChannelGame {
         let game_strat = WrappedStrategy::new(BlackjackStrategyCombinedOrderedHashMap::new());
         let optimal_strategy = optimize_blackjack(game_strat, 0).await;
         ChannelGame {
-            game_state: GameState::new(optimal_strategy, action_receiver, option_sender),
+            game_state: GameState::new(optimal_strategy, action_receiver, option_sender, do_print),
+            do_print,
         }
     }
 
@@ -235,9 +241,13 @@ impl ChannelGame {
     pub async fn play(&mut self) {
         self.game_state.nb_hands_played += 1;
         self.game_state.deal();
-        self.game_state.print_before_hand();
+        if self.do_print {
+            self.game_state.print_before_hand();
+        }
         self.game_state.play().await;
-        self.game_state.print_after_hand();
+        if self.do_print {
+            self.game_state.print_after_hand();
+        }
     }
 
     pub async fn ask_to_play_another_hand(&self) -> bool {
@@ -253,11 +263,15 @@ impl ChannelGame {
 
 struct GameStrategy {
     game_data: Arc<Mutex<GameData>>,
+    do_print: bool,
 }
 
 impl GameStrategy {
-    pub fn new(game_data: Arc<Mutex<GameData>>) -> GameStrategy {
-        GameStrategy { game_data }
+    pub fn new(game_data: Arc<Mutex<GameData>>, do_print: bool) -> GameStrategy {
+        GameStrategy {
+            game_data,
+            do_print,
+        }
     }
 
     async fn evaluate_double_down(
@@ -276,10 +290,14 @@ impl GameStrategy {
                 .get_double_down(situation, _deck)
                 .await
         {
-            println!("Right decision for double down");
+            if self.do_print {
+                println!("Right decision for double down");
+            }
             self.game_data.lock().await.nb_right_decisions += 1;
         } else {
-            println!("Wrong decision for double down");
+            if self.do_print {
+                println!("Wrong decision for double down");
+            }
         }
         self.game_data.lock().await.nb_hands_played += 1;
         if do_double_down {
@@ -307,10 +325,14 @@ impl GameStrategy {
                 .get_draw(situation, _deck)
                 .await
         {
-            println!("Right decision for draw");
+            if self.do_print {
+                println!("Right decision for draw");
+            }
             self.game_data.lock().await.nb_right_decisions += 1;
         } else {
-            println!("Wrong decision for draw");
+            if self.do_print {
+                println!("Wrong decision for draw");
+            }
         }
         self.game_data.lock().await.nb_hands_played += 1;
         if do_draw {
@@ -326,21 +348,23 @@ impl GameStrategy {
 #[async_trait]
 impl BlackjackGame for GameStrategy {
     async fn get_draw(&mut self, situation: HandSituation, _deck: &mut WrappedDeck) -> bool {
-        println!(
-            "The dealer is showing: {}",
-            situation
-                .dealer_card()
-                .get_representative_card()
-                .to_blackjack_score()
-        );
-        println!(
-            "Your hand is: {} {}",
-            match situation.situation().lower() == situation.situation().upper() {
-                true => "Hard",
-                false => "Soft",
-            },
-            situation.situation().upper()
-        );
+        if self.do_print {
+            println!(
+                "The dealer is showing: {}",
+                situation
+                    .dealer_card()
+                    .get_representative_card()
+                    .to_blackjack_score()
+            );
+            println!(
+                "Your hand is: {} {}",
+                match situation.situation().lower() == situation.situation().upper() {
+                    true => "Hard",
+                    false => "Soft",
+                },
+                situation.situation().upper()
+            );
+        }
         let mut evaluate_now = false;
         if let Some(cached_decision) = self.game_data.lock().await.cached_decision {
             if cached_decision == GameAction::Stop {
@@ -372,21 +396,23 @@ impl BlackjackGame for GameStrategy {
     }
 
     async fn get_double_down(&mut self, situation: HandSituation, _deck: &mut WrappedDeck) -> bool {
-        println!(
-            "The dealer is showing: {}",
-            situation
-                .dealer_card()
-                .get_representative_card()
-                .to_blackjack_score()
-        );
-        println!(
-            "Your hand is: {} {}",
-            match situation.situation().lower() == situation.situation().upper() {
-                true => "Hard",
-                false => "Soft",
-            },
-            situation.situation().upper()
-        );
+        if self.do_print {
+            println!(
+                "The dealer is showing: {}",
+                situation
+                    .dealer_card()
+                    .get_representative_card()
+                    .to_blackjack_score()
+            );
+            println!(
+                "Your hand is: {} {}",
+                match situation.situation().lower() == situation.situation().upper() {
+                    true => "Hard",
+                    false => "Soft",
+                },
+                situation.situation().upper()
+            );
+        }
         let mut evaluate_now = false;
         if let Some(cached_decision) = self.game_data.lock().await.cached_decision {
             if cached_decision == GameAction::Stop {
@@ -424,20 +450,22 @@ impl BlackjackGame for GameStrategy {
     }
 
     async fn get_split(&mut self, situation: SplitSituation, _deck: &mut WrappedDeck) -> bool {
-        println!(
-            "The dealer is showing: {}",
-            situation
-                .dealer_card()
-                .get_representative_card()
-                .to_blackjack_score()
-        );
-        println!(
-            "Your hand rank is: {}",
-            situation
-                .situation()
-                .get_representative_card()
-                .to_blackjack_score()
-        );
+        if self.do_print {
+            println!(
+                "The dealer is showing: {}",
+                situation
+                    .dealer_card()
+                    .get_representative_card()
+                    .to_blackjack_score()
+            );
+            println!(
+                "Your hand rank is: {}",
+                situation
+                    .situation()
+                    .get_representative_card()
+                    .to_blackjack_score()
+            );
+        }
         if let Some(cached_decision) = self.game_data.lock().await.cached_decision {
             if cached_decision == GameAction::Stop {
                 return false;
@@ -474,10 +502,14 @@ impl BlackjackGame for GameStrategy {
                 .get_split(situation, _deck)
                 .await
         {
-            println!("Right decision for split");
+            if self.do_print {
+                println!("Right decision for split");
+            }
             self.game_data.lock().await.nb_right_decisions += 1;
         } else {
-            println!("Wrong decision for split");
+            if self.do_print {
+                println!("Wrong decision for split");
+            }
         }
         self.game_data.lock().await.nb_hands_played += 1;
         if do_it {

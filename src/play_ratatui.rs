@@ -26,7 +26,7 @@ async fn main() -> io::Result<()> {
     let (action_sender, action_receiver) = mpsc::channel::<GameAction>(32);
     let (option_sender, mut option_receiver) = mpsc::channel::<Vec<GameAction>>(32);
     let option_sender_clone = option_sender.clone();
-    let channel_game = Arc::new(Mutex::new(ChannelGame::new(action_receiver, option_sender_clone).await));
+    let channel_game = Arc::new(Mutex::new(ChannelGame::new(action_receiver, option_sender_clone, false).await));
     let channel_game_clone = channel_game.clone();
     let t = tokio::spawn(async move {
         loop {
