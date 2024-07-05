@@ -10,7 +10,7 @@ use ratatui::{
     widgets::*, TerminalOptions,
 };
 
-use blackjack_rust::game::channel_game::{ChannelGame, GameAction, GameInfo};
+use blackjack_rust::game::channel_game::{ChannelGame, GameAction, GameInfo, get_word, get_short_letter};
 
 use std::sync::Arc;
 use tokio::sync::mpsc;
@@ -50,8 +50,13 @@ async fn main() -> io::Result<()> {
         terminal.draw(ui)?;
         let choice = handle_events()?;
         action_sender.send(choice).await.unwrap();
+        
         if choice == GameAction::Stop {
             should_quit = true;
+        }
+
+        if choice != GameAction::Continue {
+            options = None;
         }
     }
 
@@ -113,6 +118,12 @@ fn draw_ui(frame: &mut Frame, game_info: GameInfo, options: Vec<GameAction>) {
     )
     .split(main_layout[2]);
 
+    let options_percentage = 100 / options.len() as u16;
+    let options_layout = Layout::new(
+        Direction::Horizontal,
+        options.iter().map(|_| Constraint::Percentage(options_percentage)).collect::<Vec<_>>().as_slice(),
+    ).split(main_layout[3]);
+
     let your_hand = Block::bordered().title("Your hand");
     let dealer_hand = Block::bordered().title("Dealer hand");
     frame.render_widget(your_hand.clone(), hands_layout[0]);
@@ -123,9 +134,23 @@ fn draw_ui(frame: &mut Frame, game_info: GameInfo, options: Vec<GameAction>) {
     frame.render_widget(your_money.clone(), money_layout[0]);
     frame.render_widget(your_bet.clone(), money_layout[1]);
 
+    for (i, option) in options.iter().enumerate() {
+        frame.render_widget(
+            Block::bordered().title(get_word(*option)),
+            options_layout[i],
+        );
+    }
+
     frame.render_widget(Paragraph::new(game_info.player_hand.to_string_internal()), your_hand.inner(hands_layout[0]));
     frame.render_widget(Paragraph::new(game_info.dealer_hand.to_string_internal(true)), dealer_hand.inner(hands_layout[1]));
 
     frame.render_widget(Paragraph::new("$".to_owned() + &game_info.current_balance.to_string()), your_money.inner(money_layout[0]));
     frame.render_widget(Paragraph::new("$".to_owned() + &game_info.player_bet.to_string()), your_bet.inner(money_layout[1]));
+
+    for (i, option) in options.iter().enumerate() {
+        frame.render_widget(
+            Paragraph::new("Press ".to_owned() + &get_short_letter(*option)),
+            options_layout[i],
+        );
+    }
 }
