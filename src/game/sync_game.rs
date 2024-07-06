@@ -15,7 +15,7 @@ pub struct SyncGame {
 impl SyncGame {
     pub fn new(
         action_receiver: std_mpsc::Receiver<GameAction>,
-        option_sender: std_mpsc::Sender<Vec<GameAction>>,
+        option_sender: std_mpsc::SyncSender<Vec<GameAction>>,
         do_print: bool,
     ) -> SyncGame {
         let rt = tokio::runtime::Runtime::new().unwrap();
