@@ -22,9 +22,8 @@ fn main() -> io::Result<()> {
     stdout().execute(EnterAlternateScreen)?;
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
 
-    let mut should_quit = false;
-    let (action_sender, action_receiver) = mpsc::channel::<GameAction>();
-    let (option_sender, mut option_receiver) = mpsc::channel::<Vec<GameAction>>();
+    let (action_sender, action_receiver) = mpsc::sync_channel::<GameAction>(1);
+    let (option_sender, mut option_receiver) = mpsc::sync_channel::<Vec<GameAction>>(1);
     let option_sender_clone = option_sender.clone();
     let sync_game = Arc::new(Mutex::<SyncGame>::new(SyncGame::new(action_receiver, option_sender_clone, false)));
     let sync_game_clone = sync_game.clone();
@@ -37,6 +36,7 @@ fn main() -> io::Result<()> {
         }
     });
     let mut options = Some(option_receiver.recv().unwrap());
+    let mut should_quit = false;
     while !should_quit {
         if options.is_none() {
             if option_receiver.try_recv().is_ok() {
