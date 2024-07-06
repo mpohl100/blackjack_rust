@@ -10,47 +10,52 @@ use ratatui::{
     widgets::*, TerminalOptions,
 };
 
-use blackjack_rust::game::channel_game::{ChannelGame, GameAction, GameInfo, get_word, get_short_letter};
-
+use blackjack_rust::game::channel_game::{GameAction, GameInfo, get_word, get_short_letter};
+use blackjack_rust::game::sync_game::SyncGame;
 use std::sync::Arc;
-use tokio::sync::mpsc;
-use tokio::sync::Mutex;
+use std::sync::mpsc;
+use std::sync::Mutex;
+use std::thread;
 
-#[tokio::main]
-async fn main() -> io::Result<()> {
+fn main() -> io::Result<()> {
     enable_raw_mode()?;
     stdout().execute(EnterAlternateScreen)?;
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
 
     let mut should_quit = false;
-    let (action_sender, action_receiver) = mpsc::channel::<GameAction>(32);
-    let (option_sender, mut option_receiver) = mpsc::channel::<Vec<GameAction>>(32);
+    let (action_sender, action_receiver) = mpsc::channel::<GameAction>();
+    let (option_sender, mut option_receiver) = mpsc::channel::<Vec<GameAction>>();
     let option_sender_clone = option_sender.clone();
-    let channel_game = Arc::new(Mutex::new(ChannelGame::new(action_receiver, option_sender_clone, false).await));
-    let channel_game_clone = channel_game.clone();
-    let t = tokio::spawn(async move {
+    let sync_game = Arc::new(Mutex::<SyncGame>::new(SyncGame::new(action_receiver, option_sender_clone, false)));
+    let sync_game_clone = sync_game.clone();
+    let t = thread::spawn(move || {
         loop {
-            channel_game_clone.lock().await.play().await;
-            if !channel_game_clone.lock().await.ask_to_play_another_hand().await {
+            sync_game_clone.lock().unwrap().play();
+            if !sync_game_clone.lock().unwrap().ask_to_play_another_hand() {
                 break;
             }
         }
     });
-    let mut options = Some(option_receiver.recv().await.unwrap());
+    let mut options = Some(option_receiver.recv().unwrap());
     while !should_quit {
         if options.is_none() {
-            options = Some(option_receiver.recv().await.unwrap());
+            if option_receiver.try_recv().is_ok() {
+                options = Some(option_receiver.recv().unwrap());    
+            }
         }
-        let game_info = channel_game.lock().await.get_game_info().await;
+        let game_info = sync_game.lock().unwrap().get_game_info();
 
         let options_clone = options.clone().unwrap();
         let ui = move |frame: &mut Frame| {
             draw_ui(frame, game_info, options_clone);
         };
         terminal.draw(ui)?;
+
         let choice = handle_events()?;
-        action_sender.send(choice).await.unwrap();
-        
+        if choice != GameAction::Continue {
+            action_sender.send(choice).unwrap();
+        }
+
         if choice == GameAction::Stop {
             should_quit = true;
         }
@@ -60,7 +65,7 @@ async fn main() -> io::Result<()> {
         }
     }
 
-    t.await.unwrap();
+    t.join().unwrap();
     disable_raw_mode()?;
     stdout().execute(LeaveAlternateScreen)?;
     Ok(())

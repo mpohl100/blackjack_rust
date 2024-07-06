@@ -13,7 +13,7 @@ pub struct SyncGame {
 }
 
 impl SyncGame {
-    fn new(
+    pub fn new(
         action_receiver: std_mpsc::Receiver<GameAction>,
         option_sender: std_mpsc::Sender<Vec<GameAction>>,
         do_print: bool,
@@ -56,11 +56,11 @@ impl SyncGame {
         SyncGame { game, rt, action_thread, option_thread, stop_sender_action, stop_sender_option }
     }
 
-    fn play(&mut self) {
+    pub fn play(&mut self) {
         self.rt.block_on(self.game.play());
     }
 
-    fn ask_to_play_another_hand(&self) -> bool {
+    pub fn ask_to_play_another_hand(&self) -> bool {
         let result = self.rt.block_on(self.game.ask_to_play_another_hand());
         if !result {
             self.stop_sender_action.send(true).unwrap();
@@ -69,7 +69,7 @@ impl SyncGame {
         result
     }
 
-    fn get_game_info(&self) -> GameInfo {
+    pub fn get_game_info(&self) -> GameInfo {
         self.rt.block_on(self.game.get_game_info())
     }
 }
