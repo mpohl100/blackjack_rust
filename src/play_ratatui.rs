@@ -35,7 +35,7 @@ fn main() -> io::Result<()> {
             }
         }
     });
-    let mut options = Some(option_receiver.recv().unwrap());
+    let mut options = None;
     let mut should_quit = false;
     while !should_quit {
         if options.is_none() {
@@ -45,7 +45,7 @@ fn main() -> io::Result<()> {
         }
         let game_info = sync_game.lock().unwrap().get_game_info();
 
-        let options_clone = options.clone().unwrap();
+        let options_clone = options.clone();
         let ui = move |frame: &mut Frame| {
             draw_ui(frame, game_info, options_clone);
         };
@@ -89,7 +89,7 @@ fn handle_events() -> io::Result<GameAction> {
     Ok(GameAction::Continue)
 }
 
-fn draw_ui(frame: &mut Frame, game_info: GameInfo, options: Vec<GameAction>) {
+fn draw_ui(frame: &mut Frame, game_info: GameInfo, options: Option<Vec<GameAction>>) {
     let main_layout = Layout::new(
         Direction::Vertical,
         [
@@ -123,12 +123,16 @@ fn draw_ui(frame: &mut Frame, game_info: GameInfo, options: Vec<GameAction>) {
     )
     .split(main_layout[2]);
 
-    let options_percentage = 100 / options.len() as u16;
-    let options_layout = Layout::new(
-        Direction::Horizontal,
-        options.iter().map(|_| Constraint::Percentage(options_percentage)).collect::<Vec<_>>().as_slice(),
-    ).split(main_layout[3]);
-
+    let options_clone = options.clone();
+    let options_layout = match options_clone {
+        None => Layout::default().split(main_layout[3]),
+        Some(options) => {
+            let options_percentage = 100 / options.len() as u16;
+            Layout::new(
+                Direction::Horizontal,
+                options.iter().map(|_| Constraint::Percentage(options_percentage)).collect::<Vec<_>>().as_slice(),
+            ).split(main_layout[3])        
+        }};
     let your_hand = Block::bordered().title("Your hand");
     let dealer_hand = Block::bordered().title("Dealer hand");
     frame.render_widget(your_hand.clone(), hands_layout[0]);
@@ -139,11 +143,14 @@ fn draw_ui(frame: &mut Frame, game_info: GameInfo, options: Vec<GameAction>) {
     frame.render_widget(your_money.clone(), money_layout[0]);
     frame.render_widget(your_bet.clone(), money_layout[1]);
 
-    for (i, option) in options.iter().enumerate() {
-        frame.render_widget(
-            Block::bordered().title(get_word(*option)),
-            options_layout[i],
-        );
+    let options_clone_2 = options.clone();
+    if !options_clone_2.is_none() {
+        for (i, option) in options_clone_2.unwrap().iter().enumerate() {
+            frame.render_widget(
+                Block::bordered().title(get_word(*option)),
+                options_layout[i],
+            );
+        }    
     }
 
     frame.render_widget(Paragraph::new(game_info.player_hand.to_string_internal()), your_hand.inner(hands_layout[0]));
@@ -152,10 +159,12 @@ fn draw_ui(frame: &mut Frame, game_info: GameInfo, options: Vec<GameAction>) {
     frame.render_widget(Paragraph::new("$".to_owned() + &game_info.current_balance.to_string()), your_money.inner(money_layout[0]));
     frame.render_widget(Paragraph::new("$".to_owned() + &game_info.player_bet.to_string()), your_bet.inner(money_layout[1]));
 
-    for (i, option) in options.iter().enumerate() {
-        frame.render_widget(
-            Paragraph::new("Press ".to_owned() + &get_short_letter(*option)),
-            options_layout[i],
-        );
+    if !options.is_none() {
+        for (i, option) in options.unwrap().iter().enumerate() {
+            frame.render_widget(
+                Paragraph::new("Press ".to_owned() + &get_short_letter(*option)),
+                options_layout[i],
+            );
+        }    
     }
 }
