@@ -128,3 +128,174 @@ pub async fn play_blackjack_hand(
     // compare player and dealer hands
     get_play_result(player_bet, player_result, dealer_result, player_hand)
 }
+
+pub trait HandData{
+
+}
+
+
+struct PlayerHandData{
+    player_hand: PlayerHand,
+    player_bet: f64,
+}
+
+impl PlayerHandData{
+    pub fn new(player_hand: PlayerHand, player_bet: f64) -> PlayerHandData{
+        PlayerHandData{
+            player_hand: player_hand,
+            player_bet: player_bet,
+        }
+    }
+}
+pub struct HandInfo{
+    player_hands: Vec<PlayerHandData>,
+    active_hand: usize,
+    dealer_hand: DealerHand,
+}
+
+impl HandInfo{
+    pub fn new(player_bet: f64, deck: &mut WrappedDeck, rng: &mut RandomNumberGenerator) -> HandInfo{
+        let player_hand = PlayerHand::new(&[deck.deal_card(rng), deck.deal_card(rng)]);
+        let dealer_hand = DealerHand::new(&[deck.deal_card(rng), deck.deal_card(rng)]);
+
+        HandInfo{
+            player_hands: vec![PlayerHandData::new(player_hand, player_bet)],
+            active_hand: 0,
+            dealer_hand: dealer_hand,
+        }
+    }
+
+    pub fn play_dealer_hand(&mut self, deck: &mut WrappedDeck, rng: &mut RandomNumberGenerator) -> i32{
+        self.dealer_hand.play(deck, rng)
+    }
+
+    pub fn get_active_hand(&mut self) -> &mut PlayerHand{
+        if self.active_hand < 0 || self.active_hand >= self.player_hands.len(){
+            panic!("Invalid active hand index");
+        }
+        &mut self.player_hands[self.active_hand].player_hand
+    }
+
+    pub fn get_dealer_hand(&mut self) -> &mut DealerHand{
+        &mut self.dealer_hand
+    }
+
+    pub fn remove_active_hand(&mut self) -> PlayerHandData{
+        let removed_hand = self.player_hands.remove(self.active_hand);
+        self.active_hand -= 1;
+        removed_hand
+    }
+
+    pub fn add_player_hand(&mut self, hand: PlayerHandData){
+        self.player_hands.push(hand);
+    }
+
+    pub fn set_active_hand(&mut self, index: usize){
+        if index < 0 || index >= self.player_hands.len(){
+            panic!("Invalid active hand index");
+        }
+        self.active_hand = index;
+    }
+
+    pub fn get_active_index(&self) -> usize{
+        self.active_hand
+    }
+
+    pub fn set_active_bet(&mut self, bet: f64){
+        self.player_hands[self.active_hand].player_bet = bet;
+    }
+
+    pub fn get_active_bet(&self) -> f64{
+        self.player_hands[self.active_hand].player_bet
+    }
+}
+
+
+pub async fn play_blackjack_hand_new(
+    hand_data: &mut HandInfo,
+    deck: &mut WrappedDeck,
+    player_strategy: WrappedGame,
+    rng: &mut RandomNumberGenerator,
+    play_mode: PlayMode,
+) -> f64 {
+    // play dealer hand at the beginning so that recursive versions for splitting use the same dealer outcome
+    let dealer_result = hand_data.play_dealer_hand(deck, rng);
+
+    // add code for splitting here
+    if play_mode == PlayMode::All && hand_data.get_active_hand().is_pair() {
+        // splitting hands is allowed
+        let rank = BlackjackRank::new(hand_data.get_active_hand().get_cards()[0].rank());
+        let do_split =
+            player_strategy.get_split(SplitSituation::new(rank, hand_data.get_dealer_hand().open_card()), deck);
+        if do_split.await {
+            let first = PlayerHand::new(&[hand_data.get_active_hand().get_cards()[0], deck.deal_card(rng)]);
+            let second = PlayerHand::new(&[hand_data.get_active_hand().get_cards()[1], deck.deal_card(rng)]);
+            let old_active_hand = hand_data.remove_active_hand();
+            let active_index = hand_data.get_active_index();
+            hand_data.add_player_hand(PlayerHandData::new(first, old_active_hand.player_bet));
+            hand_data.add_player_hand(PlayerHandData::new(second, old_active_hand.player_bet));
+            hand_data.set_active_hand(active_index + 1);
+            let mut overall_result = 0.0;
+            overall_result += Box::pin(play_blackjack_hand_new(
+                hand_data,
+                deck,
+                player_strategy.clone(),
+                rng,
+                play_mode,
+            ))
+            .await;
+            hand_data.set_active_hand(hand_data.get_active_index() + 1);
+            overall_result += Box::pin(play_blackjack_hand_new(
+                hand_data,
+                deck,
+                player_strategy,
+                rng,
+                play_mode,
+            ))
+            .await;
+            return overall_result;
+        }
+    }
+
+    let mut player_points;
+    let mut only_draw_once = false;
+    if play_mode == PlayMode::All || play_mode == PlayMode::DoubleDown {
+        player_points = evaluate_blackjack_hand(&hand_data.get_active_hand().get_blackjack_hand());
+        only_draw_once = player_strategy
+            .get_double_down(
+                HandSituation::new(player_points, hand_data.get_dealer_hand().open_card()),
+                deck,
+            )
+            .await;
+        if only_draw_once {
+            hand_data.set_active_bet(hand_data.get_active_bet() * 2.0);
+        }
+    }
+
+    if only_draw_once {
+        hand_data.get_active_hand().add_card(&deck.deal_card(rng));
+        player_points = evaluate_blackjack_hand(&hand_data.get_active_hand().get_blackjack_hand());
+    } else {
+        loop {
+            player_points = evaluate_blackjack_hand(&hand_data.get_active_hand().get_blackjack_hand());
+            if player_points.lower() > 21 {
+                break;
+            }
+            let draw = player_strategy
+                .get_draw(
+                    HandSituation::new(player_points, hand_data.get_dealer_hand().open_card()),
+                    deck,
+                )
+                .await;
+            if !draw {
+                break;
+            }
+            hand_data.get_active_hand().add_card(&deck.deal_card(rng));
+        }
+    }
+    // deduce player result
+    let player_result = player_points.upper();
+
+    // compare player and dealer hands
+    get_play_result(hand_data.get_active_bet(), player_result, dealer_result, hand_data.get_active_hand().clone())
+}
