@@ -1,11 +1,14 @@
 use crate::blackjack::blackjack_situation::HandSituation;
 use crate::blackjack::blackjack_situation::SplitSituation;
-use crate::blackjack::deck::Card;
 use crate::blackjack::deck::EightDecks;
 use crate::blackjack::deck::WrappedDeck;
 use crate::blackjack::hand::DealerHand;
 use crate::blackjack::hand::PlayerHand;
-use crate::blackjack::play_blackjack_hand::play_blackjack_hand;
+use crate::blackjack::play_blackjack_hand::play_blackjack_hand_new;
+use crate::blackjack::play_blackjack_hand::HandData;
+use crate::blackjack::play_blackjack_hand::PlayerHandData;
+use crate::blackjack::play_blackjack_hand::HandInfo;
+use crate::blackjack::play_blackjack_hand::WrappedHandData;
 use crate::blackjack::play_blackjack_hand::PlayMode;
 use crate::blackjack::rng::RandomNumberGenerator;
 use crate::blackjack::strategy::blackjack_strategy_combined_ordered_hash_map::BlackjackStrategyCombinedOrderedHashMap;
@@ -95,7 +98,6 @@ struct GameData {
     nb_right_decisions: i32,
     action_receiver: mpsc::Receiver<GameAction>,
     option_sender: mpsc::Sender<Vec<GameAction>>,
-    game_info_sender: mpsc::Sender<GameInfo>,
     cached_decision: Option<GameAction>,
 }
 
@@ -104,7 +106,6 @@ impl GameData {
         optimal_strategy: WrappedStrategy,
         action_receiver: mpsc::Receiver<GameAction>,
         option_sender: mpsc::Sender<Vec<GameAction>>,
-        game_info_sender: mpsc::Sender<GameInfo>,
     ) -> GameData {
         GameData {
             optimal_strategy,
@@ -112,22 +113,74 @@ impl GameData {
             nb_right_decisions: 0,
             action_receiver,
             option_sender,
-            game_info_sender,
             cached_decision: None,
         }
+    }
+}
+
+struct ChannelHandInfo{
+    hand_info: HandInfo,
+    game_info_sender: mpsc::Sender<GameInfo>,
+}
+
+impl ChannelHandInfo {
+    pub fn new(hand_info: HandInfo, game_info_sender: mpsc::Sender<GameInfo>) -> ChannelHandInfo {
+        ChannelHandInfo {
+            hand_info,
+            game_info_sender,
+        }
+    }
+}
+
+#[async_trait]
+impl HandData for ChannelHandInfo{
+    async fn play_dealer_hand(&mut self, deck: &mut WrappedDeck, rng: &mut RandomNumberGenerator) -> i32 {
+        self.hand_info.play_dealer_hand(deck, rng).await
+    }
+
+    async fn get_active_hand(&mut self) -> &mut PlayerHand {
+        self.hand_info.get_active_hand().await
+    }
+
+    async fn get_dealer_hand(&mut self) -> &mut DealerHand {
+        self.hand_info.get_dealer_hand().await
+    }
+
+    async fn remove_active_hand(&mut self) -> PlayerHandData {
+        self.hand_info.remove_active_hand().await
+    }
+
+    async fn add_player_hand(&mut self, hand: PlayerHandData) {
+        self.hand_info.add_player_hand(hand).await
+    }
+
+    async fn set_active_hand(&mut self, index: usize) {
+        self.hand_info.set_active_hand(index).await
+    }
+
+    async fn get_active_index(&self) -> usize {
+        self.hand_info.get_active_index().await
+    }
+
+    async fn set_active_bet(&mut self, bet: f64) {
+        self.hand_info.set_active_bet(bet).await
+    }
+
+    async fn get_active_bet(&self) -> f64 {
+        self.hand_info.get_active_bet().await
     }
 }
 
 struct GameState {
     rng: RandomNumberGenerator,
     deck: WrappedDeck,
-    dealer_hand: DealerHand,
-    player_hand: PlayerHand,
+    hand_info: Option<WrappedHandData>,
     current_balance: f64,
     previous_balance: f64,
     nb_hands_played: i32,
     player_bet: f64,
     game_data: Arc<Mutex<GameData>>,
+    game_info_sender: mpsc::Sender<GameInfo>,
     do_print: bool,
 }
 
@@ -142,8 +195,7 @@ impl GameState {
         GameState {
             rng: RandomNumberGenerator::new(),
             deck: WrappedDeck::new(Box::new(EightDecks::new())),
-            dealer_hand: DealerHand::new(&[Card::new_with_int(0), Card::new_with_int(1)]),
-            player_hand: PlayerHand::new(&[Card::new_with_int(2), Card::new_with_int(3)]),
+            hand_info: None,
             current_balance: 1000.0,
             previous_balance: 1000.0,
             nb_hands_played: 0,
@@ -152,37 +204,30 @@ impl GameState {
                 optimal_strategy,
                 action_receiver,
                 option_sender,
-                game_info_sender,
             ))),
+            game_info_sender: game_info_sender,
             do_print: do_print,
         }
     }
 
     pub fn deal(&mut self) {
-        self.dealer_hand = DealerHand::new(&[
-            self.deck.deal_card(&mut self.rng),
-            self.deck.deal_card(&mut self.rng),
-        ]);
-        self.player_hand = PlayerHand::new(&[
-            self.deck.deal_card(&mut self.rng),
-            self.deck.deal_card(&mut self.rng),
-        ]);
+        self.hand_info = Some(WrappedHandData::new(Box::new(ChannelHandInfo::new(HandInfo::new(self.player_bet, &mut self.deck, &mut self.rng), self.game_info_sender.clone()))));
     }
 
-    pub fn print_before_hand(&self) {
+    pub async fn print_before_hand(&self) {
         println!("Starting to play hand number {}", self.nb_hands_played);
         println!("Your balance is: {}", self.current_balance);
-        println!("Your hand: {:?}", self.player_hand.get_cards());
+        if let Some(hand_info) = self.hand_info.as_ref() {
+            println!("Your hand: {:?}", hand_info.hand_data.lock().await.get_active_hand().await.get_cards());
+        }
     }
 
     pub async fn play(&mut self) {
         self.previous_balance = self.current_balance;
         let game = GameStrategy::new(self.game_data.clone(), self.do_print);
         let wrapped_game = WrappedGame::new(game);
-        self.current_balance += play_blackjack_hand(
-            self.player_bet,
-            self.player_hand.clone(),
-            self.dealer_hand.clone(),
+        self.current_balance += play_blackjack_hand_new(
+            &mut self.hand_info.as_mut().unwrap(),
             &mut self.deck,
             wrapped_game,
             &mut self.rng,
@@ -208,7 +253,7 @@ pub struct ChannelGame {
     do_print: bool,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct GameInfo {
     pub dealer_hand: DealerHand,
     pub player_hand: PlayerHand,
@@ -236,17 +281,6 @@ impl ChannelGame {
                 do_print,
             ),
             do_print,
-        }
-    }
-
-    pub async fn get_game_info(&self) -> GameInfo {
-        GameInfo {
-            dealer_hand: self.game_state.dealer_hand.clone(),
-            player_hand: self.game_state.player_hand.clone(),
-            current_balance: self.game_state.current_balance,
-            nb_hands_played: self.game_state.nb_hands_played,
-            nb_right_decisions: self.game_state.game_data.lock().await.nb_right_decisions,
-            player_bet: self.game_state.player_bet,
         }
     }
 

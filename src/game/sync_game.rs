@@ -21,7 +21,8 @@ impl SyncGame {
         let rt = tokio::runtime::Runtime::new().unwrap();
         let (async_action_sender, async_action_receiver) = mpsc::channel::<GameAction>(32);
         let (async_option_sender, mut async_option_receiver) = mpsc::channel::<Vec<GameAction>>(32);
-    
+        let (async_game_info_sender, async_game_info_receiver) = mpsc::channel::<GameInfo>(1);
+
         let (stop_sender_action, stop_receiver_action) = std_mpsc::channel::<bool>();
         let action_thread = thread::spawn(move || {
             loop{
@@ -52,7 +53,7 @@ impl SyncGame {
             }
         });
 
-        let game = rt.block_on(ChannelGame::new(async_action_receiver, async_option_sender, do_print));
+        let game = rt.block_on(ChannelGame::new(async_action_receiver, async_option_sender, async_game_info_sender, do_print));
         SyncGame { game, rt, action_thread, option_thread, stop_sender_action, stop_sender_option }
     }
 
@@ -67,9 +68,5 @@ impl SyncGame {
             self.stop_sender_option.send(true).unwrap();
         }
         result
-    }
-
-    pub fn get_game_info(&self) -> GameInfo {
-        self.rt.block_on(self.game.get_game_info())
     }
 }
