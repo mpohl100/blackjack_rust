@@ -134,7 +134,7 @@ pub async fn play_blackjack_hand(
 }
 
 
-struct PlayerHandData{
+pub struct PlayerHandData{
     player_hand: PlayerHand,
     player_bet: f64,
 }
@@ -161,9 +161,18 @@ pub trait HandData{
     async fn get_active_bet(&self) -> f64;
 }
 
-struct WrappedHandData{
-    hand_data: Arc<Mutex<dyn HandData + Send>>,
+pub struct WrappedHandData{
+    pub hand_data: Arc<Mutex<Box<dyn HandData + Send>>>,
 }
+
+impl WrappedHandData{
+    pub fn new(data: Box<dyn HandData + Send>) -> WrappedHandData{
+        WrappedHandData{
+            hand_data: Arc::new(Mutex::new(data)),
+        }
+    }
+}
+
 pub struct HandInfo{
     player_hands: Vec<PlayerHandData>,
     active_hand: usize,

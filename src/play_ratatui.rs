@@ -43,7 +43,7 @@ fn main() -> io::Result<()> {
                 options = Some(option_receiver.recv().unwrap());    
             }
         }
-        let game_info = sync_game.lock().unwrap().get_game_info();
+        let game_info = GameInfo::default();
 
         let options_clone = options.clone();
         let ui = move |frame: &mut Frame| {
