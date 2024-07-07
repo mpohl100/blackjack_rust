@@ -95,6 +95,7 @@ struct GameData {
     nb_right_decisions: i32,
     action_receiver: mpsc::Receiver<GameAction>,
     option_sender: mpsc::Sender<Vec<GameAction>>,
+    game_info_sender: mpsc::Sender<GameInfo>,
     cached_decision: Option<GameAction>,
 }
 
@@ -103,6 +104,7 @@ impl GameData {
         optimal_strategy: WrappedStrategy,
         action_receiver: mpsc::Receiver<GameAction>,
         option_sender: mpsc::Sender<Vec<GameAction>>,
+        game_info_sender: mpsc::Sender<GameInfo>,
     ) -> GameData {
         GameData {
             optimal_strategy,
@@ -110,6 +112,7 @@ impl GameData {
             nb_right_decisions: 0,
             action_receiver,
             option_sender,
+            game_info_sender,
             cached_decision: None,
         }
     }
@@ -133,6 +136,7 @@ impl GameState {
         optimal_strategy: WrappedStrategy,
         action_receiver: mpsc::Receiver<GameAction>,
         option_sender: mpsc::Sender<Vec<GameAction>>,
+        game_info_sender: mpsc::Sender<GameInfo>,
         do_print: bool,
     ) -> GameState {
         GameState {
@@ -148,6 +152,7 @@ impl GameState {
                 optimal_strategy,
                 action_receiver,
                 option_sender,
+                game_info_sender,
             ))),
             do_print: do_print,
         }
@@ -217,12 +222,19 @@ impl ChannelGame {
     pub async fn new(
         action_receiver: mpsc::Receiver<GameAction>,
         option_sender: mpsc::Sender<Vec<GameAction>>,
+        game_info_sender: mpsc::Sender<GameInfo>,
         do_print: bool,
     ) -> ChannelGame {
         let game_strat = WrappedStrategy::new(BlackjackStrategyCombinedOrderedHashMap::new());
         let optimal_strategy = optimize_blackjack(game_strat, 0).await;
         ChannelGame {
-            game_state: GameState::new(optimal_strategy, action_receiver, option_sender, do_print),
+            game_state: GameState::new(
+                optimal_strategy,
+                action_receiver,
+                option_sender,
+                game_info_sender,
+                do_print,
+            ),
             do_print,
         }
     }
