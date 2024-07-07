@@ -187,7 +187,8 @@ impl HandInfo{
     }
 
     pub fn add_player_hand(&mut self, hand: PlayerHandData){
-        self.player_hands.push(hand);
+        // add player hand to the right of the active hand
+        self.player_hands.insert(self.active_hand + 1, hand);
     }
 
     pub fn set_active_hand(&mut self, index: usize){
@@ -233,8 +234,8 @@ pub async fn play_blackjack_hand_new(
             let old_active_hand = hand_data.remove_active_hand();
             let active_index = hand_data.get_active_index();
             hand_data.add_player_hand(PlayerHandData::new(first, old_active_hand.player_bet));
-            hand_data.add_player_hand(PlayerHandData::new(second, old_active_hand.player_bet));
             hand_data.set_active_hand(active_index + 1);
+            hand_data.add_player_hand(PlayerHandData::new(second, old_active_hand.player_bet));
             let mut overall_result = 0.0;
             overall_result += Box::pin(play_blackjack_hand_new(
                 hand_data,
