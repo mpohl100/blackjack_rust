@@ -39,13 +39,15 @@ fn main() -> io::Result<()> {
     let mut should_quit = false;
     while !should_quit {
         if options.is_none() {
-            if option_receiver.try_recv().is_ok() {
-                options = Some(option_receiver.recv().unwrap());    
+            match option_receiver.try_recv() {
+                Ok(options_received) => { options = Some(options_received); },
+                Err(_message) => {}    
             }
         }
         let mut game_info = None;
-        if game_info_receiver.try_recv().is_ok() {
-            game_info = Some(game_info_receiver.recv().unwrap());
+        match game_info_receiver.try_recv() {
+            Ok(game_info_received) => {game_info = Some(game_info_received); },
+            Err(_message) => {}
         }
 
         let options_clone = options.clone();
