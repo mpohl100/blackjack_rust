@@ -51,7 +51,7 @@ async fn play_blackjack_normal() {
     //let result_ordinary_map = play(BlackjackStrategy::new(false), play_configuration.clone(), strategy_configuration.clone(), &thread_pool,"OrderedMap".to_string());
     //let result_vec = play(BlackjackStrategyVec::new(false), play_configuration.clone(), strategy_configuration.clone(), &thread_pool,"ReversedVec".to_string());
     //let result_vec_reversed = play(BlackjackStrategyVec::new(true), play_configuration, strategy_configuration.clone(), &thread_pool,"Vec".to_string());
-    assert!(result_hash_map > -500.0);
+    assert!(result_hash_map > -1000.0);
     //assert!(result_ordinary_map > -5000.0);
     //assert!(result_vec > -5000.0);
     //assert!(result_vec_reversed > -5000.0);

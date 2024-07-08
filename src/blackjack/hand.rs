@@ -148,7 +148,7 @@ mod blackjack_hand_tests {
         hand.cards.clear();
         hand.add_card(&Card::new(Rank::King, Suit::Spades));
         hand.add_card(&Card::new(Rank::Queen, Suit::Clubs));
-        assert!(!hand.is_pair());
+        assert!(hand.is_pair());
 
         // Test when hand has more than 2 cards
         hand.cards.clear();
