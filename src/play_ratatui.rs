@@ -8,14 +8,10 @@ use ratatui::{
     },
     prelude::*,
     widgets::*,
-    TerminalOptions,
 };
 
 use blackjack_rust::game::sync_game::SyncGame;
-use blackjack_rust::game::{
-    self,
-    channel_game::{get_short_letter, get_word, GameAction, GameInfo},
-};
+use blackjack_rust::game::channel_game::{get_short_letter, get_word, GameAction, GameInfo};
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -27,19 +23,11 @@ fn main() -> io::Result<()> {
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
 
     let (action_sender, action_receiver) = mpsc::sync_channel::<GameAction>(1);
-    let (option_sender, mut option_receiver) = mpsc::sync_channel::<Vec<GameAction>>(1);
+    let (option_sender, option_receiver) = mpsc::sync_channel::<Vec<GameAction>>(1);
     let (game_info_sender, game_info_receiver) = mpsc::sync_channel::<GameInfo>(1);
     let option_sender_clone = option_sender.clone();
-    let mut options = Arc::new(Mutex::new(None));
-    let mut game_info = Arc::new(Mutex::new(None));
-    let options_clone = options.clone();
-    let game_info_clone = game_info.clone();
-    let reset_data = move || {
-        let mut opt = options_clone.lock().unwrap();
-        *opt = None;
-        let mut game = game_info_clone.lock().unwrap();
-        *game = None;
-    };
+    let options = Arc::new(Mutex::new(None));
+    let game_info = Arc::new(Mutex::new(None));
     let t = thread::spawn(move || {
         let mut sync_game = SyncGame::new(
             action_receiver,
@@ -52,29 +40,24 @@ fn main() -> io::Result<()> {
             if !sync_game.ask_to_play_another_hand() {
                 break;
             }
-            reset_data();
         }
     });
     let mut should_quit = false;
     while !should_quit {
-        
-        if options.lock().unwrap().is_none() {
-            let mut opt = options.lock().unwrap();
-            match option_receiver.try_recv() {
-                Ok(options_received) => {
-                    *opt = Some(options_received);
-                }
-                Err(_message) => {}
+        match option_receiver.try_recv() {
+            Ok(options_received) => {
+                let mut opt = options.lock().unwrap();
+                *opt = Some(options_received);
             }
+            Err(_message) => {}
         }
-        if game_info.lock().unwrap().is_none() {
-            let mut game = game_info.lock().unwrap();
-            match game_info_receiver.try_recv() {
-                Ok(game_info_received) => {
-                    *game = Some(game_info_received);
-                }
-                Err(_message) => {}
+
+        match game_info_receiver.try_recv() {
+            Ok(game_info_received) => {
+                let mut game = game_info.lock().unwrap();
+                *game = Some(game_info_received);
             }
+            Err(_message) => {}
         }
 
         let options_clone = options.lock().unwrap().clone();
@@ -91,13 +74,6 @@ fn main() -> io::Result<()> {
 
         if choice == GameAction::Stop {
             should_quit = true;
-        }
-
-        if choice != GameAction::Continue {
-            let mut opt = options.lock().unwrap();
-            *opt = None;
-            let mut game = game_info.lock().unwrap();
-            *game = None;
         }
     }
 
