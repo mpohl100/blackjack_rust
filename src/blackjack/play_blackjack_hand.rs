@@ -155,8 +155,8 @@ pub trait HandData{
     async fn get_dealer_hand(&mut self) -> &mut DealerHand;
     async fn remove_active_hand(&mut self) -> PlayerHandData;
     async fn add_player_hand(&mut self, hand: PlayerHandData);
-    async fn set_active_hand(&mut self, index: usize);
-    async fn get_active_index(&self) -> usize;
+    async fn set_active_hand(&mut self, index: i32);
+    async fn get_active_index(&self) -> i32;
     async fn set_active_bet(&mut self, bet: f64);
     async fn get_active_bet(&self) -> f64;
     async fn send_game_info(&mut self, active_hand_finished: bool);
@@ -222,22 +222,22 @@ impl HandData for HandInfo{
     }
 
     async fn add_player_hand(&mut self, hand: PlayerHandData){
-        if self.active_hand < 0 || self.active_hand >= self.player_hands.len().try_into().unwrap(){
+        if self.active_hand < -1 || self.active_hand >= self.player_hands.len().try_into().unwrap(){
             panic!("Invalid active hand index");
         }
         // add player hand to the right of the active hand
         self.player_hands.insert((self.active_hand + 1) as usize, hand);
     }
 
-    async fn set_active_hand(&mut self, index: usize){
-        if index >= self.player_hands.len(){
+    async fn set_active_hand(&mut self, index: i32){
+        if index < 0 || index >= self.player_hands.len().try_into().unwrap(){
             panic!("Invalid active hand index");
         }
-        self.active_hand = index as i32;
+        self.active_hand = index;
     }
 
-    async fn get_active_index(&self) -> usize{
-        self.active_hand as usize
+    async fn get_active_index(&self) -> i32{
+        self.active_hand
     }
 
     async fn set_active_bet(&mut self, bet: f64){
@@ -280,10 +280,10 @@ pub async fn play_blackjack_hand_new(
         if do_split.await {
             let first = PlayerHand::new(&[hand_data.hand_data.lock().await.get_active_hand().await.get_cards()[0], deck.deal_card(rng)]);
             let second = PlayerHand::new(&[hand_data.hand_data.lock().await.get_active_hand().await.get_cards()[1], deck.deal_card(rng)]);
-            let old_active_hand = hand_data.hand_data.lock().await.remove_active_hand().await;
             let active_index = hand_data.hand_data.lock().await.get_active_index().await;
+            let old_active_hand = hand_data.hand_data.lock().await.remove_active_hand().await;
             hand_data.hand_data.lock().await.add_player_hand(PlayerHandData::new(first, old_active_hand.player_bet)).await;
-            hand_data.hand_data.lock().await.set_active_hand(active_index + 1).await;
+            hand_data.hand_data.lock().await.set_active_hand(active_index).await;
             hand_data.hand_data.lock().await.send_game_info(false).await;
             hand_data.hand_data.lock().await.add_player_hand(PlayerHandData::new(second, old_active_hand.player_bet)).await;
             hand_data.hand_data.lock().await.send_game_info(false).await;
