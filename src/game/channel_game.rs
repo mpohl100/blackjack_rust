@@ -307,7 +307,7 @@ impl ChannelGame {
         self.game_state.nb_hands_played += 1;
         self.game_state.deal();
         if self.do_print {
-            self.game_state.print_before_hand();
+            self.game_state.print_before_hand().await;
         }
         self.game_state.play().await;
         if self.do_print {
