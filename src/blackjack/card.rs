@@ -150,7 +150,11 @@ impl Card {
     }
 
     pub fn to_string_internal(&self) -> String {
-        format!("{}{}", self.rank.to_string_internal(), self.suit.to_string_internal())
+        format!(
+            "{}{}",
+            self.rank.to_string_internal(),
+            self.suit.to_string_internal()
+        )
     }
 }
 

@@ -10,8 +10,8 @@ use ratatui::{
     widgets::*,
 };
 
-use blackjack_rust::game::sync_game::SyncGame;
 use blackjack_rust::game::channel_game::{get_short_letter, get_word, GameAction, GameInfo};
+use blackjack_rust::game::sync_game::SyncGame;
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -137,7 +137,9 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
 
     let options_clone = options.clone();
     match options_clone {
-        None => { Layout::default().split(main_layout[3]); },
+        None => {
+            Layout::default().split(main_layout[3]);
+        }
         Some(options) => {
             let options_percentage = 100 / options.len() as u16;
             let options_layout = Layout::new(
@@ -151,14 +153,11 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
             .split(main_layout[3]);
             for (i, option) in options.iter().enumerate() {
                 let block = Block::bordered().title(get_word(*option));
+                frame.render_widget(block.clone(), options_layout[i]);
                 frame.render_widget(
-                block.clone(),
-                options_layout[i],
+                    Paragraph::new("Press ".to_owned() + &get_short_letter(*option)),
+                    block.inner(options_layout[i]),
                 );
-                frame.render_widget(
-                Paragraph::new("Press ".to_owned() + &get_short_letter(*option)),
-                block.inner(options_layout[i]),
-            );
             }
         }
     };
