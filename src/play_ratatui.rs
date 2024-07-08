@@ -57,8 +57,9 @@ fn main() -> io::Result<()> {
     });
     let mut should_quit = false;
     while !should_quit {
-        let mut opt = options.lock().unwrap();
-        if opt.is_none() {
+        
+        if options.lock().unwrap().is_none() {
+            let mut opt = options.lock().unwrap();
             match option_receiver.try_recv() {
                 Ok(options_received) => {
                     *opt = Some(options_received);
@@ -66,8 +67,8 @@ fn main() -> io::Result<()> {
                 Err(_message) => {}
             }
         }
-        let mut game = game_info.lock().unwrap();
-        if game.is_none() {
+        if game_info.lock().unwrap().is_none() {
+            let mut game = game_info.lock().unwrap();
             match game_info_receiver.try_recv() {
                 Ok(game_info_received) => {
                     *game = Some(game_info_received);
