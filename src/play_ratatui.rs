@@ -41,15 +41,15 @@ fn main() -> io::Result<()> {
         *game = None;
     };
     let t = thread::spawn(move || {
-        let sync_game = Arc::new(Mutex::<SyncGame>::new(SyncGame::new(
+        let mut sync_game = SyncGame::new(
             action_receiver,
             option_sender_clone,
             game_info_sender,
             false,
-        )));
+        );
         loop {
-            sync_game.lock().unwrap().play();
-            if !sync_game.lock().unwrap().ask_to_play_another_hand() {
+            sync_game.play();
+            if !sync_game.ask_to_play_another_hand() {
                 break;
             }
             reset_data();

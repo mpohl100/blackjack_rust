@@ -20,7 +20,7 @@ pub enum PlayMode {
     Draw,
 }
 
-fn get_play_result(
+async fn get_play_result(
     player_bet: f64,
     player_result: i32,
     dealer_result: i32,
@@ -130,7 +130,7 @@ pub async fn play_blackjack_hand(
     let player_result = player_points.upper();
 
     // compare player and dealer hands
-    get_play_result(player_bet, player_result, dealer_result, player_hand)
+    get_play_result(player_bet, player_result, dealer_result, player_hand).await
 }
 
 
@@ -355,7 +355,9 @@ pub async fn play_blackjack_hand_new(
     let player_result = player_points.upper();
 
     // compare player and dealer hands
-    let result = get_play_result(hand_data.hand_data.lock().await.get_active_bet().await, player_result, dealer_result, hand_data.hand_data.lock().await.get_active_hand().await.clone());
+    let active_bet = hand_data.hand_data.lock().await.get_active_bet().await;
+    let active_hand = hand_data.hand_data.lock().await.get_active_hand().await.clone();
+    let result = get_play_result(active_bet, player_result, dealer_result, active_hand).await;
     hand_data.hand_data.lock().await.send_game_info(true).await;
     result
 }
