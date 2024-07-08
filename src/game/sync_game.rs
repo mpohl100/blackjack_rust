@@ -3,6 +3,7 @@ use std::{sync::mpsc as std_mpsc, thread};
 use tokio::sync::mpsc;
 
 // Synchronous wrapper
+#[allow(dead_code)]
 pub struct SyncGame {
     game: ChannelGame,
     rt: tokio::runtime::Runtime,

@@ -171,7 +171,7 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
     frame.render_widget(your_money.clone(), money_layout[0]);
     frame.render_widget(your_bet.clone(), money_layout[1]);
 
-    if !game_info.is_none() {
+    if game_info.is_some() {
         let game_info_unwrapped = game_info.unwrap();
         frame.render_widget(
             Paragraph::new(game_info_unwrapped.player_hand.to_string_internal()),

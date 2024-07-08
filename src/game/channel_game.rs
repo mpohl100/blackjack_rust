@@ -70,8 +70,8 @@ pub fn get_short_letter(action: GameAction) -> String {
 
 pub fn get_word(action: GameAction) -> String {
     match action {
-        GameAction::Split => return "Split".to_owned(),
-        GameAction::DoubleDown => return "Double Down".to_owned(),
+        GameAction::Split => "Split".to_owned(),
+        GameAction::DoubleDown => "Double Down".to_owned(),
         GameAction::Hit => "Hit".to_owned(),
         GameAction::Stand => "Stand".to_owned(),
         GameAction::Stop => "Stop".to_owned(),
@@ -143,16 +143,15 @@ impl ChannelHandInfo {
     }
 
     async fn get_game_info(&mut self, active_hand_finished: bool) -> GameInfo {
-        let game_info = GameInfo {
+        GameInfo {
             dealer_hand: self.hand_info.get_dealer_hand().await.clone(),
             player_hand: self.hand_info.get_active_hand().await.clone(),
             current_balance: 0.0,
             nb_hands_played: 0,
             nb_right_decisions: 0,
-            active_hand_finished: active_hand_finished,
+            active_hand_finished,
             player_bet: self.hand_info.get_active_bet().await,
-        };
-        game_info
+        }
     }
 }
 
@@ -238,8 +237,8 @@ impl GameState {
                 action_receiver,
                 option_sender,
             ))),
-            game_info_sender: game_info_sender,
-            do_print: do_print,
+            game_info_sender,
+            do_print,
         }
     }
 
@@ -272,7 +271,7 @@ impl GameState {
         let game = GameStrategy::new(self.game_data.clone(), self.do_print);
         let wrapped_game = WrappedGame::new(game);
         self.current_balance += play_blackjack_hand_new(
-            &mut self.hand_info.as_mut().unwrap(),
+            self.hand_info.as_mut().unwrap(),
             &mut self.deck,
             wrapped_game,
             &mut self.rng,
@@ -375,10 +374,8 @@ impl GameStrategy {
                 println!("Right decision for double down");
             }
             self.game_data.lock().await.nb_right_decisions += 1;
-        } else {
-            if self.do_print {
-                println!("Wrong decision for double down");
-            }
+        } else if self.do_print {
+            println!("Wrong decision for double down");
         }
         self.game_data.lock().await.nb_hands_played += 1;
         if do_double_down {
@@ -410,10 +407,8 @@ impl GameStrategy {
                 println!("Right decision for draw");
             }
             self.game_data.lock().await.nb_right_decisions += 1;
-        } else {
-            if self.do_print {
-                println!("Wrong decision for draw");
-            }
+        } else if self.do_print {
+            println!("Wrong decision for draw");
         }
         self.game_data.lock().await.nb_hands_played += 1;
         if do_draw {
@@ -587,10 +582,8 @@ impl BlackjackGame for GameStrategy {
                 println!("Right decision for split");
             }
             self.game_data.lock().await.nb_right_decisions += 1;
-        } else {
-            if self.do_print {
-                println!("Wrong decision for split");
-            }
+        } else if self.do_print {
+            println!("Wrong decision for split");
         }
         self.game_data.lock().await.nb_hands_played += 1;
         if do_it {

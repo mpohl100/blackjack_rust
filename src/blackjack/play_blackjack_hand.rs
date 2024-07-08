@@ -141,8 +141,8 @@ pub struct PlayerHandData {
 impl PlayerHandData {
     pub fn new(player_hand: PlayerHand, player_bet: f64) -> PlayerHandData {
         PlayerHandData {
-            player_hand: player_hand,
-            player_bet: player_bet,
+            player_hand,
+            player_bet,
         }
     }
 }
@@ -195,7 +195,7 @@ impl HandInfo {
         HandInfo {
             player_hands: vec![PlayerHandData::new(player_hand, player_bet)],
             active_hand: 0,
-            dealer_hand: dealer_hand,
+            dealer_hand,
         }
     }
 }
