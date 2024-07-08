@@ -108,7 +108,7 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
             Constraint::Length(1),
             Constraint::Min(0),
             Constraint::Min(0),
-            Constraint::Length(1),
+            Constraint::Min(0),
         ],
     )
     .split(frame.size());
@@ -136,11 +136,11 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
     .split(main_layout[2]);
 
     let options_clone = options.clone();
-    let options_layout = match options_clone {
-        None => Layout::default().split(main_layout[3]),
+    match options_clone {
+        None => { Layout::default().split(main_layout[3]); },
         Some(options) => {
             let options_percentage = 100 / options.len() as u16;
-            Layout::new(
+            let options_layout = Layout::new(
                 Direction::Horizontal,
                 options
                     .iter()
@@ -148,7 +148,18 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
                     .collect::<Vec<_>>()
                     .as_slice(),
             )
-            .split(main_layout[3])
+            .split(main_layout[3]);
+            for (i, option) in options.iter().enumerate() {
+                let block = Block::bordered().title(get_word(*option));
+                frame.render_widget(
+                block.clone(),
+                options_layout[i],
+                );
+                frame.render_widget(
+                Paragraph::new("Press ".to_owned() + &get_short_letter(*option)),
+                block.inner(options_layout[i]),
+            );
+            }
         }
     };
     let your_hand = Block::bordered().title("Your hand");
@@ -160,16 +171,6 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
     let your_bet = Block::bordered().title("Bet");
     frame.render_widget(your_money.clone(), money_layout[0]);
     frame.render_widget(your_bet.clone(), money_layout[1]);
-
-    let options_clone_2 = options.clone();
-    if !options_clone_2.is_none() {
-        for (i, option) in options_clone_2.unwrap().iter().enumerate() {
-            frame.render_widget(
-                Block::bordered().title(get_word(*option)),
-                options_layout[i],
-            );
-        }
-    }
 
     if !game_info.is_none() {
         let game_info_unwrapped = game_info.unwrap();
@@ -190,14 +191,5 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
             Paragraph::new("$".to_owned() + &game_info_unwrapped.player_bet.to_string()),
             your_bet.inner(money_layout[1]),
         );
-    }
-
-    if !options.is_none() {
-        for (i, option) in options.unwrap().iter().enumerate() {
-            frame.render_widget(
-                Paragraph::new("Press ".to_owned() + &get_short_letter(*option)),
-                options_layout[i],
-            );
-        }
     }
 }
