@@ -7,13 +7,14 @@ use ratatui::{
         ExecutableCommand,
     },
     prelude::*,
-    widgets::*, TerminalOptions,
+    widgets::*,
+    TerminalOptions,
 };
 
-use blackjack_rust::game::channel_game::{GameAction, GameInfo, get_word, get_short_letter};
+use blackjack_rust::game::channel_game::{get_short_letter, get_word, GameAction, GameInfo};
 use blackjack_rust::game::sync_game::SyncGame;
-use std::sync::Arc;
 use std::sync::mpsc;
+use std::sync::Arc;
 use std::sync::Mutex;
 use std::thread;
 
@@ -27,7 +28,12 @@ fn main() -> io::Result<()> {
     let (game_info_sender, game_info_receiver) = mpsc::sync_channel::<GameInfo>(1);
     let option_sender_clone = option_sender.clone();
     let t = thread::spawn(move || {
-        let sync_game = Arc::new(Mutex::<SyncGame>::new(SyncGame::new(action_receiver, option_sender_clone, game_info_sender, false)));
+        let sync_game = Arc::new(Mutex::<SyncGame>::new(SyncGame::new(
+            action_receiver,
+            option_sender_clone,
+            game_info_sender,
+            false,
+        )));
         loop {
             sync_game.lock().unwrap().play();
             if !sync_game.lock().unwrap().ask_to_play_another_hand() {
@@ -36,23 +42,30 @@ fn main() -> io::Result<()> {
         }
     });
     let mut options = None;
+    let mut game_info = None;
     let mut should_quit = false;
     while !should_quit {
         if options.is_none() {
             match option_receiver.try_recv() {
-                Ok(options_received) => { options = Some(options_received); },
-                Err(_message) => {}    
+                Ok(options_received) => {
+                    options = Some(options_received);
+                }
+                Err(_message) => {}
             }
         }
-        let mut game_info = None;
-        match game_info_receiver.try_recv() {
-            Ok(game_info_received) => {game_info = Some(game_info_received); },
-            Err(_message) => {}
+        if game_info.is_none() {
+            match game_info_receiver.try_recv() {
+                Ok(game_info_received) => {
+                    game_info = Some(game_info_received);
+                }
+                Err(_message) => {}
+            }
         }
 
         let options_clone = options.clone();
+        let game_info_clone = game_info.clone();
         let ui = move |frame: &mut Frame| {
-            draw_ui(frame, game_info, options_clone);
+            draw_ui(frame, game_info_clone, options_clone);
         };
         terminal.draw(ui)?;
 
@@ -67,6 +80,7 @@ fn main() -> io::Result<()> {
 
         if choice != GameAction::Continue {
             options = None;
+            game_info = None;
         }
     }
 
@@ -80,7 +94,7 @@ fn handle_events() -> io::Result<GameAction> {
     if event::poll(std::time::Duration::from_millis(50))? {
         if let Event::Key(key) = event::read()? {
             if key.kind == event::KeyEventKind::Press {
-                match key.code{
+                match key.code {
                     KeyCode::Char('q') => return Ok(GameAction::Stop),
                     KeyCode::Char('h') => return Ok(GameAction::Hit),
                     KeyCode::Char('t') => return Ok(GameAction::Stand),
@@ -135,9 +149,15 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
             let options_percentage = 100 / options.len() as u16;
             Layout::new(
                 Direction::Horizontal,
-                options.iter().map(|_| Constraint::Percentage(options_percentage)).collect::<Vec<_>>().as_slice(),
-            ).split(main_layout[3])        
-        }};
+                options
+                    .iter()
+                    .map(|_| Constraint::Percentage(options_percentage))
+                    .collect::<Vec<_>>()
+                    .as_slice(),
+            )
+            .split(main_layout[3])
+        }
+    };
     let your_hand = Block::bordered().title("Your hand");
     let dealer_hand = Block::bordered().title("Dealer hand");
     frame.render_widget(your_hand.clone(), hands_layout[0]);
@@ -155,24 +175,36 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
                 Block::bordered().title(get_word(*option)),
                 options_layout[i],
             );
-        }    
+        }
     }
 
-    if !game_info.is_none(){
+    if !game_info.is_none() {
         let game_info_unwrapped = game_info.unwrap();
-        frame.render_widget(Paragraph::new(game_info_unwrapped.player_hand.to_string_internal()), your_hand.inner(hands_layout[0]));
-        frame.render_widget(Paragraph::new(game_info_unwrapped.dealer_hand.to_string_internal(true)), dealer_hand.inner(hands_layout[1]));
-    
-        frame.render_widget(Paragraph::new("$".to_owned() + &game_info_unwrapped.current_balance.to_string()), your_money.inner(money_layout[0]));
-        frame.render_widget(Paragraph::new("$".to_owned() + &game_info_unwrapped.player_bet.to_string()), your_bet.inner(money_layout[1]));    
+        frame.render_widget(
+            Paragraph::new(game_info_unwrapped.player_hand.to_string_internal()),
+            your_hand.inner(hands_layout[0]),
+        );
+        frame.render_widget(
+            Paragraph::new(game_info_unwrapped.dealer_hand.to_string_internal(true)),
+            dealer_hand.inner(hands_layout[1]),
+        );
+
+        frame.render_widget(
+            Paragraph::new("$".to_owned() + &game_info_unwrapped.current_balance.to_string()),
+            your_money.inner(money_layout[0]),
+        );
+        frame.render_widget(
+            Paragraph::new("$".to_owned() + &game_info_unwrapped.player_bet.to_string()),
+            your_bet.inner(money_layout[1]),
+        );
     }
-    
+
     if !options.is_none() {
         for (i, option) in options.unwrap().iter().enumerate() {
             frame.render_widget(
                 Paragraph::new("Press ".to_owned() + &get_short_letter(*option)),
                 options_layout[i],
             );
-        }    
+        }
     }
 }
