@@ -178,11 +178,11 @@ impl HandData for ChannelHandInfo{
         self.hand_info.add_player_hand(hand).await
     }
 
-    async fn set_active_hand(&mut self, index: usize) {
+    async fn set_active_hand(&mut self, index: i32) {
         self.hand_info.set_active_hand(index).await;
     }
 
-    async fn get_active_index(&self) -> usize {
+    async fn get_active_index(&self) -> i32 {
         self.hand_info.get_active_index().await
     }
 

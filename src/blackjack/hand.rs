@@ -20,7 +20,7 @@ impl BlackjackHand {
         if self.cards.len() != 2 {
             false
         } else {
-            self.cards[0].rank() == self.cards[1].rank()
+            self.cards[0].to_blackjack_score() == self.cards[1].to_blackjack_score()
         }
     }
 }
