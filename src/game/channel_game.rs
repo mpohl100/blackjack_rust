@@ -118,6 +118,17 @@ impl GameData {
     }
 }
 
+#[derive(Clone, Default)]
+pub struct GameInfo {
+    pub dealer_hand: DealerHand,
+    pub player_hand: PlayerHand,
+    pub current_balance: f64,
+    pub nb_hands_played: i32,
+    pub nb_right_decisions: i32,
+    pub active_hand_finished: bool,
+    pub player_bet: f64,
+}
+
 struct ChannelHandInfo{
     hand_info: HandInfo,
     game_info_sender: mpsc::Sender<GameInfo>,
@@ -129,6 +140,19 @@ impl ChannelHandInfo {
             hand_info,
             game_info_sender,
         }
+    }
+
+    async fn get_game_info(&mut self, active_hand_finished: bool) -> GameInfo{
+        let game_info = GameInfo {
+            dealer_hand: self.hand_info.get_dealer_hand().await.clone(),
+            player_hand: self.hand_info.get_active_hand().await.clone(),
+            current_balance: 0.0,
+            nb_hands_played: 0,
+            nb_right_decisions: 0,
+            active_hand_finished: active_hand_finished,
+            player_bet: self.hand_info.get_active_bet().await,
+        };
+        game_info
     }
 }
 
@@ -155,7 +179,7 @@ impl HandData for ChannelHandInfo{
     }
 
     async fn set_active_hand(&mut self, index: usize) {
-        self.hand_info.set_active_hand(index).await
+        self.hand_info.set_active_hand(index).await;
     }
 
     async fn get_active_index(&self) -> usize {
@@ -168,6 +192,11 @@ impl HandData for ChannelHandInfo{
 
     async fn get_active_bet(&self) -> f64 {
         self.hand_info.get_active_bet().await
+    }
+
+    async fn send_game_info(&mut self, active_hand_finished: bool) {
+        let game_info = self.get_game_info(active_hand_finished).await;
+        self.game_info_sender.send(game_info).await.unwrap();
     }
 }
 
@@ -251,16 +280,6 @@ impl GameState {
 pub struct ChannelGame {
     game_state: GameState,
     do_print: bool,
-}
-
-#[derive(Clone, Default)]
-pub struct GameInfo {
-    pub dealer_hand: DealerHand,
-    pub player_hand: PlayerHand,
-    pub current_balance: f64,
-    pub nb_hands_played: i32,
-    pub nb_right_decisions: i32,
-    pub player_bet: f64,
 }
 
 impl ChannelGame {

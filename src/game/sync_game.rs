@@ -8,20 +8,23 @@ pub struct SyncGame {
     rt: tokio::runtime::Runtime,
     action_thread: thread::JoinHandle<()>,
     option_thread: thread::JoinHandle<()>,
+    game_info_thread: thread::JoinHandle<()>,
     stop_sender_action: std_mpsc::Sender<bool>,
     stop_sender_option: std_mpsc::Sender<bool>,
+    stop_game_info_sender: std_mpsc::Sender<bool>,
 }
 
 impl SyncGame {
     pub fn new(
         action_receiver: std_mpsc::Receiver<GameAction>,
         option_sender: std_mpsc::SyncSender<Vec<GameAction>>,
+        game_info_sender: std_mpsc::SyncSender<GameInfo>,
         do_print: bool,
     ) -> SyncGame {
         let rt = tokio::runtime::Runtime::new().unwrap();
         let (async_action_sender, async_action_receiver) = mpsc::channel::<GameAction>(32);
         let (async_option_sender, mut async_option_receiver) = mpsc::channel::<Vec<GameAction>>(32);
-        let (async_game_info_sender, async_game_info_receiver) = mpsc::channel::<GameInfo>(1);
+        let (async_game_info_sender, mut async_game_info_receiver) = mpsc::channel::<GameInfo>(1);
 
         let (stop_sender_action, stop_receiver_action) = std_mpsc::channel::<bool>();
         let action_thread = thread::spawn(move || {
@@ -53,8 +56,23 @@ impl SyncGame {
             }
         });
 
+        let (stop_game_info_sender, stop_game_info_receiver) = std_mpsc::channel::<bool>();
+        let game_info_thread = thread::spawn(move || {
+            loop {
+                if async_game_info_receiver.try_recv().is_ok() {
+                    let game_info = async_game_info_receiver.blocking_recv().unwrap();
+                    game_info_sender.send(game_info).unwrap();    
+                }
+                // sleep 50 ms
+                thread::sleep(std::time::Duration::from_millis(50));
+                if stop_game_info_receiver.try_recv().is_ok() {
+                    break;
+                }
+            }
+        }); 
+
         let game = rt.block_on(ChannelGame::new(async_action_receiver, async_option_sender, async_game_info_sender, do_print));
-        SyncGame { game, rt, action_thread, option_thread, stop_sender_action, stop_sender_option }
+        SyncGame { game, rt, action_thread, option_thread, game_info_thread, stop_sender_action, stop_sender_option, stop_game_info_sender }
     }
 
     pub fn play(&mut self) {
@@ -66,6 +84,7 @@ impl SyncGame {
         if !result {
             self.stop_sender_action.send(true).unwrap();
             self.stop_sender_option.send(true).unwrap();
+            self.stop_game_info_sender.send(true).unwrap();
         }
         result
     }

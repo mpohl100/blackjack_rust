@@ -24,13 +24,13 @@ fn main() -> io::Result<()> {
 
     let (action_sender, action_receiver) = mpsc::sync_channel::<GameAction>(1);
     let (option_sender, mut option_receiver) = mpsc::sync_channel::<Vec<GameAction>>(1);
+    let (game_info_sender, game_info_receiver) = mpsc::sync_channel::<GameInfo>(1);
     let option_sender_clone = option_sender.clone();
-    let sync_game = Arc::new(Mutex::<SyncGame>::new(SyncGame::new(action_receiver, option_sender_clone, false)));
-    let sync_game_clone = sync_game.clone();
     let t = thread::spawn(move || {
+        let sync_game = Arc::new(Mutex::<SyncGame>::new(SyncGame::new(action_receiver, option_sender_clone, game_info_sender, false)));
         loop {
-            sync_game_clone.lock().unwrap().play();
-            if !sync_game_clone.lock().unwrap().ask_to_play_another_hand() {
+            sync_game.lock().unwrap().play();
+            if !sync_game.lock().unwrap().ask_to_play_another_hand() {
                 break;
             }
         }
@@ -43,7 +43,10 @@ fn main() -> io::Result<()> {
                 options = Some(option_receiver.recv().unwrap());    
             }
         }
-        let game_info = GameInfo::default();
+        let mut game_info = None;
+        if game_info_receiver.try_recv().is_ok() {
+            game_info = Some(game_info_receiver.recv().unwrap());
+        }
 
         let options_clone = options.clone();
         let ui = move |frame: &mut Frame| {
@@ -89,7 +92,7 @@ fn handle_events() -> io::Result<GameAction> {
     Ok(GameAction::Continue)
 }
 
-fn draw_ui(frame: &mut Frame, game_info: GameInfo, options: Option<Vec<GameAction>>) {
+fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<GameAction>>) {
     let main_layout = Layout::new(
         Direction::Vertical,
         [
@@ -153,12 +156,15 @@ fn draw_ui(frame: &mut Frame, game_info: GameInfo, options: Option<Vec<GameActio
         }    
     }
 
-    frame.render_widget(Paragraph::new(game_info.player_hand.to_string_internal()), your_hand.inner(hands_layout[0]));
-    frame.render_widget(Paragraph::new(game_info.dealer_hand.to_string_internal(true)), dealer_hand.inner(hands_layout[1]));
-
-    frame.render_widget(Paragraph::new("$".to_owned() + &game_info.current_balance.to_string()), your_money.inner(money_layout[0]));
-    frame.render_widget(Paragraph::new("$".to_owned() + &game_info.player_bet.to_string()), your_bet.inner(money_layout[1]));
-
+    if !game_info.is_none(){
+        let game_info_unwrapped = game_info.unwrap();
+        frame.render_widget(Paragraph::new(game_info_unwrapped.player_hand.to_string_internal()), your_hand.inner(hands_layout[0]));
+        frame.render_widget(Paragraph::new(game_info_unwrapped.dealer_hand.to_string_internal(true)), dealer_hand.inner(hands_layout[1]));
+    
+        frame.render_widget(Paragraph::new("$".to_owned() + &game_info_unwrapped.current_balance.to_string()), your_money.inner(money_layout[0]));
+        frame.render_widget(Paragraph::new("$".to_owned() + &game_info_unwrapped.player_bet.to_string()), your_bet.inner(money_layout[1]));    
+    }
+    
     if !options.is_none() {
         for (i, option) in options.unwrap().iter().enumerate() {
             frame.render_widget(
