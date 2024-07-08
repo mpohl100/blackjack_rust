@@ -24,14 +24,16 @@ impl SyncGame {
         let rt = tokio::runtime::Runtime::new().unwrap();
         let (async_action_sender, async_action_receiver) = mpsc::channel::<GameAction>(32);
         let (async_option_sender, mut async_option_receiver) = mpsc::channel::<Vec<GameAction>>(32);
-        let (async_game_info_sender, mut async_game_info_receiver) = mpsc::channel::<GameInfo>(1);
+        let (async_game_info_sender, mut async_game_info_receiver) = mpsc::channel::<GameInfo>(32);
 
         let (stop_sender_action, stop_receiver_action) = std_mpsc::channel::<bool>();
         let action_thread = thread::spawn(move || {
-            loop{
-                if action_receiver.try_recv().is_ok() {
-                    let action = action_receiver.recv().unwrap();
-                    async_action_sender.blocking_send(action).unwrap();    
+            loop {
+                match action_receiver.try_recv() {
+                    Ok(action) => {
+                        async_action_sender.blocking_send(action).unwrap();
+                    }
+                    Err(_message) => {}
                 }
                 // sleep 50 ms
                 thread::sleep(std::time::Duration::from_millis(50));
@@ -44,9 +46,11 @@ impl SyncGame {
         let (stop_sender_option, stop_receiver_option) = std_mpsc::channel::<bool>();
         let option_thread = thread::spawn(move || {
             loop {
-                if async_option_receiver.try_recv().is_ok() {
-                    let options = async_option_receiver.blocking_recv().unwrap();
-                    option_sender.send(options).unwrap();    
+                match async_option_receiver.try_recv() {
+                    Ok(options) => {
+                        option_sender.send(options).unwrap();
+                    }
+                    Err(_message) => {}
                 }
                 // sleep 50 ms
                 thread::sleep(std::time::Duration::from_millis(50));
@@ -59,9 +63,11 @@ impl SyncGame {
         let (stop_game_info_sender, stop_game_info_receiver) = std_mpsc::channel::<bool>();
         let game_info_thread = thread::spawn(move || {
             loop {
-                if async_game_info_receiver.try_recv().is_ok() {
-                    let game_info = async_game_info_receiver.blocking_recv().unwrap();
-                    game_info_sender.send(game_info).unwrap();    
+                match async_game_info_receiver.try_recv() {
+                    Ok(game_info) => {
+                        game_info_sender.send(game_info).unwrap();
+                    }
+                    Err(_message) => {}
                 }
                 // sleep 50 ms
                 thread::sleep(std::time::Duration::from_millis(50));
@@ -69,10 +75,24 @@ impl SyncGame {
                     break;
                 }
             }
-        }); 
+        });
 
-        let game = rt.block_on(ChannelGame::new(async_action_receiver, async_option_sender, async_game_info_sender, do_print));
-        SyncGame { game, rt, action_thread, option_thread, game_info_thread, stop_sender_action, stop_sender_option, stop_game_info_sender }
+        let game = rt.block_on(ChannelGame::new(
+            async_action_receiver,
+            async_option_sender,
+            async_game_info_sender,
+            do_print,
+        ));
+        SyncGame {
+            game,
+            rt,
+            action_thread,
+            option_thread,
+            game_info_thread,
+            stop_sender_action,
+            stop_sender_option,
+            stop_game_info_sender,
+        }
     }
 
     pub fn play(&mut self) {
