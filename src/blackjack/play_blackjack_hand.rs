@@ -176,7 +176,7 @@ impl WrappedHandData{
 
 pub struct HandInfo{
     player_hands: Vec<PlayerHandData>,
-    active_hand: usize,
+    active_hand: i32,
     dealer_hand: DealerHand,
 }
 
@@ -201,10 +201,11 @@ impl HandData for HandInfo{
     }
 
     async fn get_active_hand(&mut self) -> &mut PlayerHand{
-        if self.active_hand < 0 || self.active_hand >= self.player_hands.len(){
+        if self.active_hand < 0 || self.active_hand >= self.player_hands.len().try_into().unwrap(){
             panic!("Invalid active hand index");
         }
-        &mut self.player_hands[self.active_hand].player_hand
+        let index = self.active_hand as usize;
+        &mut self.player_hands[index].player_hand
     }
 
     async fn get_dealer_hand(&mut self) -> &mut DealerHand{
@@ -212,36 +213,48 @@ impl HandData for HandInfo{
     }
 
     async fn remove_active_hand(&mut self) -> PlayerHandData{
-        let removed_hand = self.player_hands.remove(self.active_hand);
+        if self.active_hand < 0 || self.active_hand >= self.player_hands.len().try_into().unwrap(){
+            panic!("Invalid active hand index");
+        }
+        let removed_hand = self.player_hands.remove(self.active_hand as usize);
         self.active_hand -= 1;
         removed_hand
     }
 
     async fn add_player_hand(&mut self, hand: PlayerHandData){
+        if self.active_hand < 0 || self.active_hand >= self.player_hands.len().try_into().unwrap(){
+            panic!("Invalid active hand index");
+        }
         // add player hand to the right of the active hand
-        self.player_hands.insert(self.active_hand + 1, hand);
+        self.player_hands.insert((self.active_hand + 1) as usize, hand);
     }
 
     async fn set_active_hand(&mut self, index: usize){
-        if index < 0 || index >= self.player_hands.len(){
+        if index >= self.player_hands.len(){
             panic!("Invalid active hand index");
         }
-        self.active_hand = index;
+        self.active_hand = index as i32;
     }
 
     async fn get_active_index(&self) -> usize{
-        self.active_hand
+        self.active_hand as usize
     }
 
     async fn set_active_bet(&mut self, bet: f64){
-        self.player_hands[self.active_hand].player_bet = bet;
+        if self.active_hand < 0 || self.active_hand >= self.player_hands.len().try_into().unwrap(){
+            panic!("Invalid active hand index");
+        }
+        self.player_hands[self.active_hand as usize].player_bet = bet;
     }
 
     async fn get_active_bet(&self) -> f64{
-        self.player_hands[self.active_hand].player_bet
+        if self.active_hand < 0 || self.active_hand >= self.player_hands.len().try_into().unwrap(){
+            panic!("Invalid active hand index");
+        }
+        self.player_hands[self.active_hand as usize].player_bet
     }
 
-    async fn send_game_info(&mut self, active_hand_finished: bool){
+    async fn send_game_info(&mut self, _active_hand_finished: bool){
         // do nothing
     }
 }
@@ -269,10 +282,10 @@ pub async fn play_blackjack_hand_new(
             let second = PlayerHand::new(&[hand_data.hand_data.lock().await.get_active_hand().await.get_cards()[1], deck.deal_card(rng)]);
             let old_active_hand = hand_data.hand_data.lock().await.remove_active_hand().await;
             let active_index = hand_data.hand_data.lock().await.get_active_index().await;
-            hand_data.hand_data.lock().await.add_player_hand(PlayerHandData::new(first, old_active_hand.player_bet));
+            hand_data.hand_data.lock().await.add_player_hand(PlayerHandData::new(first, old_active_hand.player_bet)).await;
             hand_data.hand_data.lock().await.set_active_hand(active_index + 1).await;
             hand_data.hand_data.lock().await.send_game_info(false).await;
-            hand_data.hand_data.lock().await.add_player_hand(PlayerHandData::new(second, old_active_hand.player_bet));
+            hand_data.hand_data.lock().await.add_player_hand(PlayerHandData::new(second, old_active_hand.player_bet)).await;
             hand_data.hand_data.lock().await.send_game_info(false).await;
             let mut overall_result = 0.0;
             overall_result += Box::pin(play_blackjack_hand_new(
@@ -310,7 +323,7 @@ pub async fn play_blackjack_hand_new(
             .await;
         if only_draw_once {
             let current_active_bet = hand_data.hand_data.lock().await.get_active_bet().await;
-            hand_data.hand_data.lock().await.set_active_bet(current_active_bet * 2.0);
+            hand_data.hand_data.lock().await.set_active_bet(current_active_bet * 2.0).await;
             hand_data.hand_data.lock().await.send_game_info(false).await;
         }
     }

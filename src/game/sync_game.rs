@@ -1,5 +1,5 @@
 use crate::game::channel_game::{ChannelGame, GameAction, GameInfo};
-use std::{option, sync::mpsc as std_mpsc, thread};
+use std::{sync::mpsc as std_mpsc, thread};
 use tokio::sync::mpsc;
 
 // Synchronous wrapper
@@ -79,7 +79,7 @@ impl SyncGame {
         self.rt.block_on(self.game.play());
     }
 
-    pub fn ask_to_play_another_hand(&self) -> bool {
+    pub fn ask_to_play_another_hand(&mut self) -> bool {
         let result = self.rt.block_on(self.game.ask_to_play_another_hand());
         if !result {
             self.stop_sender_action.send(true).unwrap();
