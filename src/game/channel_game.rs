@@ -6,10 +6,10 @@ use crate::blackjack::hand::DealerHand;
 use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::play_blackjack_hand::play_blackjack_hand_new;
 use crate::blackjack::play_blackjack_hand::HandData;
-use crate::blackjack::play_blackjack_hand::PlayerHandData;
 use crate::blackjack::play_blackjack_hand::HandInfo;
-use crate::blackjack::play_blackjack_hand::WrappedHandData;
 use crate::blackjack::play_blackjack_hand::PlayMode;
+use crate::blackjack::play_blackjack_hand::PlayerHandData;
+use crate::blackjack::play_blackjack_hand::WrappedHandData;
 use crate::blackjack::rng::RandomNumberGenerator;
 use crate::blackjack::strategy::blackjack_strategy_combined_ordered_hash_map::BlackjackStrategyCombinedOrderedHashMap;
 
@@ -129,7 +129,7 @@ pub struct GameInfo {
     pub player_bet: f64,
 }
 
-struct ChannelHandInfo{
+struct ChannelHandInfo {
     hand_info: HandInfo,
     game_info_sender: mpsc::Sender<GameInfo>,
 }
@@ -142,7 +142,7 @@ impl ChannelHandInfo {
         }
     }
 
-    async fn get_game_info(&mut self, active_hand_finished: bool) -> GameInfo{
+    async fn get_game_info(&mut self, active_hand_finished: bool) -> GameInfo {
         let game_info = GameInfo {
             dealer_hand: self.hand_info.get_dealer_hand().await.clone(),
             player_hand: self.hand_info.get_active_hand().await.clone(),
@@ -157,8 +157,12 @@ impl ChannelHandInfo {
 }
 
 #[async_trait]
-impl HandData for ChannelHandInfo{
-    async fn play_dealer_hand(&mut self, deck: &mut WrappedDeck, rng: &mut RandomNumberGenerator) -> i32 {
+impl HandData for ChannelHandInfo {
+    async fn play_dealer_hand(
+        &mut self,
+        deck: &mut WrappedDeck,
+        rng: &mut RandomNumberGenerator,
+    ) -> i32 {
         self.hand_info.play_dealer_hand(deck, rng).await
     }
 
@@ -240,14 +244,26 @@ impl GameState {
     }
 
     pub fn deal(&mut self) {
-        self.hand_info = Some(WrappedHandData::new(Box::new(ChannelHandInfo::new(HandInfo::new(self.player_bet, &mut self.deck, &mut self.rng), self.game_info_sender.clone()))));
+        self.hand_info = Some(WrappedHandData::new(Box::new(ChannelHandInfo::new(
+            HandInfo::new(self.player_bet, &mut self.deck, &mut self.rng),
+            self.game_info_sender.clone(),
+        ))));
     }
 
     pub async fn print_before_hand(&self) {
         println!("Starting to play hand number {}", self.nb_hands_played);
         println!("Your balance is: {}", self.current_balance);
         if let Some(hand_info) = self.hand_info.as_ref() {
-            println!("Your hand: {:?}", hand_info.hand_data.lock().await.get_active_hand().await.get_cards());
+            println!(
+                "Your hand: {:?}",
+                hand_info
+                    .hand_data
+                    .lock()
+                    .await
+                    .get_active_hand()
+                    .await
+                    .get_cards()
+            );
         }
     }
 

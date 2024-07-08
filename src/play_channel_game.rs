@@ -26,7 +26,8 @@ async fn main() {
     let (game_info_sender, _game_info_receiver) = mpsc::channel::<GameInfo>(1);
     let option_sender_clone = option_sender.clone();
     let t = tokio::spawn(async move {
-        let mut channel_game = ChannelGame::new(action_receiver, option_sender_clone, game_info_sender, true).await;
+        let mut channel_game =
+            ChannelGame::new(action_receiver, option_sender_clone, game_info_sender, true).await;
         loop {
             channel_game.play().await;
             if !channel_game.ask_to_play_another_hand().await {
