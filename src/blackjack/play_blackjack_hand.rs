@@ -159,6 +159,7 @@ pub trait HandData{
     async fn get_active_index(&self) -> usize;
     async fn set_active_bet(&mut self, bet: f64);
     async fn get_active_bet(&self) -> f64;
+    async fn send_game_info(&mut self, active_hand_finished: bool);
 }
 
 pub struct WrappedHandData{
@@ -239,6 +240,10 @@ impl HandData for HandInfo{
     async fn get_active_bet(&self) -> f64{
         self.player_hands[self.active_hand].player_bet
     }
+
+    async fn send_game_info(&mut self, active_hand_finished: bool){
+        // do nothing
+    }
 }
 
 
@@ -249,6 +254,7 @@ pub async fn play_blackjack_hand_new(
     rng: &mut RandomNumberGenerator,
     play_mode: PlayMode,
 ) -> f64 {
+    hand_data.hand_data.lock().await.send_game_info(false).await;
     // play dealer hand at the beginning so that recursive versions for splitting use the same dealer outcome
     let dealer_result = hand_data.hand_data.lock().await.play_dealer_hand(deck, rng).await;
 
@@ -264,8 +270,10 @@ pub async fn play_blackjack_hand_new(
             let old_active_hand = hand_data.hand_data.lock().await.remove_active_hand().await;
             let active_index = hand_data.hand_data.lock().await.get_active_index().await;
             hand_data.hand_data.lock().await.add_player_hand(PlayerHandData::new(first, old_active_hand.player_bet));
-            hand_data.hand_data.lock().await.set_active_hand(active_index + 1);
+            hand_data.hand_data.lock().await.set_active_hand(active_index + 1).await;
+            hand_data.hand_data.lock().await.send_game_info(false).await;
             hand_data.hand_data.lock().await.add_player_hand(PlayerHandData::new(second, old_active_hand.player_bet));
+            hand_data.hand_data.lock().await.send_game_info(false).await;
             let mut overall_result = 0.0;
             overall_result += Box::pin(play_blackjack_hand_new(
                 hand_data,
@@ -277,6 +285,7 @@ pub async fn play_blackjack_hand_new(
             .await;
             let active_index = hand_data.hand_data.lock().await.get_active_index().await;
             hand_data.hand_data.lock().await.set_active_hand(active_index + 1).await;
+            hand_data.hand_data.lock().await.send_game_info(false).await;
             overall_result += Box::pin(play_blackjack_hand_new(
                 hand_data,
                 deck,
@@ -302,11 +311,13 @@ pub async fn play_blackjack_hand_new(
         if only_draw_once {
             let current_active_bet = hand_data.hand_data.lock().await.get_active_bet().await;
             hand_data.hand_data.lock().await.set_active_bet(current_active_bet * 2.0);
+            hand_data.hand_data.lock().await.send_game_info(false).await;
         }
     }
 
     if only_draw_once {
         hand_data.hand_data.lock().await.get_active_hand().await.add_card(&deck.deal_card(rng));
+        hand_data.hand_data.lock().await.send_game_info(false).await;
         player_points = evaluate_blackjack_hand(&hand_data.hand_data.lock().await.get_active_hand().await.get_blackjack_hand());
     } else {
         loop {
@@ -324,11 +335,14 @@ pub async fn play_blackjack_hand_new(
                 break;
             }
             hand_data.hand_data.lock().await.get_active_hand().await.add_card(&deck.deal_card(rng));
+            hand_data.hand_data.lock().await.send_game_info(false).await;
         }
     }
     // deduce player result
     let player_result = player_points.upper();
 
     // compare player and dealer hands
-    get_play_result(hand_data.hand_data.lock().await.get_active_bet().await, player_result, dealer_result, hand_data.hand_data.lock().await.get_active_hand().await.clone())
+    let result = get_play_result(hand_data.hand_data.lock().await.get_active_bet().await, player_result, dealer_result, hand_data.hand_data.lock().await.get_active_hand().await.clone());
+    hand_data.hand_data.lock().await.send_game_info(true).await;
+    result
 }
