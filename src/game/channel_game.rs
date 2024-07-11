@@ -119,14 +119,19 @@ impl GameData {
 }
 
 #[derive(Clone, Default)]
-pub struct GameInfo {
-    pub dealer_hand: DealerHand,
+pub struct GameInfoPerHand{
     pub player_hand: PlayerHand,
+    pub player_bet: f64,
+    pub is_active: bool,
+    pub is_won: Option<bool>,
+}
+
+#[derive(Clone, Default)]
+pub struct GameInfo {
+    pub hands: Vec<GameInfoPerHand>,
     pub current_balance: f64,
     pub nb_hands_played: i32,
     pub nb_right_decisions: i32,
-    pub active_hand_finished: bool,
-    pub player_bet: f64,
 }
 
 struct ChannelHandInfo {
@@ -143,14 +148,20 @@ impl ChannelHandInfo {
     }
 
     async fn get_game_info(&mut self, active_hand_finished: bool) -> GameInfo {
+        let mut info_per_hand = Vec::new();
+        for (index, hand) in self.hand_info.get_player_hands().iter().enumerate() {
+            info_per_hand.push(GameInfoPerHand {
+                player_hand: hand.player_hand.clone(),
+                player_bet: hand.player_bet,
+                is_active: self.get_active_index().await == index as i32,
+                is_won: hand.is_won,
+            });
+        }
         GameInfo {
-            dealer_hand: self.hand_info.get_dealer_hand().await.clone(),
-            player_hand: self.hand_info.get_active_hand().await.clone(),
-            current_balance: 0.0,
+            hands: info_per_hand,
+            current_balance: self.hand_info.get_current_balance(),
             nb_hands_played: 0,
             nb_right_decisions: 0,
-            active_hand_finished,
-            player_bet: self.hand_info.get_active_bet().await,
         }
     }
 }
@@ -200,6 +211,14 @@ impl HandData for ChannelHandInfo {
     async fn send_game_info(&mut self, active_hand_finished: bool) {
         let game_info = self.get_game_info(active_hand_finished).await;
         self.game_info_sender.send(game_info).await.unwrap();
+    }
+
+    async fn book_amount(&mut self, amount: f64) {
+        self.hand_info.book_amount(amount).await;
+    }
+
+    async fn play_dealer(&mut self, deck: &mut WrappedDeck, rng: &mut RandomNumberGenerator) {
+        self.hand_info.play_dealer(deck, rng).await;
     }
 }
 
@@ -270,7 +289,7 @@ impl GameState {
         self.previous_balance = self.current_balance;
         let game = GameStrategy::new(self.game_data.clone(), self.do_print);
         let wrapped_game = WrappedGame::new(game);
-        self.current_balance += play_blackjack_hand_new(
+        play_blackjack_hand_new(
             self.hand_info.as_mut().unwrap(),
             &mut self.deck,
             wrapped_game,
@@ -278,6 +297,9 @@ impl GameState {
             PlayMode::All,
         )
         .await;
+        // call play_dealer of hand_info
+        let channel_hand_info = self.hand_info.as_mut().unwrap();
+        channel_hand_info.hand_data.lock().await.play_dealer(&mut self.deck, &mut self.rng).await;
     }
 
     pub fn print_after_hand(&self) {
