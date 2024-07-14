@@ -1,5 +1,6 @@
 use crate::game::channel_game::ChannelGame;
 use crate::game::channel_game::GameAction;
+use crate::game::channel_game::GameInfo;
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -10,6 +11,7 @@ pub struct BlackjackGame {
     pub game_token: Uuid,
     action_sender: Option<mpsc::Sender<GameAction>>,
     option_receiver: Option<mpsc::Receiver<Vec<GameAction>>>,
+    game_info_receiver: Option<mpsc::Receiver<GameInfo>>,
     thread_handle: Option<tokio::task::JoinHandle<()>>,
 }
 
@@ -19,6 +21,7 @@ impl BlackjackGame {
             game_token: Uuid::new_v4(),
             action_sender: None,
             option_receiver: None,
+            game_info_receiver: None,
             thread_handle: None,
         };
         game.start().await;
@@ -28,11 +31,14 @@ impl BlackjackGame {
     pub async fn start(&mut self) {
         let (action_sender, action_receiver) = mpsc::channel::<GameAction>(32);
         let (option_sender, option_receiver) = mpsc::channel::<Vec<GameAction>>(32);
+        let (game_info_sender, game_info_receiver) = mpsc::channel::<GameInfo>(32);
         self.action_sender = Some(action_sender);
         self.option_receiver = Some(option_receiver);
+        self.game_info_receiver = Some(game_info_receiver);
         let option_sender_clone = option_sender.clone();
+        let game_info_sender_clone = game_info_sender.clone();
         let t = tokio::spawn(async move {
-            let mut channel_game = ChannelGame::new(action_receiver, option_sender_clone).await;
+            let mut channel_game = ChannelGame::new(action_receiver, option_sender_clone, game_info_sender_clone, true).await;
             loop {
                 channel_game.play().await;
                 if !channel_game.ask_to_play_another_hand().await {
