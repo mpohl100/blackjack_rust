@@ -203,7 +203,7 @@ impl HandInfo {
             player_hands: vec![PlayerHandData::new(player_hand, player_bet)],
             active_hand: 0,
             dealer_hand,
-            current_balance: current_balance,
+            current_balance,
         }
     }
 
