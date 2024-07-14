@@ -51,7 +51,7 @@ impl BlackjackGame {
 }
 
 pub struct BlackjackService {
-    games: Mutex<HashMap<String, Arc<Mutex<BlackjackGame>>>>,
+    games: Mutex<HashMap<Uuid, Arc<Mutex<BlackjackGame>>>>,
 }
 
 impl Default for BlackjackService {
@@ -61,16 +61,28 @@ impl Default for BlackjackService {
 }
 
 pub struct CreateGameResponse {
-    pub game_id: String,
+    pub game_id: Uuid,
     pub game_token: Uuid,
 }
 
 impl CreateGameResponse {
-    pub fn new(game_id: String, game_token: Uuid) -> CreateGameResponse {
+    pub fn new(game_id: Uuid, game_token: Uuid) -> CreateGameResponse {
         CreateGameResponse {
             game_id,
             game_token,
         }
+    }
+}
+
+#[derive(Default)]
+pub struct PlayResponse {
+    pub game_info: GameInfo,
+    pub options: Vec<GameAction>,
+}
+
+impl PlayResponse {
+    pub fn new(game_info: GameInfo, options: Vec<GameAction>) -> PlayResponse {
+        PlayResponse { game_info, options }
     }
 }
 
@@ -84,17 +96,17 @@ impl BlackjackService {
     pub async fn create_game(&self) -> CreateGameResponse {
         let game = Arc::new(Mutex::new(BlackjackGame::new().await));
         let mut data = self.games.lock().await;
-        let game_id = data.len().to_string();
+        let game_id = Uuid::new_v4();
         data.insert(game_id.clone(), game.clone());
         let token = game.lock().await.game_token;
         CreateGameResponse::new(game_id, token)
     }
 
-    pub async fn get_game(&self, game_id: String) -> Option<Arc<Mutex<BlackjackGame>>> {
+    pub async fn get_game(&self, game_id: Uuid) -> Option<Arc<Mutex<BlackjackGame>>> {
         self.games.lock().await.get(&game_id).cloned()
     }
 
-    pub async fn delete_game(&self, game_id: String) -> bool {
+    pub async fn delete_game(&self, game_id: Uuid) -> bool {
         let game = self.games.lock().await.remove(&game_id);
         if let Some(game) = game {
             let sender = &game.lock().await.action_sender;
@@ -112,7 +124,7 @@ impl BlackjackService {
         true
     }
 
-    pub async fn play_game(&self, game_id: String, action: String) {
+    pub async fn play_game(&self, game_id: Uuid, action: String) -> PlayResponse {
         if let Some(game) = self.games.lock().await.get_mut(&game_id) {
             if let Some(sender) = &game.lock().await.action_sender {
                 let _ = sender
@@ -127,9 +139,18 @@ impl BlackjackService {
                     ))
                     .await;
             }
+            let mut options = None;
+            let mut game_info = None;
             if let Some(receiver) = game.lock().await.option_receiver.as_mut() {
-                let _options = receiver.recv().await;
+                options = receiver.recv().await;
+            }
+            if let Some(receiver) = game.lock().await.game_info_receiver.as_mut() {
+                game_info = receiver.recv().await;
+            }
+            if options.is_some() && game_info.is_some() {
+                return PlayResponse::new(game_info.unwrap(), options.unwrap());
             }
         }
+        PlayResponse::default()
     }
 }
