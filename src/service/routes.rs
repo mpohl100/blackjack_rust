@@ -1,5 +1,8 @@
-use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Responder};
+use crate::service::domain::BlackjackService;
+
+use actix_web::{web, HttpRequest, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct GameResponse {
@@ -28,43 +31,65 @@ struct GameState {
     winner: Option<String>,
 }
 
-async fn create_game() -> impl Responder {
-    // Your implementation to create a new game
+pub async fn create_game(blackjack_service: web::Data<BlackjackService>) -> impl Responder {
+    let create_game_response = blackjack_service.create_game().await;
     HttpResponse::Created().json(GameResponse {
-        id: "123e4567-e89b-12d3-a456-426614174000".to_string(),
-        access_token: "123e4567-e89b-12d3-a456-426614174000".to_string(),
+        id: create_game_response.game_id.to_string(),
+        access_token: create_game_response.game_token.to_string(),
     })
 }
 
-async fn delete_game(req: HttpRequest, _info: web::Path<(String,)>) -> impl Responder {
+pub async fn delete_game(
+    blackjack_service: web::Data<BlackjackService>,
+    req: HttpRequest,
+    info: web::Path<(Uuid,)>,
+) -> impl Responder {
     // Your implementation to delete the game with the specified ID
     if let Some(auth_header) = req.headers().get("Authorization") {
         if let Ok(auth_str) = auth_header.to_str() {
             if let Some(stripped) = auth_str.strip_prefix("Bearer ") {
-                let _token = stripped;
                 // Check token validity and permission
+                let token = stripped;
+                let game_id = info.into_inner().0;
+                let blackjack_game = blackjack_service.get_game(game_id.clone()).await;
                 // Implement your token validation logic here
-                return HttpResponse::NoContent();
+                if let Some(game) = blackjack_game {
+                    if game.lock().await.game_token.to_string() == token {
+                        // Implement your game deletion logic here
+                        blackjack_service.delete_game(game_id).await;
+                        return HttpResponse::NoContent();
+                    }
+                }
+                return HttpResponse::Unauthorized();
             }
         }
     }
     HttpResponse::Unauthorized()
 }
 
-async fn play_game(
+pub async fn play_game(
+    blackjack_service: web::Data<BlackjackService>,
     req: HttpRequest,
-    info: web::Path<(String,)>,
+    info: web::Path<(Uuid,)>,
     query: web::Query<Action>,
 ) -> impl Responder {
     // Your implementation to play the game with the specified ID and action
     if let Some(auth_header) = req.headers().get("Authorization") {
         if let Ok(auth_str) = auth_header.to_str() {
             if let Some(stripped) = auth_str.strip_prefix("Bearer ") {
-                let _token = stripped;
+                let token = stripped;
                 // Check token validity and permission
                 // Implement your token validation logic here
-                let _game_id = info.into_inner().0;
-                let _action = query.into_inner();
+                let game_id = info.into_inner().0;
+                let blackjack_game = blackjack_service.get_game(game_id.clone()).await;
+                if let Some(game) = blackjack_game {
+                    if game.lock().await.game_token.to_string() == token {
+                        // Implement your game playing logic here
+                        let action = query.into_inner();
+                        let _play_response = blackjack_service.play_game(game_id, action.action).await;
+
+                    }
+                }
                 return HttpResponse::Ok().json(GameState {
                     player_hands: Vec::new(),
                     dealer_hand: Hand {
@@ -82,19 +107,6 @@ async fn play_game(
 }
 
 #[derive(Debug, Deserialize)]
-struct Action {
-    _action: String,
-}
-
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
-        App::new()
-            .route("/blackjack", web::post().to(create_game))
-            .route("/blackjack/{game_id}", web::delete().to(delete_game))
-            .route("/blackjack/{game_id}/play", web::post().to(play_game))
-    })
-    .bind("127.0.0.1:8080")?
-    .run()
-    .await
+pub struct Action {
+    action: String,
 }
