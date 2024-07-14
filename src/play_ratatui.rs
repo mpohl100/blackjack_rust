@@ -112,11 +112,8 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
     }
     main_constraints.push(Constraint::Min(0));
     main_constraints.push(Constraint::Min(0));
-    let main_layout = Layout::new(
-        Direction::Vertical,
-        main_constraints.as_slice(),
-    )
-    .split(frame.size());
+    let main_layout =
+        Layout::new(Direction::Vertical, main_constraints.as_slice()).split(frame.size());
     frame.render_widget(
         Block::new().borders(Borders::TOP).title("Blackjack Game"),
         main_layout[0],
@@ -163,12 +160,11 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
 
     if let Some(game_info) = game_info {
         for (i, hand) in game_info.hands.iter().enumerate() {
-
             let hand_layout = Layout::new(
                 Direction::Horizontal,
                 [Constraint::Percentage(50), Constraint::Percentage(50)],
             )
-            .split(main_layout[i+1]);
+            .split(main_layout[i + 1]);
 
             let hand_box = Block::bordered().title(format!("Hand {}", i + 1));
             let bet_box = Block::bordered().title("Bet");
@@ -189,7 +185,11 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
         frame.render_widget(dealer_hand.clone(), money_layout[1]);
 
         frame.render_widget(
-            Paragraph::new(game_info.dealer_hand.to_string_internal(!game_info.current_hand_finished)),
+            Paragraph::new(
+                game_info
+                    .dealer_hand
+                    .to_string_internal(!game_info.current_hand_finished),
+            ),
             dealer_hand.inner(money_layout[1]),
         );
 
