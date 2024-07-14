@@ -119,7 +119,7 @@ impl GameData {
 }
 
 #[derive(Clone, Default)]
-pub struct GameInfoPerHand{
+pub struct GameInfoPerHand {
     pub player_hand: PlayerHand,
     pub player_bet: f64,
     pub is_active: bool,
@@ -276,7 +276,12 @@ impl GameState {
             current_balance = inner_hand_info.get_current_balance().await;
         }
         self.hand_info = Some(WrappedHandData::new(Box::new(ChannelHandInfo::new(
-            HandInfo::new(self.player_bet, current_balance, &mut self.deck, &mut self.rng),
+            HandInfo::new(
+                self.player_bet,
+                current_balance,
+                &mut self.deck,
+                &mut self.rng,
+            ),
             self.game_info_sender.clone(),
         ))));
     }
@@ -312,7 +317,12 @@ impl GameState {
         .await;
         // call play_dealer of hand_info
         let channel_hand_info = self.hand_info.as_mut().unwrap();
-        channel_hand_info.hand_data.lock().await.play_dealer(&mut self.deck, &mut self.rng).await;
+        channel_hand_info
+            .hand_data
+            .lock()
+            .await
+            .play_dealer(&mut self.deck, &mut self.rng)
+            .await;
     }
 
     pub fn print_after_hand(&self) {

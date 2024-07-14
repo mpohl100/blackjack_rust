@@ -291,7 +291,13 @@ impl HandData for HandInfo {
         for hand in &mut self.player_hands {
             let player_points = evaluate_blackjack_hand(&hand.player_hand.get_blackjack_hand());
             let player_result = player_points.upper();
-            let result = get_play_result(hand.player_bet, player_result, dealer_result, hand.player_hand.clone()).await;
+            let result = get_play_result(
+                hand.player_bet,
+                player_result,
+                dealer_result,
+                hand.player_hand.clone(),
+            )
+            .await;
             hand.is_won = Some(result > 0.0);
             if result > 0.0 {
                 self.current_balance += hand.player_bet + result;
@@ -312,7 +318,12 @@ pub async fn play_blackjack_hand_new(
     play_mode: PlayMode,
 ) {
     let initial_bet = hand_data.hand_data.lock().await.get_active_bet().await;
-    hand_data.hand_data.lock().await.book_amount(-initial_bet).await;
+    hand_data
+        .hand_data
+        .lock()
+        .await
+        .book_amount(-initial_bet)
+        .await;
     hand_data.hand_data.lock().await.send_game_info(false).await;
 
     // add code for splitting here
@@ -392,7 +403,12 @@ pub async fn play_blackjack_hand_new(
                 .add_player_hand(PlayerHandData::new(second, old_active_hand.player_bet))
                 .await;
             // refund the initial bet as they are booked again inside the function calls
-            hand_data.hand_data.lock().await.book_amount(initial_bet).await;
+            hand_data
+                .hand_data
+                .lock()
+                .await
+                .book_amount(initial_bet)
+                .await;
             hand_data.hand_data.lock().await.send_game_info(false).await;
             Box::pin(play_blackjack_hand_new(
                 hand_data,
@@ -400,7 +416,8 @@ pub async fn play_blackjack_hand_new(
                 player_strategy.clone(),
                 rng,
                 play_mode,
-            )).await;
+            ))
+            .await;
             let active_index = hand_data.hand_data.lock().await.get_active_index().await;
             hand_data
                 .hand_data
@@ -415,7 +432,8 @@ pub async fn play_blackjack_hand_new(
                 player_strategy,
                 rng,
                 play_mode,
-            )).await;
+            ))
+            .await;
             return;
         }
     }
@@ -455,7 +473,12 @@ pub async fn play_blackjack_hand_new(
                 .await
                 .set_active_bet(current_active_bet * 2.0)
                 .await;
-            hand_data.hand_data.lock().await.book_amount(-current_active_bet).await;
+            hand_data
+                .hand_data
+                .lock()
+                .await
+                .book_amount(-current_active_bet)
+                .await;
             hand_data.hand_data.lock().await.send_game_info(false).await;
         }
     }
