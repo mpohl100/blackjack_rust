@@ -2,6 +2,7 @@ use crate::service::domain::BlackjackService;
 
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct GameResponse {
@@ -33,7 +34,7 @@ struct GameState {
 pub async fn create_game(blackjack_service: web::Data<BlackjackService>) -> impl Responder {
     let create_game_response = blackjack_service.create_game().await;
     HttpResponse::Created().json(GameResponse {
-        id: create_game_response.game_id,
+        id: create_game_response.game_id.to_string(),
         access_token: create_game_response.game_token.to_string(),
     })
 }
@@ -41,7 +42,7 @@ pub async fn create_game(blackjack_service: web::Data<BlackjackService>) -> impl
 pub async fn delete_game(
     blackjack_service: web::Data<BlackjackService>,
     req: HttpRequest,
-    info: web::Path<(String,)>,
+    info: web::Path<(Uuid,)>,
 ) -> impl Responder {
     // Your implementation to delete the game with the specified ID
     if let Some(auth_header) = req.headers().get("Authorization") {
@@ -69,7 +70,7 @@ pub async fn delete_game(
 pub async fn play_game(
     blackjack_service: web::Data<BlackjackService>,
     req: HttpRequest,
-    info: web::Path<(String,)>,
+    info: web::Path<(Uuid,)>,
     query: web::Query<Action>,
 ) -> impl Responder {
     // Your implementation to play the game with the specified ID and action
@@ -85,7 +86,8 @@ pub async fn play_game(
                     if game.lock().await.game_token.to_string() == token {
                         // Implement your game playing logic here
                         let action = query.into_inner();
-                        blackjack_service.play_game(game_id, action.action).await;
+                        let _play_response = blackjack_service.play_game(game_id, action.action).await;
+
                     }
                 }
                 return HttpResponse::Ok().json(GameState {
