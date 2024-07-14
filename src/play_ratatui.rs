@@ -102,14 +102,19 @@ fn handle_events() -> io::Result<GameAction> {
 }
 
 fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<GameAction>>) {
+    let mut main_constraints = vec![Constraint::Length(1)];
+    if let Some(game_info) = &game_info {
+        for _ in 0..game_info.hands.len() {
+            main_constraints.push(Constraint::Min(0));
+        }
+    } else {
+        main_constraints.push(Constraint::Min(0));
+    }
+    main_constraints.push(Constraint::Min(0));
+    main_constraints.push(Constraint::Min(0));
     let main_layout = Layout::new(
         Direction::Vertical,
-        [
-            Constraint::Length(1),
-            Constraint::Min(0),
-            Constraint::Min(0),
-            Constraint::Min(0),
-        ],
+        main_constraints.as_slice(),
     )
     .split(frame.size());
     frame.render_widget(
@@ -120,25 +125,19 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
         Block::new()
             .borders(Borders::TOP)
             .title("Available Actions"),
-        main_layout[3],
+        main_layout[main_constraints.len() - 1],
     );
-
-    let hands_layout = Layout::new(
-        Direction::Horizontal,
-        [Constraint::Percentage(50), Constraint::Percentage(50)],
-    )
-    .split(main_layout[1]);
 
     let money_layout = Layout::new(
         Direction::Horizontal,
         [Constraint::Percentage(50), Constraint::Percentage(50)],
     )
-    .split(main_layout[2]);
+    .split(main_layout[main_constraints.len() - 2]);
 
     let options_clone = options.clone();
     match options_clone {
         None => {
-            Layout::default().split(main_layout[3]);
+            Layout::default().split(main_layout[main_constraints.len() - 1]);
         }
         Some(options) => {
             let options_percentage = 100 / options.len() as u16;
@@ -150,7 +149,7 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
                     .collect::<Vec<_>>()
                     .as_slice(),
             )
-            .split(main_layout[3]);
+            .split(main_layout[main_constraints.len() - 1]);
             for (i, option) in options.iter().enumerate() {
                 let block = Block::bordered().title(get_word(*option));
                 frame.render_widget(block.clone(), options_layout[i]);
@@ -161,34 +160,45 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
             }
         }
     };
-    let your_hand = Block::bordered().title("Your hand");
-    let dealer_hand = Block::bordered().title("Dealer hand");
-    frame.render_widget(your_hand.clone(), hands_layout[0]);
-    frame.render_widget(dealer_hand.clone(), hands_layout[1]);
 
-    let your_money = Block::bordered().title("Your money");
-    let your_bet = Block::bordered().title("Bet");
-    frame.render_widget(your_money.clone(), money_layout[0]);
-    frame.render_widget(your_bet.clone(), money_layout[1]);
+    if let Some(game_info) = game_info {
+        for (i, hand) in game_info.hands.iter().enumerate() {
 
-    if game_info.is_some() {
-        let game_info_unwrapped = game_info.unwrap();
+            let hand_layout = Layout::new(
+                Direction::Horizontal,
+                [Constraint::Percentage(50), Constraint::Percentage(50)],
+            )
+            .split(main_layout[i+1]);
+
+            let hand_box = Block::bordered().title(format!("Hand {}", i + 1));
+            let bet_box = Block::bordered().title("Bet");
+            frame.render_widget(hand_box.clone(), hand_layout[0]);
+            frame.render_widget(bet_box.clone(), hand_layout[1]);
+
+            frame.render_widget(
+                Paragraph::new(hand.player_hand.to_string_internal()),
+                hand_box.inner(hand_layout[0]),
+            );
+            frame.render_widget(
+                Paragraph::new("$".to_owned() + &hand.player_bet.to_string()),
+                bet_box.inner(hand_layout[1]),
+            );
+        }
+
+        let dealer_hand = Block::bordered().title("Dealer hand");
+        frame.render_widget(dealer_hand.clone(), money_layout[1]);
+
         frame.render_widget(
-            Paragraph::new(game_info_unwrapped.player_hand.to_string_internal()),
-            your_hand.inner(hands_layout[0]),
+            Paragraph::new(game_info.dealer_hand.to_string_internal(!game_info.current_hand_finished)),
+            dealer_hand.inner(money_layout[1]),
         );
-        frame.render_widget(
-            Paragraph::new(game_info_unwrapped.dealer_hand.to_string_internal(true)),
-            dealer_hand.inner(hands_layout[1]),
-        );
+
+        let your_money = Block::bordered().title("Your money");
+        frame.render_widget(your_money.clone(), money_layout[0]);
 
         frame.render_widget(
-            Paragraph::new("$".to_owned() + &game_info_unwrapped.current_balance.to_string()),
+            Paragraph::new("$".to_owned() + &game_info.current_balance.to_string()),
             your_money.inner(money_layout[0]),
-        );
-        frame.render_widget(
-            Paragraph::new("$".to_owned() + &game_info_unwrapped.player_bet.to_string()),
-            your_bet.inner(money_layout[1]),
         );
     }
 }

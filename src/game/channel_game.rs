@@ -129,9 +129,11 @@ pub struct GameInfoPerHand{
 #[derive(Clone, Default)]
 pub struct GameInfo {
     pub hands: Vec<GameInfoPerHand>,
+    pub dealer_hand: DealerHand,
     pub current_balance: f64,
     pub nb_hands_played: i32,
     pub nb_right_decisions: i32,
+    pub current_hand_finished: bool,
 }
 
 struct ChannelHandInfo {
@@ -159,9 +161,11 @@ impl ChannelHandInfo {
         }
         GameInfo {
             hands: info_per_hand,
-            current_balance: self.hand_info.get_current_balance(),
+            dealer_hand: self.hand_info.get_dealer_hand().await.clone(),
+            current_balance: self.hand_info.get_current_balance().await,
             nb_hands_played: 0,
             nb_right_decisions: 0,
+            current_hand_finished: active_hand_finished,
         }
     }
 }
@@ -220,6 +224,10 @@ impl HandData for ChannelHandInfo {
     async fn play_dealer(&mut self, deck: &mut WrappedDeck, rng: &mut RandomNumberGenerator) {
         self.hand_info.play_dealer(deck, rng).await;
     }
+
+    async fn get_current_balance(&self) -> f64 {
+        self.hand_info.get_current_balance().await
+    }
 }
 
 struct GameState {
@@ -261,9 +269,14 @@ impl GameState {
         }
     }
 
-    pub fn deal(&mut self) {
+    pub async fn deal(&mut self) {
+        let mut current_balance = 1000.0;
+        if let Some(hand_info) = self.hand_info.as_ref() {
+            let inner_hand_info = hand_info.hand_data.lock().await;
+            current_balance = inner_hand_info.get_current_balance().await;
+        }
         self.hand_info = Some(WrappedHandData::new(Box::new(ChannelHandInfo::new(
-            HandInfo::new(self.player_bet, &mut self.deck, &mut self.rng),
+            HandInfo::new(self.player_bet, current_balance, &mut self.deck, &mut self.rng),
             self.game_info_sender.clone(),
         ))));
     }
@@ -342,7 +355,7 @@ impl ChannelGame {
 
     pub async fn play(&mut self) {
         self.game_state.nb_hands_played += 1;
-        self.game_state.deal();
+        self.game_state.deal().await;
         if self.do_print {
             self.game_state.print_before_hand().await;
         }

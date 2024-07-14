@@ -8,7 +8,6 @@ use crate::blackjack::traits::WrappedGame;
 
 use super::analysis::blackjack_analysis::HandSituation;
 use super::analysis::blackjack_analysis::SplitSituation;
-use super::hand;
 
 use async_trait::async_trait;
 use std::sync::Arc;
@@ -168,6 +167,7 @@ pub trait HandData {
     async fn send_game_info(&mut self, active_hand_finished: bool);
     async fn book_amount(&mut self, amount: f64);
     async fn play_dealer(&mut self, deck: &mut WrappedDeck, rng: &mut RandomNumberGenerator);
+    async fn get_current_balance(&self) -> f64;
 }
 
 pub struct WrappedHandData {
@@ -192,6 +192,7 @@ pub struct HandInfo {
 impl HandInfo {
     pub fn new(
         player_bet: f64,
+        current_balance: f64,
         deck: &mut WrappedDeck,
         rng: &mut RandomNumberGenerator,
     ) -> HandInfo {
@@ -202,16 +203,12 @@ impl HandInfo {
             player_hands: vec![PlayerHandData::new(player_hand, player_bet)],
             active_hand: 0,
             dealer_hand,
-            current_balance: 0.0,
+            current_balance: current_balance,
         }
     }
 
     pub fn get_player_hands(&self) -> &Vec<PlayerHandData> {
         &self.player_hands
-    }
-
-    pub fn get_current_balance(&self) -> f64 {
-        self.current_balance
     }
 }
 
@@ -301,6 +298,10 @@ impl HandData for HandInfo {
             }
         }
     }
+
+    async fn get_current_balance(&self) -> f64 {
+        self.current_balance
+    }
 }
 
 pub async fn play_blackjack_hand_new(
@@ -311,7 +312,7 @@ pub async fn play_blackjack_hand_new(
     play_mode: PlayMode,
 ) {
     let initial_bet = hand_data.hand_data.lock().await.get_active_bet().await;
-    hand_data.hand_data.lock().await.book_amount(-initial_bet);
+    hand_data.hand_data.lock().await.book_amount(-initial_bet).await;
     hand_data.hand_data.lock().await.send_game_info(false).await;
 
     // add code for splitting here
@@ -391,7 +392,7 @@ pub async fn play_blackjack_hand_new(
                 .add_player_hand(PlayerHandData::new(second, old_active_hand.player_bet))
                 .await;
             // refund the initial bet as they are booked again inside the function calls
-            hand_data.hand_data.lock().await.book_amount(initial_bet);
+            hand_data.hand_data.lock().await.book_amount(initial_bet).await;
             hand_data.hand_data.lock().await.send_game_info(false).await;
             Box::pin(play_blackjack_hand_new(
                 hand_data,
@@ -419,7 +420,7 @@ pub async fn play_blackjack_hand_new(
         }
     }
 
-    let mut player_points;
+    let player_points;
     let mut only_draw_once = false;
     if play_mode == PlayMode::All || play_mode == PlayMode::DoubleDown {
         player_points = evaluate_blackjack_hand(
@@ -454,7 +455,7 @@ pub async fn play_blackjack_hand_new(
                 .await
                 .set_active_bet(current_active_bet * 2.0)
                 .await;
-            hand_data.hand_data.lock().await.book_amount(-current_active_bet);
+            hand_data.hand_data.lock().await.book_amount(-current_active_bet).await;
             hand_data.hand_data.lock().await.send_game_info(false).await;
         }
     }
@@ -468,18 +469,9 @@ pub async fn play_blackjack_hand_new(
             .await
             .add_card(&deck.deal_card(rng));
         hand_data.hand_data.lock().await.send_game_info(false).await;
-        player_points = evaluate_blackjack_hand(
-            &hand_data
-                .hand_data
-                .lock()
-                .await
-                .get_active_hand()
-                .await
-                .get_blackjack_hand(),
-        );
     } else {
         loop {
-            player_points = evaluate_blackjack_hand(
+            let player_points = evaluate_blackjack_hand(
                 &hand_data
                     .hand_data
                     .lock()
