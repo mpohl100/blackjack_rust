@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rand = { git = "https://github.com/rust-lang-nursery/rand" }
+rand = { version="0.8.4", features = ["std_rng"] }
 clap = "2.33.3"
 actix-web = "4.5.1"
 serde = { version = "1.0.197", features = ["derive"] }
