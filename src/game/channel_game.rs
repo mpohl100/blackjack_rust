@@ -533,7 +533,7 @@ impl BlackjackGame for GameStrategy {
         }
         let mut evaluate_now = false;
         if let Some(cached_decision) = self.game_data.lock().await.cached_decision {
-            if cached_decision == GameAction::Stop {
+            if cached_decision == GameAction::Stop || cached_decision == GameAction::Hit || cached_decision == GameAction::Stand {
                 return false;
             } else if cached_decision == GameAction::DoubleDown {
                 evaluate_now = true;
