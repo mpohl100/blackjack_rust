@@ -317,6 +317,9 @@ impl GameState {
         channel_hand_info
             .play_dealer(&mut self.deck, &mut self.rng)
             .await;
+        channel_hand_info.send_game_info(true).await;
+        // sleep asynchronously for 1.5 seconds
+        tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
     }
 
     pub fn print_after_hand(&self) {
