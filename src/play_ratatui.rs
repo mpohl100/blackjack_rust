@@ -41,6 +41,7 @@ fn main() -> io::Result<()> {
                 break;
             }
         }
+        sync_game.cleanup();
     });
     let mut should_quit = false;
     while !should_quit {

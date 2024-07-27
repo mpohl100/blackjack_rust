@@ -38,7 +38,12 @@ impl SyncGame {
                 }
                 // sleep 50 ms
                 thread::sleep(std::time::Duration::from_millis(50));
-                if stop_receiver_action.try_recv().is_ok() {
+                let stop_thread = match stop_receiver_action.try_recv() {
+                    Ok(true) => true,
+                    Ok(false) => false,
+                    _ => false,
+                };
+                if stop_thread {
                     break;
                 }
             }
@@ -55,7 +60,12 @@ impl SyncGame {
                 }
                 // sleep 50 ms
                 thread::sleep(std::time::Duration::from_millis(50));
-                if stop_receiver_option.try_recv().is_ok() {
+                let stop_thread = match stop_receiver_option.try_recv() {
+                    Ok(true) => true,
+                    Ok(false) => false,
+                    _ => false,
+                };
+                if stop_thread {
                     break;
                 }
             }
@@ -72,9 +82,14 @@ impl SyncGame {
                 }
                 // sleep 50 ms
                 thread::sleep(std::time::Duration::from_millis(50));
-                if stop_game_info_receiver.try_recv().is_ok() {
+                let stop_thread = match stop_game_info_receiver.try_recv() {
+                    Ok(true) => true,
+                    Ok(false) => false,
+                    _ => false,
+                };
+                if stop_thread {
                     break;
-                }
+                }    
             }
         });
 
@@ -102,11 +117,12 @@ impl SyncGame {
 
     pub fn ask_to_play_another_hand(&mut self) -> bool {
         let result = self.rt.block_on(self.game.ask_to_play_another_hand());
-        if !result {
-            self.stop_sender_action.send(true).unwrap();
-            self.stop_sender_option.send(true).unwrap();
-            self.stop_game_info_sender.send(true).unwrap();
-        }
         result
+    }
+
+    pub fn cleanup(self){
+        self.stop_sender_action.send(true).unwrap();
+        self.stop_sender_option.send(true).unwrap();
+        self.stop_game_info_sender.send(true).unwrap();
     }
 }
