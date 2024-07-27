@@ -180,11 +180,11 @@ impl HandData for ChannelHandInfo {
         self.hand_info.play_dealer_hand(deck, rng).await
     }
 
-    async fn get_active_hand(&mut self) -> &mut PlayerHand {
+    async fn get_active_hand(&self) -> PlayerHand {
         self.hand_info.get_active_hand().await
     }
 
-    async fn get_dealer_hand(&mut self) -> &mut DealerHand {
+    async fn get_dealer_hand(&self) -> DealerHand {
         self.hand_info.get_dealer_hand().await
     }
 
@@ -198,6 +198,10 @@ impl HandData for ChannelHandInfo {
 
     async fn set_active_hand(&mut self, index: i32) {
         self.hand_info.set_active_hand(index).await;
+    }
+
+    async fn change_active_hand(&mut self, player_hand: PlayerHand) {
+        self.hand_info.change_active_hand(player_hand).await;
     }
 
     async fn get_active_index(&self) -> i32 {
@@ -272,8 +276,7 @@ impl GameState {
     pub async fn deal(&mut self) {
         let mut current_balance = 1000.0;
         if let Some(hand_info) = self.hand_info.as_ref() {
-            let inner_hand_info = hand_info.hand_data.lock().await;
-            current_balance = inner_hand_info.get_current_balance().await;
+            current_balance = hand_info.get_current_balance().await;
         }
         self.hand_info = Some(WrappedHandData::new(Box::new(ChannelHandInfo::new(
             HandInfo::new(
@@ -292,13 +295,7 @@ impl GameState {
         if let Some(hand_info) = self.hand_info.as_ref() {
             println!(
                 "Your hand: {:?}",
-                hand_info
-                    .hand_data
-                    .lock()
-                    .await
-                    .get_active_hand()
-                    .await
-                    .get_cards()
+                hand_info.get_active_hand().await.get_cards()
             );
         }
     }
@@ -318,9 +315,6 @@ impl GameState {
         // call play_dealer of hand_info
         let channel_hand_info = self.hand_info.as_mut().unwrap();
         channel_hand_info
-            .hand_data
-            .lock()
-            .await
             .play_dealer(&mut self.deck, &mut self.rng)
             .await;
     }
