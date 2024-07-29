@@ -78,8 +78,12 @@ impl DealerHand {
         }
     }
 
-    fn get_cards(&self) -> Vec<Card> {
-        self.blackjack_hand.cards.clone()
+    pub fn get_cards(&self, only_open_cards: bool) -> Vec<Card> {
+        if only_open_cards {
+            vec![self.blackjack_hand.cards[0]]
+        } else {
+            self.blackjack_hand.cards.clone()
+        }
     }
 
     pub fn play(&mut self, deck: &mut WrappedDeck, rng: &mut RandomNumberGenerator) -> i32 {
@@ -104,12 +108,12 @@ impl DealerHand {
     }
 
     pub fn open_card(&self) -> BlackjackRank {
-        BlackjackRank::new(self.get_cards()[0].rank())
+        BlackjackRank::new(self.get_cards(true)[0].rank())
     }
 
     pub fn to_string_internal(&self, only_open_card: bool) -> String {
         if only_open_card {
-            return format!("{} *", self.get_cards()[0].to_string_internal());
+            return format!("{} *", self.get_cards(true)[0].to_string_internal());
         }
         let mut result = String::new();
         for card in &self.blackjack_hand.cards {
@@ -276,7 +280,7 @@ mod dealer_hand_tests {
         ];
         let dealer_hand = DealerHand::new(&cards);
 
-        assert_eq!(dealer_hand.get_cards(), cards);
+        assert_eq!(dealer_hand.get_cards(false), cards);
     }
 
     #[test]
