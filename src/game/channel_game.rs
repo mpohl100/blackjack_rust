@@ -5,6 +5,7 @@ use crate::blackjack::deck::WrappedDeck;
 use crate::blackjack::hand::DealerHand;
 use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::play_blackjack_hand::play_blackjack_hand_new;
+use crate::blackjack::play_blackjack_hand::HandResult;
 use crate::blackjack::play_blackjack_hand::HandData;
 use crate::blackjack::play_blackjack_hand::HandInfo;
 use crate::blackjack::play_blackjack_hand::PlayMode;
@@ -123,7 +124,7 @@ pub struct GameInfoPerHand {
     pub player_hand: PlayerHand,
     pub player_bet: f64,
     pub is_active: bool,
-    pub is_won: Option<bool>,
+    pub result: Option<HandResult>,
 }
 
 #[derive(Clone, Default)]
@@ -156,7 +157,7 @@ impl ChannelHandInfo {
                 player_hand: hand.player_hand.clone(),
                 player_bet: hand.player_bet,
                 is_active: self.get_active_index().await == index as i32,
-                is_won: hand.is_won,
+                result: hand.result.clone(),
             });
         }
         GameInfo {
