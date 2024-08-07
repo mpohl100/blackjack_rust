@@ -96,7 +96,7 @@ impl Suit {
         }
     }
 
-    fn to_sonderzeichen(&self) -> String {
+    fn to_sonderzeichen(self) -> String {
         match self {
             Suit::Hearts => '♥'.to_string(),
             Suit::Diamonds => '♦'.to_string(),
