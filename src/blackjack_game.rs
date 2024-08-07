@@ -1,5 +1,7 @@
-use blackjack_rust::blackjack::deck::Card;
+use blackjack_rust::blackjack::{deck::Card, traits::Stringable};
 use blackjack_rust::blackjack::play_blackjack_hand::HandResult;
+use blackjack_rust::blackjack::hand::BlackjackHand;
+use blackjack_rust::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 
 use std::{
     io::{self, stdout},
@@ -126,6 +128,14 @@ fn create_centered_text_from_hand(hand: &Vec<Card>) -> Line {
         spans.push(styled_span);
         spans.push(Span::raw(" "));
     }
+
+
+    let blackjack_hand = BlackjackHand::new(hand);
+    let points = evaluate_blackjack_hand(&blackjack_hand);
+    let points_string = points.to_ui();
+
+    spans.push(Span::raw("(".to_owned() + points_string.as_str() + ")"));
+
     // make sure the text renders in one line
     Line::from(spans)
 }
