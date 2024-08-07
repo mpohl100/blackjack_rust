@@ -149,6 +149,14 @@ fn get_bet_background_color(hand_result: Option<HandResult>) -> Color {
     }
 }
 
+fn get_hand_background_color(is_active: bool) -> Color{
+    if is_active {
+        Color::Blue
+    } else {
+        Color::Reset
+    }
+}
+
 fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<GameAction>>) {
     let mut main_constraints = vec![Constraint::Length(1)];
     if let Some(game_info) = &game_info {
@@ -214,7 +222,7 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
             )
             .split(main_layout[i + 1]);
 
-            let hand_box = Block::bordered().title(format!("Hand {}", i + 1));
+            let hand_box = Block::bordered().title(format!("Hand {}", i + 1)).bg(get_hand_background_color(hand.is_active));
             let bet_box = Block::bordered().title("Bet").bg(get_bet_background_color(hand.result.clone()));
             frame.render_widget(hand_box.clone(), hand_layout[0]);
             frame.render_widget(bet_box.clone(), hand_layout[1]);
