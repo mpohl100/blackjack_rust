@@ -5,7 +5,7 @@ mod blackjack_points;
 pub mod blackjack_situation;
 mod card;
 pub mod deck;
-mod evaluate_blackjack_hand;
+pub mod evaluate_blackjack_hand;
 pub mod hand;
 pub mod play_blackjack;
 pub mod play_blackjack_hand;
