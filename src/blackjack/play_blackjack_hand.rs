@@ -370,7 +370,7 @@ impl HandData for HandInfo {
 
     async fn play_dealer(&mut self, deck: &mut WrappedDeck, rng: &mut RandomNumberGenerator) {
         let mut do_play_dealer = false;
-        for hand in &mut self.player_hands{
+        for hand in &mut self.player_hands {
             let player_points = evaluate_blackjack_hand(&hand.player_hand.get_blackjack_hand());
             if player_points.lower() <= 21 {
                 do_play_dealer = true;
@@ -378,8 +378,8 @@ impl HandData for HandInfo {
             }
         }
         let dealer_result = match do_play_dealer {
-            true => { self.dealer_hand.play(deck, rng) },
-            false => 21 
+            true => self.dealer_hand.play(deck, rng),
+            false => 21,
         };
         for hand in &mut self.player_hands {
             let player_points = evaluate_blackjack_hand(&hand.player_hand.get_blackjack_hand());

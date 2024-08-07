@@ -89,7 +89,7 @@ impl SyncGame {
                 };
                 if stop_thread {
                     break;
-                }    
+                }
             }
         });
 
@@ -120,7 +120,7 @@ impl SyncGame {
         result
     }
 
-    pub fn cleanup(self){
+    pub fn cleanup(self) {
         self.stop_sender_action.send(true).unwrap();
         self.stop_sender_option.send(true).unwrap();
         self.stop_game_info_sender.send(true).unwrap();
