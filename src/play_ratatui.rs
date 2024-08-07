@@ -1,6 +1,9 @@
-use blackjack_rust::blackjack::{deck::Card, hand::PlayerHand};
+use blackjack_rust::blackjack::deck::Card;
 
-use std::{io::{self, stdout}, str::FromStr};
+use std::{
+    io::{self, stdout},
+    str::FromStr,
+};
 
 use ratatui::{
     crossterm::{
@@ -106,7 +109,6 @@ fn handle_events() -> io::Result<GameAction> {
 }
 
 fn create_centered_text_from_hand(hand: &Vec<Card>) -> Line {
-
     let mut spans = Vec::<Span>::new();
     // Iterate over the cards of the player's hand
     for card in hand {
@@ -197,15 +199,12 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
             frame.render_widget(hand_box.clone(), hand_layout[0]);
             frame.render_widget(bet_box.clone(), hand_layout[1]);
 
-
             // iterate over the cards of the player hand and make the string of each card created by to_sonderzeichen() to the colour of suit.get_color()
             let cards = hand.player_hand.get_cards();
             let text = create_centered_text_from_hand(&cards);
 
-            frame.render_widget(
-                text,
-                hand_box.inner(hand_layout[0]),
-            );
+            frame.render_widget(text, hand_box.inner(hand_layout[0]));
+
             frame.render_widget(
                 Paragraph::new("$".to_owned() + &hand.player_bet.to_string()),
                 bet_box.inner(hand_layout[1]),
@@ -215,13 +214,12 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
         let dealer_hand = Block::bordered().title("Dealer hand");
         frame.render_widget(dealer_hand.clone(), money_layout[1]);
 
-        let dealer_cards = game_info.dealer_hand.get_cards(!game_info.current_hand_finished);
-        let dealer_text = create_centered_text_from_hand(&dealer_cards); 
+        let dealer_cards = game_info
+            .dealer_hand
+            .get_cards(!game_info.current_hand_finished);
+        let dealer_text = create_centered_text_from_hand(&dealer_cards);
 
-        frame.render_widget(
-            dealer_text,
-            dealer_hand.inner(money_layout[1]),
-        );
+        frame.render_widget(dealer_text, dealer_hand.inner(money_layout[1]));
 
         let your_money = Block::bordered().title("Your money");
         frame.render_widget(your_money.clone(), money_layout[0]);
