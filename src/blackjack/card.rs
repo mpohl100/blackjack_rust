@@ -95,6 +95,24 @@ impl Suit {
             _ => panic!("wrong i32 for Suit"),
         }
     }
+
+    fn to_sonderzeichen(self) -> String {
+        match self {
+            Suit::Hearts => '♥'.to_string(),
+            Suit::Diamonds => '♦'.to_string(),
+            Suit::Spades => '♠'.to_string(),
+            Suit::Clubs => '♣'.to_string(),
+        }
+    }
+
+    pub fn get_color(&self) -> String {
+        match self {
+            Suit::Hearts => "red".to_string(),
+            Suit::Diamonds => "blue".to_string(),
+            Suit::Spades => "black".to_string(),
+            Suit::Clubs => "green".to_string(),
+        }
+    }
 }
 
 impl Stringable for Suit {
@@ -154,6 +172,14 @@ impl Card {
             "{}{}",
             self.rank.to_string_internal(),
             self.suit.to_string_internal()
+        )
+    }
+
+    pub fn to_sonderzeichen(&self) -> String {
+        format!(
+            "{}{}",
+            self.rank.to_string_internal(),
+            self.suit.to_sonderzeichen()
         )
     }
 }

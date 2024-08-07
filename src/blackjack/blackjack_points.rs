@@ -22,6 +22,14 @@ impl Points {
     pub fn upper(&self) -> i32 {
         self.upper
     }
+
+    pub fn to_ui(self) -> String {
+        if self.lower() == self.upper() {
+            "Hard ".to_owned() + &self.lower.to_string()
+        } else {
+            "Soft ".to_owned() + &self.upper.to_string()
+        }
+    }
 }
 
 impl Stringable for Points {

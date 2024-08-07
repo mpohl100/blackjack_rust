@@ -1,4 +1,12 @@
-use std::io::{self, stdout};
+use blackjack_rust::blackjack::{deck::Card, traits::Stringable};
+use blackjack_rust::blackjack::play_blackjack_hand::HandResult;
+use blackjack_rust::blackjack::hand::BlackjackHand;
+use blackjack_rust::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
+
+use std::{
+    io::{self, stdout},
+    str::FromStr,
+};
 
 use ratatui::{
     crossterm::{
@@ -7,6 +15,7 @@ use ratatui::{
         ExecutableCommand,
     },
     prelude::*,
+    text::Span,
     widgets::*,
 };
 
@@ -41,6 +50,7 @@ fn main() -> io::Result<()> {
                 break;
             }
         }
+        sync_game.cleanup();
     });
     let mut should_quit = false;
     while !should_quit {
@@ -99,6 +109,52 @@ fn handle_events() -> io::Result<GameAction> {
         }
     }
     Ok(GameAction::Continue)
+}
+
+fn create_centered_text_from_hand(hand: &Vec<Card>) -> Line {
+    let mut spans = Vec::<Span>::new();
+    // Iterate over the cards of the player's hand
+    for card in hand {
+        // Get the color from the suit
+        let color = Color::from_str(&card.suit().get_color()).expect("Invalid color");
+
+        // Create a styled Span for the card
+        let styled_span = Span::styled(
+            card.to_sonderzeichen(),
+            Style::default().fg(color).add_modifier(Modifier::BOLD),
+        );
+
+        // Push the styled Span and a space Span to the Text object
+        spans.push(styled_span);
+        spans.push(Span::raw(" "));
+    }
+
+
+    let blackjack_hand = BlackjackHand::new(hand);
+    let points = evaluate_blackjack_hand(&blackjack_hand);
+    let points_string = points.to_ui();
+
+    spans.push(Span::raw("(".to_owned() + points_string.as_str() + ")"));
+
+    // make sure the text renders in one line
+    Line::from(spans)
+}
+
+fn get_bet_background_color(hand_result: Option<HandResult>) -> Color {
+    match hand_result {
+        Some(HandResult::Win(_)) => Color::Green,
+        Some(HandResult::Loss(_)) => Color::Red,
+        Some(HandResult::Tie) => Color::Yellow,
+        None => Color::Reset,
+    }
+}
+
+fn get_hand_background_color(is_active: bool) -> Color{
+    if is_active {
+        Color::Blue
+    } else {
+        Color::Reset
+    }
 }
 
 fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<GameAction>>) {
@@ -166,15 +222,17 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
             )
             .split(main_layout[i + 1]);
 
-            let hand_box = Block::bordered().title(format!("Hand {}", i + 1));
-            let bet_box = Block::bordered().title("Bet");
+            let hand_box = Block::bordered().title(format!("Hand {}", i + 1)).bg(get_hand_background_color(hand.is_active));
+            let bet_box = Block::bordered().title("Bet").bg(get_bet_background_color(hand.result.clone()));
             frame.render_widget(hand_box.clone(), hand_layout[0]);
             frame.render_widget(bet_box.clone(), hand_layout[1]);
 
-            frame.render_widget(
-                Paragraph::new(hand.player_hand.to_string_internal()),
-                hand_box.inner(hand_layout[0]),
-            );
+            // iterate over the cards of the player hand and make the string of each card created by to_sonderzeichen() to the colour of suit.get_color()
+            let cards = hand.player_hand.get_cards();
+            let text = create_centered_text_from_hand(&cards);
+
+            frame.render_widget(text, hand_box.inner(hand_layout[0]));
+
             frame.render_widget(
                 Paragraph::new("$".to_owned() + &hand.player_bet.to_string()),
                 bet_box.inner(hand_layout[1]),
@@ -184,14 +242,12 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
         let dealer_hand = Block::bordered().title("Dealer hand");
         frame.render_widget(dealer_hand.clone(), money_layout[1]);
 
-        frame.render_widget(
-            Paragraph::new(
-                game_info
-                    .dealer_hand
-                    .to_string_internal(!game_info.current_hand_finished),
-            ),
-            dealer_hand.inner(money_layout[1]),
-        );
+        let dealer_cards = game_info
+            .dealer_hand
+            .get_cards(!game_info.current_hand_finished);
+        let dealer_text = create_centered_text_from_hand(&dealer_cards);
+
+        frame.render_widget(dealer_text, dealer_hand.inner(money_layout[1]));
 
         let your_money = Block::bordered().title("Your money");
         frame.render_widget(your_money.clone(), money_layout[0]);
