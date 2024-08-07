@@ -40,8 +40,8 @@ name = "play_channel_game"
 path = "src/play_channel_game.rs"
 
 [[bin]]
-name = "play_ratatui"
-path = "src/play_ratatui.rs"
+name = "blackjack_game"
+path = "src/blackjack_game.rs"
 
 [[bin]]
 name = "server"
