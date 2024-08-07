@@ -133,10 +133,18 @@ pub async fn play_blackjack_hand(
     get_play_result(player_bet, player_result, dealer_result, player_hand).await
 }
 
+
+#[derive(Clone)]
+pub enum HandResult{
+    Win(f64),
+    Loss(f64),
+    Tie,
+}
+
 pub struct PlayerHandData {
     pub player_hand: PlayerHand,
     pub player_bet: f64,
-    pub is_won: Option<bool>,
+    pub result: Option<HandResult>,
 }
 
 impl PlayerHandData {
@@ -144,7 +152,7 @@ impl PlayerHandData {
         PlayerHandData {
             player_hand,
             player_bet,
-            is_won: None,
+            result: None,
         }
     }
 }
@@ -391,7 +399,11 @@ impl HandData for HandInfo {
                 hand.player_hand.clone(),
             )
             .await;
-            hand.is_won = Some(result > 0.0);
+            hand.result = match result{
+                r if r > 0.0 => Some(HandResult::Win(r)),
+                r if r < 0.0 => Some(HandResult::Loss(r)),
+                _ => Some(HandResult::Tie),
+            };
             if result > 0.0 {
                 self.current_balance += hand.player_bet + result;
             }
