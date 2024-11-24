@@ -1,7 +1,7 @@
+use blackjack_rust::blackjack::deck::Card;
 use blackjack_rust::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
 use blackjack_rust::blackjack::hand::BlackjackHand;
 use blackjack_rust::blackjack::play_blackjack_hand::HandResult;
-use blackjack_rust::blackjack::{deck::Card, traits::Stringable};
 
 use std::{
     io::{self, stdout},
@@ -79,13 +79,12 @@ fn main() -> io::Result<()> {
         terminal.draw(ui)?;
 
         let choice = handle_events()?;
-        if choice != GameAction::Continue {
-            if std::time::Instant::now() - last_sent_action_timestamp
+        if choice != GameAction::Continue
+            && std::time::Instant::now() - last_sent_action_timestamp
                 > std::time::Duration::from_millis(500)
-            {
-                action_sender.send(choice).unwrap();
-                last_sent_action_timestamp = std::time::Instant::now();
-            }
+        {
+            action_sender.send(choice).unwrap();
+            last_sent_action_timestamp = std::time::Instant::now();
         }
 
         if choice == GameAction::Stop {
