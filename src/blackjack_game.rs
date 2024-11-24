@@ -53,6 +53,7 @@ fn main() -> io::Result<()> {
         sync_game.cleanup();
     });
     let mut should_quit = false;
+    let mut last_sent_action_timestamp = std::time::Instant::now();
     while !should_quit {
         match option_receiver.try_recv() {
             Ok(options_received) => {
@@ -79,7 +80,10 @@ fn main() -> io::Result<()> {
 
         let choice = handle_events()?;
         if choice != GameAction::Continue {
-            action_sender.send(choice).unwrap();
+            if std::time::Instant::now() - last_sent_action_timestamp > std::time::Duration::from_millis(500) {
+                action_sender.send(choice).unwrap();
+                last_sent_action_timestamp = std::time::Instant::now();
+            }
         }
 
         if choice == GameAction::Stop {
