@@ -12,9 +12,9 @@ pub struct BlackjackHand {
 }
 
 impl BlackjackHand {
-    pub fn new(cards: &Vec<Card>) -> BlackjackHand {
+    pub fn new(cards: &[Card]) -> BlackjackHand {
         BlackjackHand {
-            cards: cards.clone(),
+            cards: cards.to_owned(),
         }
     }
 
