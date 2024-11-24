@@ -5,9 +5,9 @@ use crate::blackjack::deck::WrappedDeck;
 use crate::blackjack::hand::DealerHand;
 use crate::blackjack::hand::PlayerHand;
 use crate::blackjack::play_blackjack_hand::play_blackjack_hand_new;
-use crate::blackjack::play_blackjack_hand::HandResult;
 use crate::blackjack::play_blackjack_hand::HandData;
 use crate::blackjack::play_blackjack_hand::HandInfo;
+use crate::blackjack::play_blackjack_hand::HandResult;
 use crate::blackjack::play_blackjack_hand::PlayMode;
 use crate::blackjack::play_blackjack_hand::PlayerHandData;
 use crate::blackjack::play_blackjack_hand::WrappedHandData;
@@ -546,7 +546,7 @@ impl BlackjackGame for GameStrategy {
             }
         }
         if evaluate_now {
-            let result= self
+            let result = self
                 .evaluate_double_down(GameAction::DoubleDown, situation, _deck)
                 .await;
             self.game_data.lock().await.cached_decision = None;

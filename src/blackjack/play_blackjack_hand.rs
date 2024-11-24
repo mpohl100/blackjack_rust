@@ -133,9 +133,8 @@ pub async fn play_blackjack_hand(
     get_play_result(player_bet, player_result, dealer_result, player_hand).await
 }
 
-
 #[derive(Clone)]
-pub enum HandResult{
+pub enum HandResult {
     Win(f64),
     Loss(f64),
     Tie,
@@ -399,7 +398,7 @@ impl HandData for HandInfo {
                 hand.player_hand.clone(),
             )
             .await;
-            hand.result = match result{
+            hand.result = match result {
                 r if r > 0.0 => Some(HandResult::Win(r)),
                 r if r < 0.0 => Some(HandResult::Loss(r)),
                 _ => Some(HandResult::Tie),
