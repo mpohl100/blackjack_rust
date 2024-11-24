@@ -1,7 +1,7 @@
-use blackjack_rust::blackjack::{deck::Card, traits::Stringable};
-use blackjack_rust::blackjack::play_blackjack_hand::HandResult;
-use blackjack_rust::blackjack::hand::BlackjackHand;
 use blackjack_rust::blackjack::evaluate_blackjack_hand::evaluate_blackjack_hand;
+use blackjack_rust::blackjack::hand::BlackjackHand;
+use blackjack_rust::blackjack::play_blackjack_hand::HandResult;
+use blackjack_rust::blackjack::{deck::Card, traits::Stringable};
 
 use std::{
     io::{self, stdout},
@@ -80,7 +80,9 @@ fn main() -> io::Result<()> {
 
         let choice = handle_events()?;
         if choice != GameAction::Continue {
-            if std::time::Instant::now() - last_sent_action_timestamp > std::time::Duration::from_millis(500) {
+            if std::time::Instant::now() - last_sent_action_timestamp
+                > std::time::Duration::from_millis(500)
+            {
                 action_sender.send(choice).unwrap();
                 last_sent_action_timestamp = std::time::Instant::now();
             }
@@ -133,7 +135,6 @@ fn create_centered_text_from_hand(hand: &Vec<Card>) -> Line {
         spans.push(Span::raw(" "));
     }
 
-
     let blackjack_hand = BlackjackHand::new(hand);
     let points = evaluate_blackjack_hand(&blackjack_hand);
     let points_string = points.to_ui();
@@ -153,7 +154,7 @@ fn get_bet_background_color(hand_result: Option<HandResult>) -> Color {
     }
 }
 
-fn get_hand_background_color(is_active: bool) -> Color{
+fn get_hand_background_color(is_active: bool) -> Color {
     if is_active {
         Color::Blue
     } else {
@@ -226,8 +227,12 @@ fn draw_ui(frame: &mut Frame, game_info: Option<GameInfo>, options: Option<Vec<G
             )
             .split(main_layout[i + 1]);
 
-            let hand_box = Block::bordered().title(format!("Hand {}", i + 1)).bg(get_hand_background_color(hand.is_active));
-            let bet_box = Block::bordered().title("Bet").bg(get_bet_background_color(hand.result.clone()));
+            let hand_box = Block::bordered()
+                .title(format!("Hand {}", i + 1))
+                .bg(get_hand_background_color(hand.is_active));
+            let bet_box = Block::bordered()
+                .title("Bet")
+                .bg(get_bet_background_color(hand.result.clone()));
             frame.render_widget(hand_box.clone(), hand_layout[0]);
             frame.render_widget(bet_box.clone(), hand_layout[1]);
 

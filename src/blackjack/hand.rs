@@ -13,7 +13,9 @@ pub struct BlackjackHand {
 
 impl BlackjackHand {
     pub fn new(cards: &Vec<Card>) -> BlackjackHand {
-        BlackjackHand { cards: cards.clone() }
+        BlackjackHand {
+            cards: cards.clone(),
+        }
     }
 
     pub fn add_card(&mut self, card: &Card) {
