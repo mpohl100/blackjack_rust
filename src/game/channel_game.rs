@@ -494,7 +494,9 @@ impl BlackjackGame for GameStrategy {
         }
         if evaluate_now {
             let choice = self.game_data.lock().await.cached_decision.unwrap();
-            return self.evaluate_draw(choice, situation, _deck).await;
+            let result = self.evaluate_draw(choice, situation, _deck).await;
+            self.game_data.lock().await.cached_decision = None;
+            return result;
         }
         let _ = self
             .game_data
@@ -544,9 +546,11 @@ impl BlackjackGame for GameStrategy {
             }
         }
         if evaluate_now {
-            return self
+            let result= self
                 .evaluate_double_down(GameAction::DoubleDown, situation, _deck)
                 .await;
+            self.game_data.lock().await.cached_decision = None;
+            return result;
         }
         let _ = self
             .game_data
