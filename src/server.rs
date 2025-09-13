@@ -1,9 +1,9 @@
-use blackjack_rust::service::startup::run;
 use blackjack_rust::service::domain::BlackjackService;
+use blackjack_rust::service::startup::run;
 
 use std::net::TcpListener;
-use tokio::sync::Mutex;
 use std::sync::Arc;
+use tokio::sync::Mutex;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

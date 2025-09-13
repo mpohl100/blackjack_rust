@@ -10,7 +10,8 @@ async fn play_blackjack_through_server() {
 
     // Create a game and assert success
     // Act
-    let create_game_response = app.client
+    let create_game_response = app
+        .client
         .post(&format!("{}/blackjack", app.addr))
         .send()
         .await
@@ -22,15 +23,20 @@ async fn play_blackjack_through_server() {
         .json()
         .await
         .expect("Failed to parse game creation response");
-    let game_id = game_response["id"].as_str().expect("No game ID in response");
-    let access_token = game_response["access_token"].as_str().expect("No access token in response");
+    let game_id = game_response["id"]
+        .as_str()
+        .expect("No game ID in response");
+    let access_token = game_response["access_token"]
+        .as_str()
+        .expect("No access token in response");
 
     // Play 10 actions and assert success
     let actions = ["hit", "stand"];
     for i in 0..10 {
         let action = actions[i % actions.len()];
         // Act
-        let play_response = app.client
+        let play_response = app
+            .client
             .post(&format!("{}/blackjack/{}/play", app.addr, game_id))
             .query(&[("action", action)])
             .bearer_auth(access_token)
@@ -44,13 +50,14 @@ async fn play_blackjack_through_server() {
             .json()
             .await
             .expect("Failed to parse game state response");
-        
+
         // Additional assertions can be done here based on the game state
     }
 
     // Delete the game and assert success
     // Act
-    let delete_response = app.client
+    let delete_response = app
+        .client
         .delete(&format!("{}/blackjack/{}", app.addr, game_id))
         .bearer_auth(access_token)
         .send()
@@ -60,5 +67,3 @@ async fn play_blackjack_through_server() {
     // Assert
     assert_eq!(delete_response.status(), StatusCode::NO_CONTENT);
 }
-
-

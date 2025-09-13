@@ -1,7 +1,7 @@
+use crate::game::channel_game::from_word;
 use crate::game::channel_game::ChannelGame;
 use crate::game::channel_game::GameAction;
 use crate::game::channel_game::GameInfo;
-use crate::game::channel_game::from_word;
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -137,9 +137,7 @@ impl BlackjackService {
         if let Some(game) = self.games.lock().await.get_mut(&game_id) {
             if !action.is_empty() {
                 if let Some(sender) = &game.lock().await.action_sender {
-                    let _ = sender
-                        .send(from_word(action.as_str()))
-                        .await;
+                    let _ = sender.send(from_word(action.as_str())).await;
                 }
             }
             let mut options = None;
