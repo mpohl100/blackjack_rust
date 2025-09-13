@@ -104,7 +104,7 @@ impl BlackjackService {
         let game = Arc::new(Mutex::new(BlackjackGame::new().await));
         let mut data = self.games.lock().await;
         let game_id = Uuid::new_v4();
-        data.insert(game_id.clone(), game.clone());
+        data.insert(game_id, game.clone());
         let token = game.lock().await.game_token;
         CreateGameResponse::new(game_id, token)
     }
@@ -148,8 +148,8 @@ impl BlackjackService {
             if let Some(receiver) = game.lock().await.game_info_receiver.as_mut() {
                 game_info = receiver.recv().await;
             }
-            if options.is_some() && game_info.is_some() {
-                return PlayResponse::new(game_info.unwrap(), options.unwrap());
+            if let (Some(options), Some(game_info)) = (options, game_info) {
+                return PlayResponse::new(game_info, options);
             }
         }
         PlayResponse::default()
