@@ -25,7 +25,4 @@ async fn play_blackjack_through_service_class(){
     let delete_response = blackjack_service.delete_game(create_game_response.game_id).await;
 
     assert!(delete_response);
-
-
-
 }
