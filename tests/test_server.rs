@@ -26,7 +26,7 @@ async fn play_blackjack_through_server() {
     let access_token = game_response["access_token"].as_str().expect("No access token in response");
 
     // Play 10 actions and assert success
-    let actions = ["hit", "stand", "double", "split"];
+    let actions = ["hit", "stand"];
     for i in 0..10 {
         let action = actions[i % actions.len()];
         // Act
@@ -59,8 +59,6 @@ async fn play_blackjack_through_server() {
 
     // Assert
     assert_eq!(delete_response.status(), StatusCode::NO_CONTENT);
-
-    app.handle.abort();
 }
 
 

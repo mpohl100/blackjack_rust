@@ -80,6 +80,17 @@ pub fn get_word(action: GameAction) -> String {
     }
 }
 
+pub fn from_word(word: &str) -> GameAction {
+    match word.to_lowercase().as_str() {
+        "split" => GameAction::Split,
+        "doubledown" | "double down" => GameAction::DoubleDown,
+        "hit" => GameAction::Hit,
+        "stand" => GameAction::Stand,
+        "stop" => GameAction::Stop,
+        _ => GameAction::Continue,
+    }
+}
+
 impl From<char> for GameAction {
     fn from(letter: char) -> GameAction {
         match letter {
