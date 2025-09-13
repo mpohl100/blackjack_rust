@@ -1,4 +1,3 @@
-
 use blackjack_rust::service::domain::BlackjackService;
 use blackjack_rust::service::startup::run;
 use reqwest::Client;
