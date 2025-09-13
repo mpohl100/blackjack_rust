@@ -2,9 +2,12 @@ use crate::service::domain::BlackjackService;
 use crate::service::routes::{create_game, delete_game, play_game};
 use actix_web::{web, web::Data, App, HttpServer, dev::Server};
 
-use std::{net::TcpListener, sync::Arc};
+use std::{net::TcpListener};
 
-pub fn run(listener: TcpListener, blackjack_service: Arc<BlackjackService>) -> Result<Server, std::io::Error> {
+use tokio::sync::Mutex;
+use std::sync::Arc;
+
+pub fn run(listener: TcpListener, blackjack_service: Arc<Mutex<BlackjackService>>) -> Result<Server, std::io::Error> {
     let server = HttpServer::new(move || {
         App::new()
             .route("/blackjack", web::post().to(create_game))
