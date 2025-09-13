@@ -116,7 +116,7 @@ fn handle_events() -> io::Result<GameAction> {
     Ok(GameAction::Continue)
 }
 
-fn create_centered_text_from_hand(hand: &Vec<Card>) -> Line {
+fn create_centered_text_from_hand(hand: &Vec<Card>) -> Line<'_> {
     let mut spans = Vec::<Span>::new();
     // Iterate over the cards of the player's hand
     for card in hand {
