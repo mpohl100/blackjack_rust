@@ -28,7 +28,7 @@ impl BlackjackGame {
         game
     }
 
-    pub async fn start(&mut self) {
+    async fn start(&mut self) {
         let (action_sender, action_receiver) = mpsc::channel::<GameAction>(32);
         let (option_sender, option_receiver) = mpsc::channel::<Vec<GameAction>>(32);
         let (game_info_sender, game_info_receiver) = mpsc::channel::<GameInfo>(32);
@@ -38,7 +38,13 @@ impl BlackjackGame {
         let option_sender_clone = option_sender.clone();
         let game_info_sender_clone = game_info_sender.clone();
         let t = tokio::spawn(async move {
-            let mut channel_game = ChannelGame::new(action_receiver, option_sender_clone, game_info_sender_clone, true).await;
+            let mut channel_game = ChannelGame::new(
+                action_receiver,
+                option_sender_clone,
+                game_info_sender_clone,
+                true,
+            )
+            .await;
             loop {
                 channel_game.play().await;
                 if !channel_game.ask_to_play_another_hand().await {
@@ -109,11 +115,13 @@ impl BlackjackService {
     pub async fn delete_game(&self, game_id: Uuid) -> bool {
         let game = self.games.lock().await.remove(&game_id);
         if let Some(game) = game {
-            let sender = &game.lock().await.action_sender;
-            if let Some(s) = sender {
-                let _ = s.send(GameAction::Stop).await;
-            } else {
-                return false;
+            {
+                let sender = &game.lock().await.action_sender;
+                if let Some(s) = sender {
+                    let _ = s.send(GameAction::Stop).await;
+                } else {
+                    return false;
+                }
             }
             if let Some(t) = &game.lock().await.thread_handle {
                 t.abort();
@@ -126,18 +134,20 @@ impl BlackjackService {
 
     pub async fn play_game(&self, game_id: Uuid, action: String) -> PlayResponse {
         if let Some(game) = self.games.lock().await.get_mut(&game_id) {
-            if let Some(sender) = &game.lock().await.action_sender {
-                let _ = sender
-                    .send(GameAction::from(
-                        action
-                            .to_lowercase()
-                            .as_str()
-                            .chars()
-                            .next()
-                            .unwrap()
-                            .to_ascii_lowercase(),
-                    ))
-                    .await;
+            if !action.is_empty() {
+                if let Some(sender) = &game.lock().await.action_sender {
+                    let _ = sender
+                        .send(GameAction::from(
+                            action
+                                .to_lowercase()
+                                .as_str()
+                                .chars()
+                                .next()
+                                .unwrap()
+                                .to_ascii_lowercase(),
+                        ))
+                        .await;
+                }
             }
             let mut options = None;
             let mut game_info = None;
